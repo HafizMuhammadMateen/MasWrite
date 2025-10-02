@@ -4,3 +4,8 @@ export type FormErrors = {
   userName?: string;
   formError?: string;
 };
+
+export type ChangePasswordModalProps = {
+  isOpen: boolean;
+  onClose: () => void; 
+}

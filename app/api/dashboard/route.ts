@@ -4,15 +4,13 @@ import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {
   console.log(req.headers)
-  const token = req.cookies.get("token")?.value;   // ✅ in your version this IS async
-  // const token = cookieStore.get("token")?.value;
+  const token = req.cookies.get("token")?.value;
   
   if (!token) {
-    console.log("token is:", token)
+    console.log("❌ No token found in cookies");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  else{
-    console.log("no token arrived!");
+  } else {
+    console.log("✅ Token found:", token);
   }
 
   try {

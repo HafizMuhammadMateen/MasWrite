@@ -6,7 +6,6 @@ import jwt from "jsonwebtoken";
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
-
     if (!email || !password) {
       return NextResponse.json({ error: "Email & password required" }, { status: 400 });
     }
@@ -31,7 +30,18 @@ export async function POST(req: Request) {
       { expiresIn: "1h" }
     );
 
-    return NextResponse.json({ message: "Login successful", token }, { status: 200 });
+    // return NextResponse.json({ message: "Login successful", token }, { status: 200 });
+    const response = NextResponse.json({ message: "Login successful"}, { status: 200 });
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60,
+      path: "/",
+    })
+
+    return response;
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });

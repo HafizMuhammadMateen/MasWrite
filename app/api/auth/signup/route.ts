@@ -8,10 +8,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     console.log("Incoming body:", body);
 
-    const { email, username, password } = body;
+    const { userName, email, password } = body;
 
     // Basic validation
-    if (!email || !username || !password) {
+    if (!userName || !email || !password) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
@@ -36,8 +36,8 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = {
+      userName,
       email,
-      username,
       password: hashedPassword,
       createdAt: new Date(),
       updatedAt: new Date(),

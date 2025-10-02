@@ -1,0 +1,145 @@
+"use client"
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { validateUsername, validateEmail, validatePassword } from "@/utils/validators";
+import { FormErrors } from "@/utils/types"; // for type defination
+
+export default function SignupForm() {
+  const[email, setEmail] = useState("");
+  const[userName, setUsername] = useState("");
+  const[password, setPassword] = useState("");
+  const[loading, setLoading] = useState(false);
+  const[errors, setErrors] = useState<FormErrors>({});
+  const router = useRouter();
+
+  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    if(e.target.name === "userName") {
+      setUsername(e.target.value);
+    } else if(e.target.name === "email") {
+      setEmail(e.target.value);
+    } else if(e.target.name === "password") {
+      setPassword(e.target.value);
+    }
+  }
+
+  const handleBlur = (e:React.ChangeEvent<HTMLInputElement>) => {
+    if(e.target.name === "userName") {
+      const validationError = validateUsername(e.currentTarget.value);
+      setErrors((prev) => ({...prev, userName: validationError}));
+    } else if(e.target.name === "email") {
+      const validationError = validateEmail(e.target.value);
+      setErrors((prev) => ({...prev, email: validationError}));
+    } else if(e.target.name === "password") {
+      const validationError = validatePassword(e.target.value, true); //calling strict check for signup page
+      setErrors((prev) => ({...prev, password: validationError}));
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // validation again on submit not just on blur
+    const userNameError = validateUsername(userName);
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password, true);
+
+    if(userNameError || emailError || passwordError) {
+      setErrors({userName: userNameError, email: emailError, password: passwordError});
+      return;
+    }
+    
+    setErrors({});
+    // setErrors({ email: "", userName: "", password: "" });
+    console.log("Form submitted with: ", {userName, email, password});
+
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-type": "application/json"},
+        body: JSON.stringify({ userName, email, password }),
+        // credentials: "include" // No need in signup page bcz cookies are not setting in signup page
+      })
+
+      if(!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Some thing went wrong!");
+      }
+
+      const data = await response.json();
+      console.log("Signup successful:", data);
+
+      router.push("/login");
+
+    } catch(err:any) {
+      // backend error message
+      setErrors((prev) => ({ ...prev, formError: err.message}))
+    } finally {
+      setLoading(false);
+    }
+
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <label>Username</label>
+      <input 
+      name="userName"
+      type="text"
+      value={userName}
+      autoComplete="off"
+      required
+      onChange={handleChange}
+      onBlur={handleBlur}
+      className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+      />
+      {errors.userName && <p className="text-red-500 text-sm">{errors.userName}</p>}
+
+      <label>Email</label>
+      <input
+      name="email"
+      type="email"
+      value={email}
+      autoComplete="email"
+      required
+      onChange={handleChange}
+      onBlur={handleBlur}
+      className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+      />
+      {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+
+      <label>Password</label>
+      <input 
+      name="password"
+      type="password"
+      value={password}
+      autoComplete="new-password"
+      required
+      onChange={handleChange}
+      onBlur={handleBlur}
+      className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+      />
+      {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+
+      <button
+        type="submit"
+        disabled={loading || Boolean(errors.userName) || Boolean(errors.email) || Boolean(errors.password)}
+        className="w-full bg-gray-700 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-900"
+      >
+        {loading? "Signing up..." : "Signup"}
+      </button>
+
+      <p>
+        Already have an account? Login
+        <Link 
+        href="/login"
+        className="text-blue-500 font-semibold"
+        > here
+        </Link>
+      </p>
+    </form>
+  )
+}

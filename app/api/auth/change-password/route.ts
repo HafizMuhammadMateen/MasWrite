@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
-import { PassThrough } from "stream";
 
 export async function POST(req: NextRequest) {
   try {
-    const[currentPassword, newPassword] = await req.json();
+    const { currentPassword, newPassword } = await req.json();
 
     // Getting token from cookies [receiving request]
     const token = req.cookies.get("token")?.value;
@@ -39,8 +38,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Update password in DB  
-    const hashed = await bcrypt.compare(currentPassword, newPassword);
-    await user.db.collection("users").updatedOne({_id: userId}, {$set: {password: hashed}});
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await db.collection("users").updateOne(
+      {_id: userId}, 
+      {$set: {password: hashed} }
+    );
 
     // Invalidate old session
     const res = NextResponse.json({ message: "Password updated successsfully. Please login again."}, { status: 200} );

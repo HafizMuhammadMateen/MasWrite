@@ -90,6 +90,7 @@ export default function SignupForm() {
       name="userName"
       type="text"
       value={userName}
+      placeholder="Username"
       autoComplete="off"
       required
       onChange={handleChange}
@@ -103,6 +104,7 @@ export default function SignupForm() {
       name="email"
       type="email"
       value={email}
+      placeholder="Email"
       autoComplete="email"
       required
       onChange={handleChange}
@@ -116,6 +118,7 @@ export default function SignupForm() {
       name="password"
       type="password"
       value={password}
+      placeholder="Password"
       autoComplete="new-password"
       required
       onChange={handleChange}
@@ -127,7 +130,7 @@ export default function SignupForm() {
       <button
         type="submit"
         disabled={loading || Boolean(errors.userName) || Boolean(errors.email) || Boolean(errors.password)}
-        className="w-full bg-gray-700 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-900"
+        className="w-full bg-gray-700 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-900 transition"
       >
         {loading? "Signing up..." : "Signup"}
       </button>

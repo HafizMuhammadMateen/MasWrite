@@ -87,7 +87,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-        <h2 className="text-xl font-semibold mb-4">Change Password</h2>
+        <h2 className="text-xl text-center font-semibold mb-4">Change Password</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <label>Current Password</label>
@@ -135,7 +135,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
           <button
             type="button"
             onClick={onClose}
-            className="w-full bg-gray-400 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-600"
+            className="w-full bg-gray-400 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-600 transition"
           >
             Cancel
           </button>
@@ -143,7 +143,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
           <button
             type="submit"
             disabled={loading || Boolean(errors.currentPassword) || Boolean(errors.newPassword) || Boolean(errors.confirmPassword)}
-            className="w-full bg-blue-600 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-700"
+            className="w-full bg-blue-600 text-white rounded py-2 font-semibold cursor-pointer hover:bg-blue-700 transition"
           >
             {loading? "Changing..." : "Change Password"}
           </button>

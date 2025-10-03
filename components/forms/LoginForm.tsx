@@ -84,12 +84,12 @@ export default function LoginForm() {
           name="email"
           type="email"
           value={email}
+          placeholder="email@example.com"
           required
           autoComplete="email"
           // onChange={(e) => setEmail(e.target.value)} 
           onChange={handleChange}
           onBlur={handleBlur}
-          placeholder="email@example.com"
           className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
           />
         {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
@@ -99,6 +99,7 @@ export default function LoginForm() {
           name="password"
           type="password"
           value={password}
+          placeholder="Password"
           required
           autoComplete="current-password"
           // onChange={(e) => setPassword(e.target.value)}
@@ -108,11 +109,16 @@ export default function LoginForm() {
         />
         {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
 
+        <p><Link 
+          href="/forgot-password"
+          className="text-decoration-line: underline"
+        >Forgot Password?
+        </Link></p>
 
         <button 
           type="submit"
           disabled={loading || Boolean(errors.email) || Boolean(errors.password)}
-          className="w-full bg-gray-700 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-900"
+          className="w-full bg-gray-700 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-900 transition"
           >
           {loading? "Logging in...": "Login"}
         </button>

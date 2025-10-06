@@ -196,11 +196,22 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
           <button
             type="submit"
             disabled={loading || Boolean(errors.currentPassword) || Boolean(errors.newPassword) || Boolean(errors.confirmPassword)}
-            className="w-full bg-blue-600 text-white rounded py-2 font-semibold cursor-pointer hover:bg-blue-700 transition"
+            className={`w-full bg-blue-600 text-white rounded py-2 font-semibold flex justify-center items-center gap-2
+            ${loading ? "opacity-75 cursor-not-allowed" : "cursor-pointer hover:bg-blue-700 transition"}`}
           >
-            {loading? "Changing..." : "Change Password"}
+            {loading? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Changing...
+              </>
+
+            ) : (
+              "Change Password"
+            )}
           </button>
+
           {errors.formError && <p className="text-red-500 text-sm">{errors.formError}</p>}
+
         </form>
       </div>
     </div>

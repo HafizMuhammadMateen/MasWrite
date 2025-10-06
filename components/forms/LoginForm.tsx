@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { validateEmail, validatePassword } from "@/utils/validators";
 import { FormErrors } from "@/utils/types"; // for type defination
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+// import { resolve } from "path";
 // import bcrypt from "bcryptjs";
 
 export default function LoginForm() {
@@ -51,6 +52,7 @@ export default function LoginForm() {
     
     try {
       setLoading(true);
+      // await new Promise(resolve => setTimeout(resolve, 3000));
       const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-type": "application/json"},
@@ -124,10 +126,19 @@ export default function LoginForm() {
         <button 
           type="submit"
           disabled={loading || Boolean(errors.email) || Boolean(errors.password)}
-          className="w-full bg-gray-700 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-900 transition"
+          className={`w-full bg-gray-700 text-white rounded py-2 font-semibold flex justify-center items-center gap-2
+            ${loading ? "opacity-75 cursor-not-allowed" : "hover:bg-gray-900 cursor-pointer transition"} `}
           >
-          {loading? "Logging in...": "Login"}
+            {loading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Logging in...
+              </> 
+            ) : (
+              "Login"
+            )}
         </button>
+
         {errors.formError && <p className="text-red-500 text-sm">{errors.formError}</p>}
 
         <p>

@@ -58,7 +58,7 @@ export default function SignupForm() {
 
     try {
       setLoading(true);
-
+      
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-type": "application/json"},
@@ -89,30 +89,32 @@ export default function SignupForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <label>Username</label>
       <input 
-      name="userName"
-      type="text"
-      value={userName}
-      placeholder="Username"
-      autoComplete="off"
-      required
-      onChange={handleChange}
-      onBlur={handleBlur}
-      className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+        name="userName"
+        type="text"
+        value={userName}
+        placeholder="Username"
+        autoComplete="off"
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+        className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
       />
+
       {errors.userName && <p className="text-red-500 text-sm">{errors.userName}</p>}
 
       <label>Email</label>
       <input
-      name="email"
-      type="email"
-      value={email}
-      placeholder="Email"
-      autoComplete="email"
-      required
-      onChange={handleChange}
-      onBlur={handleBlur}
-      className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+        name="email"
+        type="email"
+        value={email}
+        placeholder="Email"
+        autoComplete="email"
+        required
+        onChange={handleChange}
+        onBlur={handleBlur}
+        className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
       />
+
       {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
       <label>Password</label>
@@ -136,15 +138,27 @@ export default function SignupForm() {
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
       </div>
+
       {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
 
       <button
         type="submit"
         disabled={loading || Boolean(errors.userName) || Boolean(errors.email) || Boolean(errors.password)}
-        className="w-full bg-gray-700 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-900 transition"
+        className={`w-full bg-gray-700 text-white rounded py-2 font-semibold flex justify-center items-center gap-2
+          ${loading ? "opacity-75 cursor-not-allowed" : "hover:bg-gray-900 cursor-pointer transition" }`}
       >
-        {loading? "Signing up..." : "Signup"}
+        {loading ? (
+          <>
+            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            Signing up...
+          </>
+
+        ) : (
+          "Signup"
+        )}
       </button>
+
+      {errors.formError && <p className="text-red-500 text-sm">{errors.formError}</p>}
 
       <p>
         Already have an account? Login

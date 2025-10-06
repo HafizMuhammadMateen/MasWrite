@@ -5,22 +5,20 @@ import { useRouter } from "next/navigation";
 import { validatePassword } from "@/utils/validators";
 import { ChangePasswordModalProps } from "../../utils/types"
 
-export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
+export default function ChangePasswordModal({ isOpen, onClose, token }: ChangePasswordModalProps) {
   const[currentPassword, setCurrentPassword] = useState("");
   const[newPassword, setNewPassword] = useState("");
   const[confirmPassword, setConfirmPassword] = useState("");
   const[loading, setLoading] = useState(false);
   const[errors, setErrors] = useState<{currentPassword?:string, newPassword?:string, confirmPassword?:string, formError?:string}>({});
   const router = useRouter();
+  const isResetFlow = Boolean(token);
+  console.log("Token arrived:", isResetFlow);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.name === "current-password") {
-      setCurrentPassword(e.target.value);
-    } else if(e.target.name === "new-password") {
-      setNewPassword(e.target.value);
-    } else if(e.target.name === "confirm-new-password") {
-      setConfirmPassword(e.target.value);
-    }
+    if(e.target.name === "currentPassword") setCurrentPassword(e.target.value);
+    else if(e.target.name === "newPassword")  setNewPassword(e.target.value);
+    else if(e.target.name === "confirmPassword")  setConfirmPassword(e.target.value);
   }
 
   const handleBlur = (e:React.ChangeEvent<HTMLInputElement>) => {
@@ -56,6 +54,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         method: "POST",
         headers: { "Content-type": "application/json"},
         body: JSON.stringify({ currentPassword, newPassword }),
+        // body: JSON.stringify(isResetFlow ? { newPassword, token } : { currentPassword, newPassword }),
         // credentials: "include" // No need in signup page bcz cookies are not setting in signup page
       })
 
@@ -82,6 +81,11 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
 
   }
 
+  const handleCancel = () => {
+    onClose();
+    router.push("/login");
+  }
+
   if(!isOpen) return null;
 
   return (
@@ -90,19 +94,23 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         <h2 className="text-xl text-center font-semibold mb-4">Change Password</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <label>Current Password</label>
-          <input 
-          name="currentPassword"
-          type="password"
-          value={currentPassword}
-          placeholder="Current password"
-          autoComplete="off"
-          required
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
-          />
-          {errors.currentPassword && <p className="text-red-500 text-sm">{errors.currentPassword}</p>}
+          {!isResetFlow && (
+            <>
+            <label>Current Password</label>
+            <input 
+              name="currentPassword"
+              type="password"
+              value={currentPassword}
+              placeholder="Current password"
+              autoComplete="off"
+              required
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+            />
+            {errors.currentPassword && <p className="text-red-500 text-sm">{errors.currentPassword}</p>}
+          </>
+          )}
 
           <label>New Password</label>
           <input
@@ -134,7 +142,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleCancel}
             className="w-full bg-gray-400 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-600 transition"
           >
             Cancel

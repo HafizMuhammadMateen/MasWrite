@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
     const resetUrl = `${process.env.AUTH_MODULE_APP_URL}/reset-password?token=${resetToken}`;
 
     await resend.emails.send({
-      from: '"Auth Module" <no-reply@auth-module.com>',
+      // from: '"Auth Module" <no-reply@auth-module.com>',
+      from: "Acme <onboarding@resend.dev>",
       to: email,
       subject: "Password Reset Request",
       html: `

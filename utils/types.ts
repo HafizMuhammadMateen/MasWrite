@@ -7,5 +7,7 @@ export type FormErrors = {
 
 export type ChangePasswordModalProps = {
   isOpen: boolean;
-  onClose: () => void; 
+  onClose: () => void;
+  isResetFlow?: boolean;
+  token?: string | null;
 }

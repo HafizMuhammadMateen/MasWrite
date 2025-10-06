@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,12 +17,13 @@ export async function POST(req: NextRequest) {
     }
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
     const userId = decoded.userId;
+    if(userId) console.log("Logged in user's id:", userId);
 
     // Finding user in db using userId
     const client = await clientPromise;
     const db = client.db("auth-module");
 
-    const user = await db.collection("users").findOne({_id: userId});
+    const user = await db.collection("users").findOne({_id: new ObjectId(userId)});
     if(!user) {
       return NextResponse.json({error: "User not found"}, {status: 404});
     }
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
     // Update password in DB  
     const hashed = await bcrypt.hash(newPassword, 10);
     await db.collection("users").updateOne(
-      {_id: userId}, 
+      {_id: new ObjectId(userId)}, 
       {$set: {password: hashed} }
     );
 

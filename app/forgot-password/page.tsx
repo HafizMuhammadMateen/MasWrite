@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { validateEmail } from "@/utils/validators";
 
 export default function ForgotPassword() {
@@ -9,6 +9,7 @@ export default function ForgotPassword() {
   const[loading, setLoading] = useState(false);
   const[errors, setErrors] = useState<{email?:string, formError?:string}>({});
   const router = useRouter();
+  const[success, setSuccess] = useState(false);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
@@ -31,6 +32,7 @@ export default function ForgotPassword() {
     }
     
     setErrors({});
+    setSuccess(false);
 
     try {
       setLoading(true);
@@ -48,11 +50,8 @@ export default function ForgotPassword() {
       }
 
       //On sccess
-      console.log("One time verification code link sent on email: ", {email});
-      alert("One time email verification code is just sent to your email.")
-
-      router.push("/reset-password");
-
+      setSuccess(true);
+      
     } catch(err:any) {
       // backend error message
       setErrors((prev) => ({ ...prev, formError: err.message}))
@@ -70,16 +69,17 @@ export default function ForgotPassword() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <label>Enter your Email</label>
           <input
-          name="email"
-          type="email"
-          value={email}
-          placeholder="Email"
-          autoComplete="email"
-          required
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+            name="email"
+            type="email"
+            value={email}
+            placeholder="Email"
+            autoComplete="email"
+            required
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
           />
+
           {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
           <button
@@ -105,7 +105,15 @@ export default function ForgotPassword() {
               "Send Code link"
             )}
           </button>
+
           {errors.formError && <p className="text-red-500 text-sm">{errors.formError}</p>}
+          {success && (
+            <div className="border border-gray-200 mt-3 pt-3 bg-green-50 p-2 rounded">
+              <p className="text-green-700 text-sm text-center">
+                A password reset link has been sent to your email. Please check your inbox.
+              </p>
+            </div>
+          )}         
         </form>
       </div>
     </div>

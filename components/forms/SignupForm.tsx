@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { validateUsername, validateEmail, validatePassword } from "@/utils/validators";
 import { FormErrors } from "@/utils/types"; // for type defination
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 
 export default function SignupForm() {
   const[email, setEmail] = useState("");
@@ -13,6 +14,7 @@ export default function SignupForm() {
   const[loading, setLoading] = useState(false);
   const[errors, setErrors] = useState<FormErrors>({});
   const router = useRouter();
+  const[showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
     if(e.target.name === "userName") {
@@ -114,17 +116,26 @@ export default function SignupForm() {
       {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
       <label>Password</label>
-      <input 
-      name="password"
-      type="password"
-      value={password}
-      placeholder="Password"
-      autoComplete="new-password"
-      required
-      onChange={handleChange}
-      onBlur={handleBlur}
-      className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
-      />
+        <div className="relative">
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            placeholder="Password"
+            required
+            autoComplete="current-password"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="w-full border border-gray-300 rounded px-3 py-2 pr-10 focus-visible:ring-gray-900"         
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-700 hover:text-gray-900"
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+      </div>
       {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
 
       <button

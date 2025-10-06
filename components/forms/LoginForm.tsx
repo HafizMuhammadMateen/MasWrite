@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { validateEmail, validatePassword } from "@/utils/validators";
 import { FormErrors } from "@/utils/types"; // for type defination
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 // import bcrypt from "bcryptjs";
 
 export default function LoginForm() {
@@ -13,6 +14,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const router = useRouter();
+  const[showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
     if(e.target.name === "email") {
@@ -44,10 +46,7 @@ export default function LoginForm() {
       return;
     }
 
-    // const hash = await bcrypt.hash("123", 10);
-    // console.log("here is your password", hash);
-    // setErrors(() => ({}));
-    setErrors({ email: "", password: "" });
+    setErrors(() => ({}));
     console.log("Form submitted with:", { email, password });
     
     try {
@@ -84,10 +83,9 @@ export default function LoginForm() {
           name="email"
           type="email"
           value={email}
-          placeholder="email@example.com"
+          placeholder="Email"
           required
           autoComplete="email"
-          // onChange={(e) => setEmail(e.target.value)} 
           onChange={handleChange}
           onBlur={handleBlur}
           className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
@@ -95,18 +93,26 @@ export default function LoginForm() {
         {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
         <label>Password</label>
-        <input
-          name="password"
-          type="password"
-          value={password}
-          placeholder="Password"
-          required
-          autoComplete="current-password"
-          // onChange={(e) => setPassword(e.target.value)}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"         
-        />
+        <div className="relative">
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            placeholder="Password"
+            required
+            autoComplete="current-password"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className="w-full border border-gray-300 rounded px-3 py-2 pr-10 focus-visible:ring-gray-900"         
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-700 hover:text-gray-900"
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
         {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
 
         <p><Link 

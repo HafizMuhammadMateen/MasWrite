@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { validatePassword } from "@/utils/validators";
 import { ChangePasswordModalProps } from "../../utils/types"
+import { FaEyeSlash, FaEye } from "react-icons/fa";
+import { FaE } from "react-icons/fa6";
 
 export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = false, token }: ChangePasswordModalProps) {
   const[currentPassword, setCurrentPassword] = useState("");
@@ -12,6 +14,9 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   const[loading, setLoading] = useState(false);
   const[errors, setErrors] = useState<{currentPassword?:string, newPassword?:string, confirmPassword?:string, formError?:string}>({});
   const router = useRouter();
+  const[showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const[showNewPassword, setShowNewPassword] = useState(false);
+  const[showConfirmPassword, setShowConfirmPassword] = useState(false);
   // console.log("is this a reset flow (Token arrived)?:", isResetFlow);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
@@ -110,48 +115,74 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
           {!isResetFlow && (
             <>
             <label>Current Password</label>
-            <input 
-              name="currentPassword"
-              type="password"
-              value={currentPassword}
-              placeholder="Current password"
-              autoComplete="current-password"
-              required
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
-
-            />
+            <div className="relative">
+              <input 
+                name="currentPassword"
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                placeholder="Current password"
+                autoComplete="current-password"
+                required
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className="w-full border border-gray-300 rounded px-3 py-2 pr-10 focus-visible:ring-gray-900"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute inset-y-0 right-3 flex items-center text-gray-700 hover:text-gray-900"
+              >
+                {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.currentPassword && <p className="text-red-500 text-sm">{errors.currentPassword}</p>}
           </>
           )}
 
           <label>New Password</label>
-          <input
-          name="newPassword"
-          type="password"
-          value={newPassword}
-          placeholder="New password"
-          autoComplete="new-password"
-          required
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
-          />
+          <div className="relative">
+            <input
+              name="newPassword"
+              type={showNewPassword ? "text" : "password"}
+              value={newPassword}
+              placeholder="New password"
+              autoComplete="new-password"
+              required
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className="w-full border border-gray-300 rounded px-3 py-2 pr-10 focus-visible:ring-gray-900"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-700 hover:text-gray-900"
+            >
+            {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           {errors.newPassword && <p className="text-red-500 text-sm">{errors.newPassword}</p>}
 
           <label>Confirm New Password</label>
-          <input 
-          name="confirmPassword"
-          type="password"
-          value={confirmPassword}
-          placeholder="Confirm password"
-          autoComplete="new-password"
-          required
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
-          />
+          <div className="relative">
+            <input 
+              name="confirmPassword"
+              value={confirmPassword}
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm password"
+              autoComplete="new-password"
+              required
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-700 hover:text-gray-900"
+              >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
           {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
 
           <button

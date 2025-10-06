@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
       return NextResponse.json({ error: "Weak password" }, { status: 400 });
     }
-
+    
     // Update password in DB  
     const hashed = await bcrypt.hash(newPassword, 10);
     await db.collection("users").updateOne(

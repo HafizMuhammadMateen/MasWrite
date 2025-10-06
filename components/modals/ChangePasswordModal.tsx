@@ -5,15 +5,14 @@ import { useRouter } from "next/navigation";
 import { validatePassword } from "@/utils/validators";
 import { ChangePasswordModalProps } from "../../utils/types"
 
-export default function ChangePasswordModal({ isOpen, onClose, token }: ChangePasswordModalProps) {
+export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = false, token }: ChangePasswordModalProps) {
   const[currentPassword, setCurrentPassword] = useState("");
   const[newPassword, setNewPassword] = useState("");
   const[confirmPassword, setConfirmPassword] = useState("");
   const[loading, setLoading] = useState(false);
   const[errors, setErrors] = useState<{currentPassword?:string, newPassword?:string, confirmPassword?:string, formError?:string}>({});
   const router = useRouter();
-  const isResetFlow = Boolean(token);
-  console.log("Token arrived:", isResetFlow);
+  // console.log("is this a reset flow (Token arrived)?:", isResetFlow);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
     if(e.target.name === "currentPassword") setCurrentPassword(e.target.value);
@@ -30,12 +29,16 @@ export default function ChangePasswordModal({ isOpen, onClose, token }: ChangePa
     e.preventDefault();
 
     // validation again on submit not just on blur
-    const currentPasswordError = validatePassword(currentPassword, true);
+    let currentPasswordError = "";
+    if(!isResetFlow) currentPasswordError = validatePassword(currentPassword, true);
     const newPasswordError = validatePassword(newPassword, true);
     const confirmPasswordError = validatePassword(confirmPassword, true);
 
     if(currentPasswordError || newPasswordError || confirmPasswordError) {
-      setErrors({currentPassword: currentPasswordError, newPassword: newPasswordError, confirmPassword: confirmPasswordError});
+      setErrors({
+        ...(isResetFlow? {} : {currentPassword: currentPasswordError}), 
+        newPassword: newPasswordError, 
+        confirmPassword: confirmPasswordError});
       return;
     }
 
@@ -50,11 +53,15 @@ export default function ChangePasswordModal({ isOpen, onClose, token }: ChangePa
     try {
       setLoading(true);
 
-      const response = await fetch("/api/auth/change-password", {
+      const url = isResetFlow ? "/api/auth/reset-password" : "/api/auth/change-password";
+      const body = isResetFlow
+      ? { token, newPassword }
+      : { currentPassword, newPassword };
+      
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-type": "application/json"},
-        body: JSON.stringify({ currentPassword, newPassword }),
-        // body: JSON.stringify(isResetFlow ? { newPassword, token } : { currentPassword, newPassword }),
+        body: JSON.stringify(body),
         // credentials: "include" // No need in signup page bcz cookies are not setting in signup page
       })
 
@@ -74,7 +81,12 @@ export default function ChangePasswordModal({ isOpen, onClose, token }: ChangePa
 
     } catch(err:any) {
       // backend error message
-      setErrors((prev) => ({ ...prev, formError: err.message}))
+      setErrors((prev) => ({ ...prev, formError: err.message}));
+      if (err.message.includes("expired")) {
+        alert("Your reset link has expired. Please request a new one.");
+        router.push("/forgot-password");
+}
+
     } finally {
       setLoading(false);
     }
@@ -83,7 +95,8 @@ export default function ChangePasswordModal({ isOpen, onClose, token }: ChangePa
 
   const handleCancel = () => {
     onClose();
-    router.push("/login");
+    if(isResetFlow) router.push("/login"); // Forgot(reset) password flow
+    else onClose(); // if user was logged in (just close the opened modal)
   }
 
   if(!isOpen) return null;
@@ -102,11 +115,12 @@ export default function ChangePasswordModal({ isOpen, onClose, token }: ChangePa
               type="password"
               value={currentPassword}
               placeholder="Current password"
-              autoComplete="off"
+              autoComplete="current-password"
               required
               onChange={handleChange}
               onBlur={handleBlur}
               className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+
             />
             {errors.currentPassword && <p className="text-red-500 text-sm">{errors.currentPassword}</p>}
           </>

@@ -19,9 +19,9 @@ export async function POST(req: NextRequest) {
       { $set: { password: hashed } } // hash it in production
     );
 
-    return NextResponse.json({ message: "Password reseted successfully" }, {status: 200});
+    return NextResponse.json({ message: "✅ Password reseted successfully" }, {status: 200});
   } catch (err: any) {
-    console.error("Reset password error:", err.message);
-    return NextResponse.json({ error: err.message || "Invalid or expired token" }, { status: 400 });
+    console.error("❌ Reset password error:", err.message);
+    return NextResponse.json({ error: err.message || "❌ Invalid or expired token" }, { status: 400 });
   }
 }

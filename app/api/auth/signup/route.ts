@@ -12,15 +12,15 @@ export async function POST(req: Request) {
 
     // Basic validation
     if (!userName || !email || !password) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+      return NextResponse.json({ error: "⚠️ All fields are required" }, { status: 400 });
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+      return NextResponse.json({ error: "❌ Invalid email" }, { status: 400 });
     }
 
     if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password)) {
-      return NextResponse.json({ error: "Weak password" }, { status: 400 });
+      return NextResponse.json({ error: "⚠️ Weak password" }, { status: 400 });
     }
 
     const client = await clientPromise;
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     // Check duplicates
     const existing = await db.collection("users").findOne({ email });
     if (existing) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 400 });
+      return NextResponse.json({ error: "⚠️ Email already registered" }, { status: 400 });
     }
 
     // Hash password
@@ -45,9 +45,9 @@ export async function POST(req: Request) {
 
     await db.collection("users").insertOne(newUser);
 
-    return NextResponse.json({ message: "User created successfully" }, { status: 201 });
+    return NextResponse.json({ message: "✅ User created successfully" }, { status: 201 });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json({ error: "❌ Something went wrong" }, { status: 500 });
   }
 }

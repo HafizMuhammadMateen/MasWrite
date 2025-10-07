@@ -24,16 +24,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({message: "If user exists, a reset link has been sent"}, {status: 200});
     }
 
-    // Generate reset token
-    // const resetToken = crypto.randomBytes(32).toString("hex");
-    // const expires = new Date(Date.now() + 1000 * 60 * 15);
-
-    // await db.collection("resetTokens").insertOne({
-    //   userId: user._id,
-    //   token: resetToken,
-    //   expires,
-    // })
-
     const resetToken = jwt.sign(
       { userId: user._id.toString() },
       process.env.JWT_SECRET!,
@@ -58,6 +48,6 @@ export async function POST(req: NextRequest) {
         
     return NextResponse.json({message: "If user exists, a reset link has been sent"}, {status: 200});
   } catch (err:any) {
-    return NextResponse.json({error: err.message || "Server error"}, {status: 500});
+    return NextResponse.json({error: err.message || "❌ Server error"}, {status: 500});
   }
 }

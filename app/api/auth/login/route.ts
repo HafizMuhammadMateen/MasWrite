@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
     if (!email || !password) {
-      return NextResponse.json({ error: "Email & password required" }, { status: 400 });
+      return NextResponse.json({ error: "⚠️ Email & password required" }, { status: 400 });
     }
 
     const client = await clientPromise;
@@ -15,12 +15,12 @@ export async function POST(req: Request) {
 
     const user = await db.collection("users").findOne({ email });
     if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "❌ Invalid credentials" }, { status: 401 });
     }
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "❌ Invalid credentials" }, { status: 401 });
     }
 
     // Sign JWT
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     );
 
     // return NextResponse.json({ message: "Login successful", token }, { status: 200 });
-    const response = NextResponse.json({ message: "Login successful"}, { status: 200 });
+    const response = NextResponse.json({ message: "✅ Login successful"}, { status: 200 });
 
     response.cookies.set("token", token, {
       httpOnly: true,
@@ -44,6 +44,6 @@ export async function POST(req: Request) {
     return response;
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json({ error: "❌ Something went wrong" }, { status: 500 });
   }
 }

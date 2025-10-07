@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     
     // Authenticating user
     if(!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "❌ Unauthorized" }, { status: 401 });
     }
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
     const userId = decoded.userId;
@@ -25,18 +25,18 @@ export async function POST(req: NextRequest) {
 
     const user = await db.collection("users").findOne({_id: new ObjectId(userId)});
     if(!user) {
-      return NextResponse.json({error: "User not found"}, {status: 404});
+      return NextResponse.json({error: "❌ User not found"}, {status: 404});
     }
 
     // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if(!isMatch) {
-      return NextResponse.json({ error: "Incorrect current password!" }, { status: 400 });
+      return NextResponse.json({ error: "❌ Incorrect current password!" }, { status: 400 });
     }
 
     // Validate new password
     if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      return NextResponse.json({ error: "Weak password" }, { status: 400 });
+      return NextResponse.json({ error: "⚠️ Weak password" }, { status: 400 });
     }
     
     // Update password in DB  
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     );
 
     // Invalidate old session
-    const res = NextResponse.json({ message: "Password updated successsfully. Please login again."}, { status: 200} );
+    const res = NextResponse.json({ message: "✅ Password updated successsfully. Please login again."}, { status: 200} );
     res.cookies.set("token", "", {
       httpOnly: true,
       sameSite: "strict",
@@ -56,6 +56,6 @@ export async function POST(req: NextRequest) {
     })
     return res;
   } catch (err:any) {
-    return NextResponse.json({error: err.message || "Server error"}, {status: 500});
+    return NextResponse.json({error: err.message || "❌ Server error"}, {status: 500});
   }
 }

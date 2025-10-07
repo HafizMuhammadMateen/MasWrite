@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST() {
   try {
     // Invalidating session
-    const response = NextResponse.json({ message: "Logout successfully." });
+    const response = NextResponse.json({ message: "✅ Logout successfully." });
     response.cookies.set("token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -15,6 +15,6 @@ export async function POST() {
 
     return response;
   } catch (e) {
-    return NextResponse.json({error: "Something went wrong"}, {status: 500})
+    return NextResponse.json({error: "❌ Something went wrong"}, {status: 500})
   }
 }

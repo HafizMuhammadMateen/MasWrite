@@ -20,7 +20,7 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   // handler if user press escape
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if(event.key === "Escape") {
+      if(event.key === "Escape" && !isResetFlow) {
         onClose();
       }
     }
@@ -119,7 +119,7 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   return (
     <div 
       className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
-      onClick={onClose} // click on backdrop closes the modal 
+      onClick={isResetFlow ? undefined : onClose} // click on backdrop closes the modal 
     >
       <div 
         className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm"

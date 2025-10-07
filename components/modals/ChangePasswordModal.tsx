@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { validatePassword } from "@/utils/validators";
 import { ChangePasswordModalProps } from "../../utils/types"
 import { FaEyeSlash, FaEye } from "react-icons/fa";
-import { FaE } from "react-icons/fa6";
 
 export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = false, token }: ChangePasswordModalProps) {
   const[currentPassword, setCurrentPassword] = useState("");
@@ -17,7 +16,21 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   const[showCurrentPassword, setShowCurrentPassword] = useState(false);
   const[showNewPassword, setShowNewPassword] = useState(false);
   const[showConfirmPassword, setShowConfirmPassword] = useState(false);
-  // console.log("is this a reset flow (Token arrived)?:", isResetFlow);
+
+  // handler if user press escape
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if(event.key === "Escape") {
+        onClose();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [onClose]);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
     if(e.target.name === "currentPassword") setCurrentPassword(e.target.value);
@@ -90,16 +103,13 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
       if (err.message.includes("expired")) {
         alert("Your reset link has expired. Please request a new one.");
         router.push("/forgot-password");
-}
-
+      }
     } finally {
       setLoading(false);
     }
-
   }
 
   const handleCancel = () => {
-    onClose();
     if(isResetFlow) router.push("/login"); // Forgot(reset) password flow
     else onClose(); // if user was logged in (just close the opened modal)
   }
@@ -107,10 +117,16 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   if(!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-        <h2 className="text-xl text-center font-semibold mb-4">Change Password</h2>
+    <div 
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={onClose} // click on backdrop closes the modal 
+    >
+      <div 
+        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm"
+        onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
+      >
 
+        <h2 className="text-xl text-center font-semibold mb-4">Change Password</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isResetFlow && (
             <>

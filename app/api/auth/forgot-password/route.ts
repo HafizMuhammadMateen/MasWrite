@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // })
 
     const resetToken = jwt.sign(
-      { userId: user._id },
+      { userId: user._id.toString() },
       process.env.JWT_SECRET!,
       { expiresIn: "15m" }
     );

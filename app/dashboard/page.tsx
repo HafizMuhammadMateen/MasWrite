@@ -11,6 +11,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchDashboard() {
+      await new Promise (resolve => setTimeout(resolve, 3000));
       const res = await fetch("/api/dashboard", {
         method: "GET",
         credentials: "include", // ensures cookies are sent
@@ -30,7 +31,12 @@ export default function DashboardPage() {
     router.push("/login");
   }
 
-  if (!data) return <p>Loading...</p>;
+  if (!data) return (
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
+      <span className="w-10 h-10 border-4 border-gray-400 border-t-transparent rounded-full animate-spin mb-4"></span>
+      <p className="text-gray-600 text-lg font-medium">Loading Dashboard...</p>
+    </div>
+  )
   
   if (data.error) {
     router.push("/login");
@@ -39,7 +45,7 @@ export default function DashboardPage() {
 
   return (
   <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-    <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
+    <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-xl">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
         Dashboard
       </h1>
@@ -49,11 +55,21 @@ export default function DashboardPage() {
           {data.message}
         </p>
 
-        <div className="bg-gray-100 rounded-md p-4 text-sm text-gray-600 overflow-x-auto">
+        {/* <div className="bg-gray-100 rounded-md p-4 text-sm text-gray-600 overflow-x-auto">
           <pre>{JSON.stringify(data.user, null, 2)}</pre>
-        </div>
+        </div> */}
       </div>
 
+      <div className="mt-4">
+        <div className="flex justify-center gap-2">
+          <label><b>Username: </b></label>
+          <p className="">{data.user.userName}</p>
+        </div>
+        <div className="flex justify-center gap-2">
+          <label><b>Email: </b></label>
+          <p className="">{data.user.email}</p>
+        </div>
+      </div>
 
       <button
         type="reset"
@@ -71,7 +87,7 @@ export default function DashboardPage() {
       <button
         type="reset"
         onClick={handleLogout}
-        className="mt-2 w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 cursor-pointer transition"
+        className="mt-4 w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 cursor-pointer transition"
       >
         Logout
       </button>

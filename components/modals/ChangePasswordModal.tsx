@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { validatePassword } from "@/utils/validators";
 import { ChangePasswordModalProps } from "../../utils/types"
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import { FormErrors } from "@/utils/types";
 
 export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = false, token }: ChangePasswordModalProps) {
   const[currentPassword, setCurrentPassword] = useState("");
   const[newPassword, setNewPassword] = useState("");
   const[confirmPassword, setConfirmPassword] = useState("");
   const[loading, setLoading] = useState(false);
-  const[errors, setErrors] = useState<{currentPassword?:string, newPassword?:string, confirmPassword?:string, formError?:string}>({});
+  const[errors, setErrors] = useState<FormErrors>({});
   const router = useRouter();
   const[showCurrentPassword, setShowCurrentPassword] = useState(false);
   const[showNewPassword, setShowNewPassword] = useState(false);
@@ -47,7 +48,7 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
     e.preventDefault();
 
     // validation again on submit not just on blur
-    let currentPasswordError = "";
+    let currentPasswordError = null;
     if(!isResetFlow) currentPasswordError = validatePassword(currentPassword, true);
     const newPasswordError = validatePassword(newPassword, true);
     const confirmPasswordError = validatePassword(confirmPassword, true);

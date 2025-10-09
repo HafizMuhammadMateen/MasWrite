@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
-// import crypto from "crypto";
-import jwt from "jsonwebtoken";
 import { Resend } from "resend";
+import { getUserByEmail, getResetPasswordURL, getResetPasswordToken } from "@/utils/authHelpers";
+import { validateEmail } from "@/utils/validators";
+
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -11,27 +11,22 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
 
     // Validate email format
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-    }
+    const emailError = validateEmail(email);
+    if (emailError) 
+      return NextResponse.json({ error: emailError }, { status: 400 });
 
-    // Finding user in db using userId
-    const client = await clientPromise;
-    const db = client.db("auth-module");
-    const user = await db.collection("users").findOne({email});
+    // Find user by email
+    const user = await getUserByEmail(email);
+    if(!user) 
+      return NextResponse.json(
+        {message: "If user exists, a reset link has been sent"},
+        {status: 200}
+      );
 
-    if(!user) {
-      return NextResponse.json({message: "If user exists, a reset link has been sent"}, {status: 200});
-    }
+    const resetToken = getResetPasswordToken(user._id.toString()); // Generate reset token
+    const resetUrl = getResetPasswordURL(resetToken); // Generate reset URL
 
-    const resetToken = jwt.sign(
-      { userId: user._id.toString() },
-      process.env.JWT_SECRET!,
-      { expiresIn: "15m" }
-    );
-
-    const resetUrl = `${process.env.AUTH_MODULE_APP_URL}/reset-password?token=${resetToken}`;
-
+    // Send reset email
     await resend.emails.send({
       // from: '"Auth Module" <no-reply@auth-module.com>',
       from: "Acme <onboarding@resend.dev>",
@@ -41,13 +36,17 @@ export async function POST(req: NextRequest) {
         <p>You requested a password reset</p>
         <p>Click here to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>
         <p>This link will expire in 15 minutes.</p>
-      `
+      `,
     });
 
-    console.log("link sent on:", email, "token", resetToken);
-        
-    return NextResponse.json({message: "If user exists, a reset link has been sent"}, {status: 200});
+    return NextResponse.json(
+      { message: "If user exists, a reset link has been sent" }, 
+      { status: 200 }
+    );
   } catch (err:any) {
-    return NextResponse.json({error: err.message || "❌ Server error"}, {status: 500});
+    return NextResponse.json(
+      { error: err.message || "❌ Server error" }, 
+      { status: 500 }
+    );
   }
 }

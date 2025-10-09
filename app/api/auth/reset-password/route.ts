@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const { userId } = verifyToken(token);
     
     // Validate password
-    const passwordError = validatePassword(newPassword);
+    const passwordError = validatePassword(newPassword, true);
     if(passwordError) return NextResponse.json({ error: passwordError }, { status: 400 });
 
     // Update password in DB

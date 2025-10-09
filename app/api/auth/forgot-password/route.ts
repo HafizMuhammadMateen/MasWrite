@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         {status: 200}
       );
 
-    const resetToken = getResetPasswordToken(user._id.toString()); // Generate reset token
+    const resetToken = getResetPasswordToken({ userId: user._id.toString() }); // Generate reset token
     const resetUrl = getResetPasswordURL(resetToken); // Generate reset URL
 
     // Send reset email

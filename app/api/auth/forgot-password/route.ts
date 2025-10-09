@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { Resend } from "resend";
-import { getUserByEmail, getResetPasswordURL, signResetPasswordToken } from "@/utils/authHelpers";
+import { getUserByEmail, 
+  getResetPasswordURL, 
+  signResetPasswordToken 
+} from "@/utils/authHelpers";
 import { validateEmail } from "@/utils/validators";
-
+import { success, error } from "@/utils/apiResponse";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -12,16 +15,11 @@ export async function POST(req: NextRequest) {
 
     // Validate email format
     const emailError = validateEmail(email);
-    if (emailError) 
-      return NextResponse.json({ error: emailError }, { status: 400 });
+    if (emailError) return error(emailError, 400);
 
     // Find user by email
     const user = await getUserByEmail(email);
-    if(!user) 
-      return NextResponse.json(
-        {message: "If user exists, a reset link has been sent"},
-        {status: 200}
-      );
+    if(!user) return success("If user exists, a reset link has been sent", 200);
 
     const resetToken = signResetPasswordToken({ userId: user._id.toString() }); // Generate reset token
     const resetUrl = getResetPasswordURL(resetToken); // Generate reset URL
@@ -39,14 +37,8 @@ export async function POST(req: NextRequest) {
       `,
     });
 
-    return NextResponse.json(
-      { message: "If user exists, a reset link has been sent" }, 
-      { status: 200 }
-    );
-  } catch (err:any) {
-    return NextResponse.json(
-      { error: err.message || "❌ Server error" }, 
-      { status: 500 }
-    );
+    return success("If user exists, a reset link has been sent", 200);
+  } catch (err: any) {
+    return error(err.message || "❌ Server error", 500);
   }
 }

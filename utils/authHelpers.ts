@@ -8,7 +8,6 @@ import { NextResponse } from "next/server";
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRY = "1h";
 const AUTH_MODULE_APP_URL = process.env.AUTH_MODULE_APP_URL as string;
-// const AUTH_MODULE_APP_URL = process.env.AUTH_MODULE_APP_URL; OR?
 
 export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 10);
@@ -16,6 +15,10 @@ export async function hashPassword(password: string) {
 
 export async function comparePassword(password: string, hash: string) {
   return await bcrypt.compare(password, hash);
+}
+
+export function verifyToken(token: string) {
+  return jwt.verify(token, JWT_SECRET) as { userId: string };
 }
 
 export function signToken(payload: object) {
@@ -26,13 +29,9 @@ export function signToken(payload: object) {
   )
 }
 
-export function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET) as { userId: string };
-}
-
-export function getResetPasswordToken(userId: string) {
+export function signResetPasswordToken(payload: object) {
   return jwt.sign(
-    { _id: new ObjectId(userId) },
+    payload,
     JWT_SECRET,
     { expiresIn: "15m" }
   )
@@ -40,6 +39,17 @@ export function getResetPasswordToken(userId: string) {
 
 export function getResetPasswordURL(token: string) {
   return `${AUTH_MODULE_APP_URL}/reset-password?token=${token}`;
+}
+
+export async function getUserById(userId: string) {
+  try {
+    const client = await clientPromise;
+    const db = client.db("auth-module");
+    return await db.collection("users").findOne({ _id: new ObjectId(userId) });
+  } catch (err) {
+    console.error("❌ Error findng user by ID:", err);
+    return null;
+  }
 }
 
 // Also check existing email (in sign up page)
@@ -50,17 +60,6 @@ export async function getUserByEmail(email: string) {
     return await db.collection("users").findOne({ email });
   } catch (err) {
     console.error("❌ Error finding user by email:", err);
-    return null;
-  }
-}
-
-export async function getUserById(userId: string) {
-  try {
-    const client = await clientPromise;
-    const db = client.db("auth-module");
-    return await db.collection("users").findOne({ _id: new ObjectId(userId) });
-  } catch (err) {
-    console.error("❌ Error findng user by ID:", err);
     return null;
   }
 }

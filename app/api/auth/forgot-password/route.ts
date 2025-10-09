@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { getUserByEmail, getResetPasswordURL, getResetPasswordToken } from "@/utils/authHelpers";
+import { getUserByEmail, getResetPasswordURL, signResetPasswordToken } from "@/utils/authHelpers";
 import { validateEmail } from "@/utils/validators";
 
 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         {status: 200}
       );
 
-    const resetToken = getResetPasswordToken({ userId: user._id.toString() }); // Generate reset token
+    const resetToken = signResetPasswordToken({ userId: user._id.toString() }); // Generate reset token
     const resetUrl = getResetPasswordURL(resetToken); // Generate reset URL
 
     // Send reset email

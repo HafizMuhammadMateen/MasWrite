@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { comparePassword, getUserByEmail, getToken, makeNewSession } from "@/utils/authHelpers";
+import { comparePassword, getUserByEmail, signToken, makeNewSession } from "@/utils/authHelpers";
 
 export async function POST(req: Request) {
   try {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     }
 
     // Sign JWT
-    const token = getToken({ userId: user._id.toString(), email: user.email });
+    const token = signToken({ userId: user._id.toString(), email: user.email });
     const response = NextResponse.json({ message: "✅ Login successful"}, { status: 200 });
 
     makeNewSession(response, token);

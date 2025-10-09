@@ -1,39 +1,36 @@
 import { NextResponse } from "next/server";
-import clientPromise from "../../../../lib/mongodb";
-import bcrypt from "bcryptjs";
+import clientPromise from "@/lib/mongodb";
+import { validateEmail, validatePassword } from "@/utils/validators";
+import { getUserByEmail, hashPassword } from "@/utils/authHelpers";
 
 export async function POST(req: Request) {
   try {
-
-    const body = await req.json();
-    console.log("Incoming body:", body);
-
-    const { userName, email, password } = body;
+    const { userName, email, password } = await req.json();
 
     // Basic validation
     if (!userName || !email || !password) {
       return NextResponse.json({ error: "⚠️ All fields are required" }, { status: 400 });
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json({ error: "❌ Invalid email" }, { status: 400 });
-    }
+    // Validate email
+    const emailError = validateEmail(email);
+    if (emailError) 
+      return NextResponse.json({ error: emailError }, { status: 400 });
 
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password)) {
-      return NextResponse.json({ error: "⚠️ Weak password" }, { status: 400 });
-    }
-
-    const client = await clientPromise;
-    const db = client.db("auth-module");
-
+    // Validate password
+    const passwordError = validatePassword(password, true);
+    if (passwordError) 
+      return NextResponse.json({ error: passwordError }, { status: 400 });
+    
     // Check duplicates
-    const existing = await db.collection("users").findOne({ email });
-    if (existing) {
-      return NextResponse.json({ error: "⚠️ Email already registered" }, { status: 400 });
-    }
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) 
+      return NextResponse.json({ error: "⚠️ Email already registered" }, { status: 400});
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
+    const client = await clientPromise;
+    const db = client.db("auth-module");
 
     const newUser = {
       userName,
@@ -45,9 +42,13 @@ export async function POST(req: Request) {
 
     await db.collection("users").insertOne(newUser);
 
-    return NextResponse.json({ message: "✅ User created successfully" }, { status: 201 });
-  } catch (e) {
-    console.error(e);
+    return NextResponse.json({ 
+        message: "✅ User created successfully",
+        user: { userName, email }
+      }, { status: 201 }
+    );
+  } catch (err) {
+    console.error("❌ Signup error:", err);
     return NextResponse.json({ error: "❌ Something went wrong" }, { status: 500 });
   }
 }

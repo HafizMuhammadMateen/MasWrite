@@ -4,10 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { validateEmail, validatePassword } from "@/utils/validators";
-import { FormErrors } from "@/utils/types"; // for type defination
+import { FormErrors } from "@/utils/types";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
-// import { resolve } from "path";
-// import bcrypt from "bcryptjs";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");

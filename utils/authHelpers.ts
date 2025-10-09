@@ -84,6 +84,24 @@ export function makeNewSession(response: NextResponse, token: string) {
   })
 }
 
+export async function makeUser(
+  userName: string,
+  email: string,
+  hashedPassword: string,
+) {
+  const newUser = {
+    userName,
+    email,
+    password: hashedPassword,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const client = await clientPromise;
+  const db = client.db("auth-module");
+  return await db.collection("users").insertOne(newUser);
+}
+
 export function invalidateSession(response: NextResponse) {
   response.cookies.set("token", "", {
     httpOnly: true,

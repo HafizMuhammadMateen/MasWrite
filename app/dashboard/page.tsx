@@ -12,7 +12,6 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchDashboard() {
       try {
-        // await new Promise (resolve => setTimeout(resolve, 3000));
         const res = await fetch("/api/dashboard", {
           method: "GET",
           credentials: "include", // ensures cookies are sent
@@ -25,7 +24,7 @@ export default function DashboardPage() {
         }
         
         const result = await res.json();
-        setData(result);
+        setData(result.data);
       } catch (error) {
         console.error("❌ Error fetching dashboard: ", error);
         setData({ error: "❌ Failed to load dashboard" });

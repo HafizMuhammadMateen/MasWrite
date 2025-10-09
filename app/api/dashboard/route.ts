@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     }
     
     console.log("✅ Dashboard access granted for:", user.email);
-    return success("✅ Access granted", 200, user);
+    return success("✅ Access granted", 200, { user });
   } catch (err: any) {
     console.error("❌ JWT verification failed:", err.message);
     return error("❌ Invalid or expired token", 401, err.message);

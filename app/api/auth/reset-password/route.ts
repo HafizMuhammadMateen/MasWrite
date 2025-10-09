@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { updatePassword, verifyToken } from "@/utils/authHelpers";
 import { validatePassword } from "@/utils/validators";
+import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,23 +9,18 @@ export async function POST(req: NextRequest) {
 
     // Verify token
     const { userId } = verifyToken(token);
+    console.log("🔑 Password reset for user:", userId);
     
     // Validate password
     const passwordError = validatePassword(newPassword, true);
-    if(passwordError) return NextResponse.json({ error: passwordError }, { status: 400 });
+    if(passwordError) return error(passwordError, 400);
 
     // Update password in DB
     await updatePassword(userId, newPassword);
 
-    return NextResponse.json(
-      { message: "✅ Password reset successfully" }, 
-      { status: 200 }
-    );
+    return success("✅ Password reset successfully", 200);
   } catch (err: any) {
     console.error("❌ Reset password error:", err.message);
-    return NextResponse.json(
-      { error: err.message || "❌ Invalid or expired token" }, 
-      { status: 400 }
-    );
+    return error(err.message || "❌ Invalid or expired token", 401);
   }
 }

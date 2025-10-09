@@ -1,49 +1,38 @@
 import { NextResponse } from "next/server";
-import clientPromise from "../../../../lib/mongodb";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { comparePassword, getUserByEmail, signToken, makeNewSession } from "@/utils/authHelpers";
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
+    
     if (!email || !password) {
+      console.log("⚠️ Missing email or password");
       return NextResponse.json({ error: "⚠️ Email & password required" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db("auth-module");
-
-    const user = await db.collection("users").findOne({ email });
-    if (!user) {
+    // Verify user
+    const user = await getUserByEmail(email);
+    if (!user) { 
+      console.log("❌ No user found for email:", email)
       return NextResponse.json({ error: "❌ Invalid credentials" }, { status: 401 });
     }
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
+    // Verify password
+    const valid = await comparePassword(password, user.password);
+    if (!valid){
+      console.log("❌ Incorrect password for:", email);  
       return NextResponse.json({ error: "❌ Invalid credentials" }, { status: 401 });
     }
 
     // Sign JWT
-    const token = jwt.sign(
-      { userId: user._id.toString(), email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
-    );
-
-    // return NextResponse.json({ message: "Login successful", token }, { status: 200 });
+    const token = signToken({ userId: user._id.toString(), email: user.email });
     const response = NextResponse.json({ message: "✅ Login successful"}, { status: 200 });
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60,
-      path: "/",
-    })
-
+    makeNewSession(response, token);
+    console.log("✅ User logged in:", user.email);
     return response;
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "❌ Something went wrong" }, { status: 500 });
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json({ error: err.message || "❌ Something went wrong" }, { status: 500 });
   }
 }

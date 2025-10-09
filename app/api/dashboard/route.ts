@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { verifyToken, getUserById } from "@/utils/authHelpers";
+import { success, error } from "@/utils/apiResponse";
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
 
   if (!token) {
     console.log("❌ No token found in cookies");
-    return NextResponse.json({ error: "❌ Unauthorized" }, { status: 401 });
+    return error("❌ Unauthorized", 401, "No token found in cookies");
   }
 
   try {
@@ -15,12 +16,13 @@ export async function GET(req: NextRequest) {
 
     if (!user) {
       console.log("❌ User not found in DB");
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return error("❌ User not found", 404);
     }
-
-    return NextResponse.json({ message: "✅ Access granted", user });
+    
+    console.log("✅ Dashboard access granted for:", user.email);
+    return success("✅ Access granted", 200, user);
   } catch (err: any) {
     console.error("❌ JWT verification failed:", err.message);
-    return NextResponse.json({ error: "❌ Invalid or expired token" }, { status: 401 });
+    return error("❌ Invalid or expired token", 401, err.message);
   }
 }

@@ -1,54 +1,32 @@
-import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
 import { validateEmail, validatePassword } from "@/utils/validators";
-import { getUserByEmail, hashPassword } from "@/utils/authHelpers";
+import { getUserByEmail, hashPassword, makeUser } from "@/utils/authHelpers";
+import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: Request) {
   try {
     const { userName, email, password } = await req.json();
 
     // Basic validation
-    if (!userName || !email || !password) {
-      return NextResponse.json({ error: "⚠️ All fields are required" }, { status: 400 });
-    }
+    if (!userName || !email || !password) return error("⚠️ All fields are required", 422);
 
-    // Validate email
     const emailError = validateEmail(email);
-    if (emailError) 
-      return NextResponse.json({ error: emailError }, { status: 400 });
-
-    // Validate password
+    if (emailError) return error(emailError, 400);
+    
     const passwordError = validatePassword(password, true);
-    if (passwordError) 
-      return NextResponse.json({ error: passwordError }, { status: 400 });
+    if (passwordError) return error(passwordError, 400);
     
     // Check duplicates
     const existingUser = await getUserByEmail(email);
-    if (existingUser) 
-      return NextResponse.json({ error: "⚠️ Email already registered" }, { status: 400});
+    if (existingUser) return error("⚠️ Email already registered" , 409); // Conflict error code
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
-    const client = await clientPromise;
-    const db = client.db("auth-module");
+    await makeUser(userName, email, hashedPassword);
 
-    const newUser = {
-      userName,
-      email,
-      password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    console.log("✅ User created", email);
 
-    await db.collection("users").insertOne(newUser);
-
-    return NextResponse.json({ 
-        message: "✅ User created successfully",
-        user: { userName, email }
-      }, { status: 201 }
-    );
+    return success("✅ User created successfully", 201, { userName, email });
   } catch (err) {
     console.error("❌ Signup error:", err);
-    return NextResponse.json({ error: "❌ Something went wrong" }, { status: 500 });
+    return error("❌ Something went wrong", 500);
   }
 }

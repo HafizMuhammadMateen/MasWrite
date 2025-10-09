@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
-import jwt from "jsonwebtoken";
-import { ObjectId } from "mongodb";
-import bcrypt from "bcryptjs";
+import { updatePassword, verifyToken } from "@/utils/authHelpers";
+import { validatePassword } from "@/utils/validators";
 
 export async function POST(req: NextRequest) {
   try {
     const { token, newPassword } = await req.json();
 
-    const payload: any = jwt.verify(token, process.env.JWT_SECRET!);
+    // Verify token
+    const { userId } = verifyToken(token);
+    
+    // Validate password
+    const passwordError = validatePassword(newPassword);
+    if(passwordError) return NextResponse.json({ error: passwordError }, { status: 400 });
 
-    const client = await clientPromise;
-    const db = client.db("auth-module");
+    // Update password in DB
+    await updatePassword(userId, newPassword);
 
-    const hashed = await bcrypt.hash(newPassword, 10);
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(payload.userId) },
-      { $set: { password: hashed } } // hash it in production
+    return NextResponse.json(
+      { message: "✅ Password reset successfully" }, 
+      { status: 200 }
     );
-
-    return NextResponse.json({ message: "✅ Password reseted successfully" }, {status: 200});
   } catch (err: any) {
     console.error("❌ Reset password error:", err.message);
-    return NextResponse.json({ error: err.message || "❌ Invalid or expired token" }, { status: 400 });
+    return NextResponse.json(
+      { error: err.message || "❌ Invalid or expired token" }, 
+      { status: 400 }
+    );
   }
 }

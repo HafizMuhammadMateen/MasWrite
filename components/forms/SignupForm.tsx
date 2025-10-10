@@ -6,6 +6,7 @@ import Link from "next/link";
 import { validateUsername, validateEmail, validatePassword } from "@/utils/validators";
 import { FormErrors } from "@/utils/types";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 export default function SignupForm() {
   const[email, setEmail] = useState("");
@@ -74,10 +75,12 @@ export default function SignupForm() {
       const data = await response.json();
       console.log("Signup successful:", data);
 
+      toast.success("Signup successful! Please log in.");
       router.push("/login");
 
     } catch(err:any) {
       // backend error message
+      toast.error(err.message || "Signup failed. Please try again.");
       setErrors((prev) => ({ ...prev, formError: err.message}))
     } finally {
       setLoading(false);

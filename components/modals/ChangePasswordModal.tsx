@@ -34,14 +34,23 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   }, [onClose]);
 
   const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.name === "currentPassword") setCurrentPassword(e.target.value);
-    else if(e.target.name === "newPassword")  setNewPassword(e.target.value);
-    else if(e.target.name === "confirmPassword")  setConfirmPassword(e.target.value);
+    const { name, value } = e.target;
+
+    // Update the field value
+    if(name === "currentPassword") setCurrentPassword(value);
+    else if(name === "newPassword")  setNewPassword(value);
+    else if(name === "confirmPassword")  setConfirmPassword(value);
+
+    // Re-validate and clear error if valid
+    const validationError = validatePassword(value);
+    setErrors((prev) => ({...prev, [name]: validationError}));
   }
 
   const handleBlur = (e:React.ChangeEvent<HTMLInputElement>) => {
-    const validationError = validatePassword(e.target.value, true); //calling strict check for new password
-    setErrors((prev) => ({...prev, [e.target.name]: validationError}));
+    const { name, value } = e.target;
+
+    const validationError = validatePassword(value, true); //calling strict check for new password
+    setErrors((prev) => ({...prev, [name]: validationError}));
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,7 +76,6 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
     }
     
     setErrors({});
-    // setErrors({ email: "", userName: "", password: "" });
 
     try {
       setLoading(true);
@@ -90,14 +98,12 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
       }
 
       //On sccess
-      console.log("Password Changed: ", {currentPassword}, "->", {newPassword});
       alert("Password changed successfully, Please login again.")
       onClose();
       const data = await response.json();
       console.log("Password changed successfull:", data);
 
       router.push("/login");
-
     } catch(err:any) {
       // backend error message
       setErrors((prev) => ({ ...prev, formError: err.message}));

@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
+import toast from "react-hot-toast";
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
-  const[isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
+  // Fetch dashboard data
   useEffect(() => {
     async function fetchDashboard() {
       try {
@@ -17,96 +19,112 @@ export default function DashboardPage() {
           credentials: "include", // ensures cookies are sent
         });
 
-        if(!res.ok) {
+        if (!res.ok) {
           const errData = await res.json();
-          setData({ error: errData.error || "❌ Unauthorized" });
+          toast.error(errData.error || "Unauthorized access");
+          setData({ error: errData.error || "Unauthorized" });
           return;
         }
-        
+
         const result = await res.json();
         setData(result.data);
-      } catch (error) {
-        console.error("❌ Error fetching dashboard: ", error);
-        setData({ error: "❌ Failed to load dashboard" });
+        toast.success("Dashboard loaded successfully");
+      } catch {
+        toast.error("Failed to load dashboard");
+        setData({ error: "Failed to load dashboard" });
       }
     }
     fetchDashboard();
   }, []);
 
+  // Redirect if unauthorized
   useEffect(() => {
-    if(data?.error) {
-      setTimeout(() => router.push("/login"), 500);
+    if (data?.error) {
+      setTimeout(() => router.push("/login"), 800);
     }
   }, [data, router]);
 
+  // Handle logout
   async function handleLogout() {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    router.push("/login");
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        toast.success("Logged out successfully");
+        router.push("/login");
+      } else {
+        toast.error("Logout failed, please try again");
+      }
+    } catch {
+      toast.error("Something went wrong while logging out");
+    }
   }
 
+  // Loading state
   if (!data) {
     return (
-      <div 
-        className="flex flex-col justify-center items-center min-h-screen bg-gray-50" 
-      >
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
         <span className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></span>
         <p className="text-gray-600 text-lg font-medium">Loading Dashboard...</p>
       </div>
-    )
+    );
   }
 
-  if(data?.error) {
+  // Redirecting state
+  if (data?.error) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen text-gray-600">
         <p>Redirecting to login...</p>
       </div>
-    )
+    );
   }
-  
+
+  // Main dashboard view
   return (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-    <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-xl">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-        Dashboard
-      </h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-xl">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Dashboard
+        </h1>
 
-      <div className="flex flex-col items-center mt-6 bg-gray-100 rounded-lg p-4 shadow-inner text-center">
-        <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl font-bold">
-          {data.user?.userName?.charAt(0)?.toUpperCase()}
+        <div className="flex flex-col items-center mt-6 bg-gray-100 rounded-lg p-4 shadow-inner text-center">
+          <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl font-bold">
+            {data.user?.userName?.charAt(0)?.toUpperCase()}
+          </div>
+          <p className="text-xl font-semibold text-gray-800 mt-3">
+            👋 Welcome, <span className="text-blue-600">{data.user?.userName}</span>
+          </p>
+          <p className="text-gray-600 mt-1">{data.user?.email}</p>
         </div>
-        <p className="text-xl font-semibold text-gray-800 mt-3">
-          👋 Welcome, <span className="text-blue-600">{data.user?.userName}</span>
-        </p>
-        <p className="text-gray-600 mt-1">{data.user?.email}</p>
+
+        <button
+          type="reset"
+          onClick={() => setIsModalOpen(true)}
+          className="mt-8 w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 cursor-pointer transition"
+        >
+          Change Password
+        </button>
+
+        <ChangePasswordModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+
+        <button
+          type="reset"
+          onClick={handleLogout}
+          className="mt-4 w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 cursor-pointer transition"
+        >
+          Logout
+        </button>
       </div>
-
-      <button
-        type="reset"
-        onClick={() => setIsModalOpen(true)}
-        className="mt-8 w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 cursor-pointer transition"
-      >
-        Change Password
-      </button>
-
-      <ChangePasswordModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
-
-      <button
-        type="reset"
-        onClick={handleLogout}
-        className="mt-4 w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 cursor-pointer transition"
-      >
-        Logout
-      </button>
     </div>
-  </div>
   );
 }
+
 
 
 // "use client"

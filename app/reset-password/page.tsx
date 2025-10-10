@@ -2,20 +2,53 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
+import {jwtDecode} from "jwt-decode";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token"); // get ?token=... from URL
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
   const[errorMsg, setErrorMsg] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     if(!token) {
       setErrorMsg("❌ Invalid or missing password reset link.");
       setIsOpen(false);
+      return;
     } else {
       setIsOpen(true);
+    }
+
+    try {
+            // decode token to get expiry timestamp
+      const decoded = jwtDecode<{ exp: number }>(token);
+      const timeLeft = decoded.exp * 1000 - Date.now();
+
+      if (timeLeft <= 0) {
+        setErrorMsg("❌ Password reset link has expired.");
+        setIsOpen(false);
+        return;
+      }
+
+      // open modal if token valid
+      setIsOpen(true);
+
+      const timer = setTimeout(() => {
+        setErrorMsg("❌ Password reset link has expired.");
+        setIsOpen(false);
+
+        // show message for 3s, then redirect
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
+      }, timeLeft);
+
+      return () => clearTimeout(timer);
+
+    } catch (err) {
+      setErrorMsg("❌ Invalid password reset token.");
+      setIsOpen(false);
     }
   }, [token]);
 

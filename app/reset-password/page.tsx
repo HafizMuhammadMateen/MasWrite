@@ -29,8 +29,8 @@ export default function ResetPasswordPage() {
 
     try {
       // decode token to get expiry timestamp
-      const decoded = jwtDecode<{ exp: number }>(token);
-      const timeLeft = decoded.exp * 1000 - Date.now();
+      const decodedToken = jwtDecode<{ exp: number }>(token);
+      const timeLeft = decodedToken.exp * 1000 - Date.now();
 
       if (timeLeft <= 0) {
         setTimeout(() => {

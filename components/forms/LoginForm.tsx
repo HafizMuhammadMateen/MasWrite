@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { validateEmail, validatePassword } from "@/utils/validators";
 import { FormErrors } from "@/utils/types";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -66,10 +67,12 @@ export default function LoginForm() {
     console.log("Login successful:", data);
     
     // localStorage.setItem("token", data.token);
+    toast.success("Login successful!");
     router.push("/dashboard");
 
     } catch(err:any) {
       // backend error message
+      toast.error(err.message || "Login failed!");
       setErrors((prev) => ({ ...prev, formError: err.message}));
     } finally {
       setLoading(false);

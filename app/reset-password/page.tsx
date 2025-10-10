@@ -13,21 +13,35 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if(!token) {
-      setErrorMsg("❌ Invalid or missing password reset link.");
-      setIsOpen(false);
+      setTimeout(() => {
+        setErrorMsg("❌ Invalid or missing password reset link.");
+        setIsOpen(false);
+
+        // show message for 3s, then redirect
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
+      });
       return;
     } else {
       setIsOpen(true);
     }
 
     try {
-            // decode token to get expiry timestamp
+      // decode token to get expiry timestamp
       const decoded = jwtDecode<{ exp: number }>(token);
       const timeLeft = decoded.exp * 1000 - Date.now();
 
       if (timeLeft <= 0) {
-        setErrorMsg("❌ Password reset link has expired.");
-        setIsOpen(false);
+        setTimeout(() => {
+          setErrorMsg("❌ Invalid or missing password reset link.");
+          setIsOpen(false);
+
+          // show message for 3s, then redirect
+          setTimeout(() => {
+            router.push("/login");
+          }, 3000);
+        });
         return;
       }
 

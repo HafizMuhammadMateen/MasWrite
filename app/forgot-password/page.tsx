@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { validateEmail } from "@/utils/validators";
+import type { FormErrors } from "@/utils/types";
 
 export default function ForgotPassword() {
   const[email, setEmail] = useState("");
   const[loading, setLoading] = useState(false);
-  const[errors, setErrors] = useState<{email?:string, formError?:string}>({});
+  const[errors, setErrors] = useState<FormErrors>({});
   const router = useRouter();
   const[success, setSuccess] = useState(false);
 

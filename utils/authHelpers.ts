@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRY = "1h";
-const AUTH_MODULE_APP_URL = process.env.AUTH_MODULE_APP_URL as string;
+const APP_URL = process.env.APP_URL as string;
 
 export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 10);
@@ -38,13 +38,13 @@ export function signResetPasswordToken(payload: object) {
 }
 
 export function getResetPasswordURL(token: string) {
-  return `${AUTH_MODULE_APP_URL}/reset-password?token=${token}`;
+  return `${APP_URL}/reset-password?token=${token}`;
 }
 
 export async function getUserById(userId: string) {
   try {
     const client = await clientPromise;
-    const db = client.db("auth-module");
+    const db = client.db("authx");
     return await db.collection("users").findOne({ _id: new ObjectId(userId) });
   } catch (err) {
     console.error("❌ Error findng user by ID:", err);
@@ -56,7 +56,7 @@ export async function getUserById(userId: string) {
 export async function getUserByEmail(email: string) {
   try {
     const client = await clientPromise;
-    const db = client.db("auth-module");
+    const db = client.db("authx");
     return await db.collection("users").findOne({ email });
   } catch (err) {
     console.error("❌ Error finding user by email:", err);
@@ -67,7 +67,7 @@ export async function getUserByEmail(email: string) {
 export async function updatePassword(userId: string, newPassword: string) {
   const hashed = await hashPassword(newPassword);
   const client = await clientPromise;
-  const db = client.db("auth-module");
+  const db = client.db("authx");
   await db.collection("users").updateOne(
     { _id: new ObjectId(userId) },
     { $set: { password: hashed } }
@@ -98,7 +98,7 @@ export async function makeUser(
   };
 
   const client = await clientPromise;
-  const db = client.db("auth-module");
+  const db = client.db("authx");
   return await db.collection("users").insertOne(newUser);
 }
 

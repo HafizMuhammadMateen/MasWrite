@@ -12,6 +12,7 @@
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "mongoose": "^8.19.1",
     "next": "15.5.4",
     "nodemailer": "^7.0.6",
     "react": "19.1.0",

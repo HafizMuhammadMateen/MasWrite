@@ -4,11 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
 import toast from "react-hot-toast";
+import { Post } from "@/lib/types/post";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
   const router = useRouter();
+
+  // Redirect if unauthorized
+  useEffect(() => {
+    if (data?.error) {
+      setTimeout(() => router.push("/login"), 800);
+    }
+  }, [data, router]);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -37,12 +47,12 @@ export default function DashboardPage() {
     fetchDashboard();
   }, []);
 
-  // Redirect if unauthorized
+  // Fetch blogs
   useEffect(() => {
-    if (data?.error) {
-      setTimeout(() => router.push("/login"), 800);
-    }
-  }, [data, router]);
+    fetch("/api/posts")
+    .then((res) => res.json())
+    .then(setPosts);
+  }, []);
 
   // Handle logout
   async function handleLogout() {
@@ -98,6 +108,13 @@ export default function DashboardPage() {
             👋 Welcome, <span className="text-blue-600">{data.user?.userName}</span>
           </p>
           <p className="text-gray-600 mt-1">{data.user?.email}</p>
+         
+          <Link
+            href="/dashboard/blogs"
+            className="mt-6 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition"
+          >
+            View Blogs
+          </Link>
         </div>
 
         <button
@@ -121,6 +138,27 @@ export default function DashboardPage() {
           Logout
         </button>
       </div>
+
+      {/* Recent Blogs */}
+      <section className="mt-10">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+          Recent Blog Posts
+        </h2>
+
+        {posts.length === 0 ? (
+          <p className="text-gray-500 text-center">No blog posts yet.</p>
+        ) : (
+          <ul className="space-y-3">
+            {posts.map((p) => (
+              <li key={p._id} className="border border-gray-200 rounded-lg p-3 hover:shadow-sm">
+                <p className="font-semibold text-gray-800">{p.title}</p>
+                <p className="text-gray-600 text-sm mt-1 line-clamp-2">{p.content}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
     </div>
   );
 }

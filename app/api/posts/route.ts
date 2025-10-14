@@ -10,9 +10,22 @@ export async function GET() {
 }
 
 // Create new posts
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "")
+}
+
 export async function POST(req: NextRequest) {
   await connectDB();
-  const data = await req.json() as { title: string; content: string };
-  const post = await Post.create(data);
+  const data = await req.json() as { title: string; content: string; };
+
+  const slug = slugify(data.title);
+  const isExisting  = await Post.findOne({ slug });
+  if(isExisting) return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
+
+  const post = await Post.create({ ...data, slug });
   return NextResponse.json(post);
 }

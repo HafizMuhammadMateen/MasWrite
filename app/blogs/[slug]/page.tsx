@@ -4,16 +4,16 @@ import { useParams, useRouter } from "next/navigation";
 import { Post } from "@/lib/types/post";
 
 export default function SinglePost() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
 
   useEffect(() => {
-    fetch(`/api/posts/${id}`).then(res => res.json()).then(setPost);
-  }, [id]);
+    fetch(`/api/posts/${slug}`).then(res => res.json()).then(setPost);
+  }, [slug]);
 
   const handleDelete = async () => {
-    await fetch(`/api/posts/${id}`, { method: "DELETE" });
+    await fetch(`/api/posts/${slug}`, { method: "DELETE" });
     router.push("/blogs");
   };
 

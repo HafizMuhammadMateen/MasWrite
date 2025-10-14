@@ -17,8 +17,8 @@ export default function BlogPage() {
       <Link href="/dashboard/blogs/new" className="text-blue-500">+ New Post</Link>
       <ul className="mt-4 space-y-2">
         {posts.map(p => (
-          <li key={p._id}>
-            <Link href={`blogs/${p._id}`} className="font-semibold">{p.title}</Link>
+          <li key={p.slug || p._id}>
+            <Link href={`blogs/${p.slug}`} className="font-semibold">{p.title}</Link>
           </li>
         ))}
       </ul>

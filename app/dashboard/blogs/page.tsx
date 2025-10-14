@@ -14,7 +14,7 @@ export default function BlogPage() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Blog Posts</h1>
-      {/* <Link href="/blog/new" className="text-blue-500">+ New Post</Link> */}
+      <Link href="/dashboard/blogs/new" className="text-blue-500">+ New Post</Link>
       <ul className="mt-4 space-y-2">
         {posts.map(p => (
           <li key={p._id}>

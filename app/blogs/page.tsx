@@ -8,7 +8,9 @@ export default function BlogPage() {
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
-    fetch("/api/posts").then(res => res.json()).then(setPosts);
+    fetch("/api/posts")
+      .then(res => res.json())
+      .then((data) => setPosts(data.posts || []));
   }, []);
 
   return (

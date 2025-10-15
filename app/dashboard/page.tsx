@@ -51,7 +51,7 @@ export default function DashboardPage() {
   useEffect(() => {
     fetch("/api/posts")
     .then((res) => res.json())
-    .then(setPosts);
+    .then((data) => setPosts(data.posts || []));
   }, []);
 
   // Handle logout

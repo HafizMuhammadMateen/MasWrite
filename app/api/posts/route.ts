@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
 
   // Query posts
   const posts = await Post.find(filter)
+    .populate("author", "userName") // only get userName from User
     .sort({ [sort]: -1 })
     .skip((page - 1) * limit)
     .limit(limit);

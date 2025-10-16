@@ -1,50 +1,47 @@
 "use client";
 
-import Link from "next/link";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { FaBars } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
+import ProfileModal from "@/components/modals/ProfileModal";
 
-export default function Header() {
-  const router = useRouter();
-
-  // Handle logout
-  async function handleLogout() {
-    try {
-      const res = await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        toast.success("Logged out successfully");
-        router.push("/login");
-      } else {
-        toast.error("Logout failed, please try again");
-      }
-    } catch {
-      toast.error("Something went wrong while logging out");
-    }
-  }
+export default function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3">
-        <Link href="/" className="text-xl font-bold text-blue-600">
-          Auth-Module Blogs
-        </Link>
-
-        <nav className="flex items-center gap-6 text-gray-700 font-medium">
-          <Link href="/blogs" className="hover:text-blue-600 transition">Blogs</Link>
-          <Link href="/dashboard" className="hover:text-blue-600 transition">Dashboard</Link>
-          <Link href="/about" className="hover:text-blue-600 transition">About</Link>
-        </nav>
-
+    <header className="flex items-center justify-between px-4 py-2 bg-white shadow-sm">
+      {/* Left: Navbar toggle + logo */}
+      <div className="flex items-center gap-3">
         <button
-          onClick={() => handleLogout()}
-          className="bg-red-500 text-white px-3 py-1.5 rounded-md cursor-pointer hover:bg-red-600  transition"
+          onClick={onToggleSidebar}
+          className="p-2 rounded hover:bg-gray-100 transition cursor-pointer"
         >
-          Logout
+          <FaBars size={20} />
         </button>
+        <span className="font-semibold text-lg">Dashboard</span>
+      </div>
+
+      {/* Middle: Search bar */}
+      <div className="flex-1 max-w-md mx-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-gray-300"
+        />
+      </div>
+
+      {/* Right: Profile Icon */}
+      <div className="relative">
+        <button
+          onClick={() => setShowProfileModal((prev) => !prev)}
+          className="p-2 rounded-full hover:bg-gray-100"
+        >
+          <FaUserCircle size={26} />
+        </button>
+
+        {showProfileModal && (
+          <ProfileModal onClose={() => setShowProfileModal(false)} />
+        )}
       </div>
     </header>
   );

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
-import Post from "@/lib/models/Post";
-import { slugify } from "@/utils/postsHelpers";
+import Blog from "@/lib/models/Blog";
+import { slugify } from "@/utils/blogsHelpers";
+import { error } from "console";
+import { verifyToken } from "@/utils/authHelpers";
 
-// Get all posts
+// Get all blogs
 export async function GET(req: NextRequest) {
   await connectDB();
 
@@ -24,36 +26,47 @@ export async function GET(req: NextRequest) {
   if (tags.length > 0) filter.tags = { $in: tags };
 
   // Pagination setup
-  const total = await Post.countDocuments(filter);
+  const total = await Blog.countDocuments(filter);
   const totalPages = Math.ceil(total / limit);
 
-  // Query posts
-  const posts = await Post.find(filter)
-    .populate("author", "userName") // only get userName from User
+  // Query blogs
+  const blogs = await Blog.find(filter)
+    .populate("author", "userName email")
     .sort({ [sort]: -1 })
     .skip((page - 1) * limit)
     .limit(limit);
 
   return NextResponse.json({
-    posts,
+    blogs,
     page,
     totalPages,
     total,
   });
 }
 
-// Create new post(s)
+// Create new blog(s)
 export async function POST(req: NextRequest) {
   await connectDB();
   const data = await req.json() as { title: string; content: string; };
 
   const slug = slugify(data.title);
-  const isExisting  = await Post.findOne({ slug });
-  if(isExisting) return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
+  const isExisting  = await Blog.findOne({ slug });
+  if(isExisting) return error("⚠️ Slug already exists", 400);
 
   const words = data.content.split(/\s+/).length; 
   const readingTime = Math.max(1, Math.round(words / 200));
 
-  const post = await Post.create({ ...data, slug, readingTime });
-  return NextResponse.json(post);
+  const token = req.cookies.get("token")?.value;
+  if (!token) return error("❌ Unauthorized", 401);
+
+  const decodedToken = verifyToken(token);
+  if(!decodedToken || !decodedToken.userId) return error("❌ Invalid token", 401); 
+
+  const blog = await Blog.create({ 
+    ...data, 
+    slug, 
+    readingTime,
+    author: decodedToken.userId, 
+  });
+  return NextResponse.json(blog);
 }

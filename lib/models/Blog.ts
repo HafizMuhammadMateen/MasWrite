@@ -1,6 +1,8 @@
 import mongoose, { Schema, Types } from "mongoose";
+import "@/lib/models/User";
+import "@/lib/models/Blog";
 
-const postSchema = new Schema(
+const blogSchema = new Schema(
   {
     title: { type: String, required: true },
     content: { type: String, required: true },
@@ -15,7 +17,7 @@ const postSchema = new Schema(
 );
 
 // Add index
-postSchema.index({ createdAt: -1 }); // for sorting/pagination
-postSchema.index({ title: "text", content: "text" }); // for search
+blogSchema.index({ createdAt: -1 }); // for sorting/pagination
+blogSchema.index({ title: "text", content: "text" }); // for search
 
-export default mongoose.models.Post || mongoose.model("Post", postSchema);
+export default mongoose.models.Post || mongoose.model("Blog", blogSchema);

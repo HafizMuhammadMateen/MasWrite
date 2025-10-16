@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
-import Post from "@/lib/models/Post";
-import { slugify } from "@/utils/postsHelpers";
+import Blog from "@/lib/models/Blog";
+import { slugify } from "@/utils/blogsHelpers";
 
-// Get single post
+// Get single blog
 export async function GET(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
   await connectDB();
   const { slug } = await context.params;
-  const post = await Post.findOne({ slug });
-  return NextResponse.json(post);
+  const blog = await Blog.findOne({ slug });
+  return NextResponse.json(blog);
 }
 
-// Update single post
+// Update single blog
 export async function PUT(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
   await connectDB();
   const { slug } = await context.params; // old slug
@@ -22,19 +22,19 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ slug: s
   const words = data.content.split(/\s+/).length;
   const readingTime = Math.max(1, Math.round(words / 200));
 
-  const post = await Post.findOneAndUpdate(
+  const blog = await Blog.findOneAndUpdate(
     { slug }, // find by old slug
     { ...data, slug: newSlug, readingTime },
     { new: true }
   );
 
-  return NextResponse.json(post);
+  return NextResponse.json(blog);
 }
 
-// Delete single post
+// Delete single blog
 export async function DELETE(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
   await connectDB();
   const { slug } = await context.params;
-  await Post.findOneAndDelete({ slug });
-  return NextResponse.json({ message: "Post Deleted" });
+  await Blog.findOneAndDelete({ slug });
+  return NextResponse.json({ message: "Blog Deleted" });
 }

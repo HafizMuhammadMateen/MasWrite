@@ -26,7 +26,7 @@ export default function BlogCard({
     <Card
       className="bg-gray-50 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1] cursor-pointer"
     >
-      <Link href={`/blogs/${slug}`}>
+      <Link href={`/dashboard/blogs/${slug}`}>
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl font-semibold text-gray-800 hover:underline">
             {title}

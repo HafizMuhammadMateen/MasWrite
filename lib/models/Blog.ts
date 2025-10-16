@@ -20,4 +20,4 @@ const blogSchema = new Schema(
 blogSchema.index({ createdAt: -1 }); // for sorting/pagination
 blogSchema.index({ title: "text", content: "text" }); // for search
 
-export default mongoose.models.Post || mongoose.model("Blog", blogSchema);
+export default mongoose.models.Blog || mongoose.model("Blog", blogSchema);

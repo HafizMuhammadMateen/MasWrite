@@ -2,14 +2,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-export default function EditPost() {
+export default function EditBlog() {
   const { slug } = useParams();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
   useEffect(() => {
-    fetch(`/api/posts/${slug}`).then(res => res.json()).then(data => {
+    fetch(`/api/blogs/${slug}`).then(res => res.json()).then(data => {
       setTitle(data.title);
       setContent(data.content);
     });
@@ -17,7 +17,7 @@ export default function EditPost() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await fetch(`/api/posts/${slug}`, {
+    await fetch(`/api/blogs/${slug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content }),

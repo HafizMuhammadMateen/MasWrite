@@ -1,16 +1,16 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Post } from "@/lib/types/post";
+import { Blog } from "@/lib/types/blog";
 
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
 
   useEffect(() => {
-    fetch("/api/posts")
+    fetch("/api/blogs")
       .then(res => res.json())
-      .then((data) => setPosts(data.posts || []));
+      .then((data) => setBlogs(data.blogs || []));
   }, []);
 
   return (
@@ -18,9 +18,9 @@ export default function BlogPage() {
       <h1 className="text-2xl font-bold mb-4">Blog Posts</h1>
       <Link href="/dashboard/blogs/new" className="text-blue-500">+ New Post</Link>
       <ul className="mt-4 space-y-2">
-        {posts.map(p => (
-          <li key={p.slug || p._id}>
-            <Link href={`blogs/${p.slug}`} className="font-semibold">{p.title}</Link>
+        {blogs.map(blog => (
+          <li key={blog.slug || blog._id}>
+            <Link href={`blogs/${blog.slug}`} className="font-semibold">{blog.title}</Link>
           </li>
         ))}
       </ul>

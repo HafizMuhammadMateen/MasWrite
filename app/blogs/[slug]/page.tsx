@@ -1,28 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Post } from "@/lib/types/post";
+import { useParams } from "next/navigation";
+import { Blog } from "@/lib/types/blog";
 
-export default function SinglePost() {
+export default function SingleBlog() {
   const { slug } = useParams();
-  const router = useRouter();
-  const [post, setPost] = useState<Post | null>(null);
+  const [blog, setBlog] = useState<Blog | null>(null);
 
+  // Views counter
   useEffect(() => {
-    fetch(`/api/posts/${slug}`).then(res => res.json()).then(setPost);
+    fetch(`/api/blogs/${slug}/view`, { method: "POST" });
   }, [slug]);
 
-  const handleDelete = async () => {
-    await fetch(`/api/posts/${slug}`, { method: "DELETE" });
-    router.push("/blogs");
-  };
+  useEffect(() => {
+    fetch(`/api/blogs/${slug}`).then(res => res.json()).then(setBlog);
+  }, [slug]);
 
-  if (!post) return <p>Loading...</p>;
+  if (!blog) return <p>Loading...</p>;
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl">{post.title}</h1>
-      <p className="mt-2">{post.content}</p>
+      <h1 className="text-3xl">{blog.title}</h1>
+      <p className="mt-2">{blog.content}</p>
     </div>
   );
 }

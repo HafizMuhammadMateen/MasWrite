@@ -3,6 +3,7 @@
 import { useState } from "react";
 import BlogCard from "@/components/blogs/BlogCard";
 import { Blog } from "@/lib/types/blog";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 interface RecentBlogsProps {
   blogs: Blog[];
@@ -51,13 +52,13 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+                className="inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
               >
-                Prev
+                <FiChevronLeft className="w-4 h-4" /> Prev
               </button>
 
               <span className="text-gray-700 font-medium">
-                Page {currentPage} of {totalPages}
+                {currentPage} / {totalPages}
               </span>
 
               <button
@@ -65,9 +66,9 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+                className="inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
               >
-                Next
+                Next <FiChevronRight className="w-4 h-4" />
               </button>
             </div>
           )}

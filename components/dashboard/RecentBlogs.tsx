@@ -18,7 +18,7 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
   const currentBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
 
   return (
-    <section className="md:col-span-2">
+    <section className="min-h-screen md:col-span-2">
       {blogs.length === 0 ? (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">
           No blog posts yet.

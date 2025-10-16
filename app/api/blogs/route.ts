@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
     slug, 
     readingTime,
     author: decodedToken.userId, 
+    publishedAt: new Date(),
   });
   return NextResponse.json(blog);
 }

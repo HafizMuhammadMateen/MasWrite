@@ -24,7 +24,12 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ slug: s
 
   const blog = await Blog.findOneAndUpdate(
     { slug }, // find by old slug
-    { ...data, slug: newSlug, readingTime },
+    { 
+      ...data, 
+      slug: newSlug, 
+      readingTime,
+      publishedAt: new Date(),
+    },
     { new: true }
   );
 

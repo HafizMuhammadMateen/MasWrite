@@ -51,7 +51,7 @@ export default function ManageBlogsPage() {
       </div>
 
       {/* Blog list (scrollable) */}
-      <div className="flex-1 overflow-y-auto space-y-4 p2">
+      <div className="flex-1 overflow-y-auto space-y-4 p-2">
         {filteredBlogs.length > 0 ? (
           filteredBlogs.map((blog) => (
             <BlogCard

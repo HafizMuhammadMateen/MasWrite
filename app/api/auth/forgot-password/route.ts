@@ -1,9 +1,6 @@
 import { NextRequest } from "next/server";
 import { Resend } from "resend";
-import { getUserByEmail, 
-  getResetPasswordURL, 
-  signResetPasswordToken 
-} from "@/utils/authHelpers";
+import { getUserByEmail, getResetPasswordURL, signResetPasswordToken } from "@/utils/authHelpers";
 import { validateEmail } from "@/utils/validators";
 import { success, error } from "@/utils/apiResponse";
 
@@ -13,25 +10,29 @@ export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
 
-    // Validate email format
+    // ✅ Validate email
     const emailError = validateEmail(email);
     if (emailError) return error(emailError, 400);
 
-    // Find user by email
+    // ✅ Find user (do not expose if absent)
     const user = await getUserByEmail(email);
-    if(!user) return success("If user exists, a reset link has been sent", 200);
+    if (!user) return success("If user exists, a reset link has been sent", 200);
 
-    const resetToken = signResetPasswordToken({ userId: user._id.toString() }); // Generate reset token
-    const resetUrl = getResetPasswordURL(resetToken); // Generate reset URL
+    // ❌ Block OAuth-only users (no password field)
+    if (!user.password)
+      return success("If user exists, a reset link has been sent", 200);
 
-    // Send reset email
+    // ✅ Generate reset token and URL
+    const resetToken = signResetPasswordToken({ userId: user._id.toString() });
+    const resetUrl = getResetPasswordURL(resetToken);
+
+    // ✅ Send reset email (silent even if fails for non-existing user)
     await resend.emails.send({
-      // from: '"Auth Module" <no-reply@auth-module.com>',
       from: "Acme <onboarding@resend.dev>",
       to: email,
       subject: "Password Reset Request",
       html: `
-        <p>You requested a password reset</p>
+        <p>You requested a password reset.</p>
         <p>Click here to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>
         <p>This link will expire in 15 minutes.</p>
       `,
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
 
     return success("If user exists, a reset link has been sent", 200);
   } catch (err: any) {
+    console.error("❌ Forgot password error:", err.message);
     return error(err.message || "❌ Server error", 500);
   }
 }

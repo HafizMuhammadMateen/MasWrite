@@ -1,43 +1,38 @@
 import { NextRequest } from "next/server";
-import { comparePassword, 
-  verifyToken, 
-  getUserById, 
-  updatePassword, 
-  invalidateSession 
-} from "@/utils/authHelpers";
+import { comparePassword, updatePassword, invalidateSession } from "@/utils/authHelpers";
 import { validatePassword } from "@/utils/validators";
 import { success, error } from "@/utils/apiResponse";
+import { getAuthenticatedUser } from "@/utils/getAuthenticatedUser";
 
 export async function POST(req: NextRequest) {
   try {
     const { currentPassword, newPassword } = await req.json();
-    const token = req.cookies.get("token")?.value;
-    
-    // Authenticating user
-    if (!token) return error("❌ Unauthorized", 401);
 
-    // Verify user
-    const { userId } = verifyToken(token);
-    const user = await getUserById(userId);
-    if (!user) return error("❌ User not found", 404);
+    // ✅ Authenticate user (works for manual + OAuth)
+    const user = await getAuthenticatedUser(req);
+    if (!user) return error("❌ Unauthorized", 401);
 
-    // Compare current password
+    // ❌ OAuth users can’t change password (no password field)
+    if (!user.password) 
+      return error("❌ Password change not allowed for Google/GitHub users", 400);
+
+    // ✅ Compare old password
     const isMatch = await comparePassword(currentPassword, user.password);
-    if (!isMatch) return error("❌ Incorrect current password!", 400);
+    if (!isMatch) return error("❌ Incorrect current password", 400);
 
-    // Validate new password
+    // ✅ Validate and update new password
     const passwordError = validatePassword(newPassword, true);
     if (passwordError) return error(passwordError, 400);
-    
-    // Update password in DB  
-    await updatePassword(userId, newPassword);
 
-    // Invalidate old session
-    const res = success("✅ Password updated successsfully. Please login again.", 200);
-    invalidateSession(res);    
+    await updatePassword(user._id.toString(), newPassword);
+
+    // ✅ Invalidate old session
+    const res = success("✅ Password updated successfully. Please login again.", 200);
+    invalidateSession(res);
     return res;
 
   } catch (err: any) {
+    console.error("❌ Change password failed:", err.message);
     return error(err.message || "❌ Server error", 500);
   }
 }

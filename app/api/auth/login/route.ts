@@ -4,38 +4,30 @@ import { success, error } from "@/utils/apiResponse";
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
-    
-    if (!email || !password) {
-      console.log("⚠️ Missing email or password");
-      // return NextResponse.json({ error: "⚠️ Email & password required" }, { status: 400 });
-      return error("⚠️ Email & password required", 422);
-    }
 
-    // Verify user
+    if (!email || !password) return error("⚠️ Email & password required", 422);
+
+    // ✅ Fetch user
     const user = await getUserByEmail(email);
-    if (!user) { 
-      console.log("❌ No user found for email:", email)
-      return error("❌ Invalid credentials", 401);
-    }
+    if (!user) return error("❌ Invalid credentials", 401);
 
-    // Verify password
-    const valid = await comparePassword(password, user.password);
-    if (!valid){
-      console.log("❌ Incorrect password for:", email);  
-      return error("❌ Invalid credentials", 401);
-    }
+    // ❌ Block OAuth-only users (no password field)
+    if (!user.password)
+      return error("⚠️ This account uses OAuth. Sign in with Google or GitHub.", 403);
 
-    // Sign JWT
+    // ✅ Verify password
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) return error("❌ Invalid credentials", 401);
+
+    // ✅ Generate JWT and set cookie
     const token = signToken({ userId: user._id.toString(), email: user.email });
-    console.log("🆔 JWT generated for user:", user._id.toString());
-
-    const response = success( "✅ Login successful", 200);
-    makeNewSession(response, token);
+    const res = success("✅ Login successful", 200);
+    makeNewSession(res, token);
 
     console.log("✅ User logged in:", user.email);
-    return response;
+    return res;
   } catch (err: any) {
-    console.error(err);
-    return error(err.message || "❌ Something went wrong", 500);
+    console.error("❌ Login error:", err.message);
+    return error(err.message || "❌ Server error", 500);
   }
 }

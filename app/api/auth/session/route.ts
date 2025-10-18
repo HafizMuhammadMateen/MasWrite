@@ -4,8 +4,10 @@ import { authOptions } from "@/lib/nextAuthOptions";
 import { verifyToken, getUserById } from "@/utils/authHelpers";
 
 export async function GET(req: NextRequest) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
-    // ✅ Try NextAuth session (OAuth users)
+    // Try NextAuth session (OAuth users)
     const nextAuthSession = await getServerSession(authOptions);
     if (nextAuthSession?.user) {
       return NextResponse.json({
@@ -15,7 +17,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // ✅ Try manual JWT session
+    // Try manual JWT session
     const manualToken = req.cookies.get("token")?.value;
     if (manualToken) {
       const { userId } = verifyToken(manualToken);
@@ -29,10 +31,11 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // ❌ No valid session found
+    // No valid session found at all
     return NextResponse.json({ authenticated: false }, { status: 401 });
   } catch (err: any) {
-    console.error("❌ Session check error:", err.message);
-    return NextResponse.json({ authenticated: false, error: err.message }, { status: 500 });
+    isDev && console.error("❌ [SessionAPI] Error:", err.message || err);
+    return NextResponse.json({ authenticated: false, error: "Server error" }, { status: 500 });
   }
 }
+

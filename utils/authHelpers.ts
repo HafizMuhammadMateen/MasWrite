@@ -1,94 +1,52 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-// import crypto from "crypto";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_AUTH_SECRET = process.env.JWT_AUTH_SECRET!;
 const JWT_EXPIRY = "1h";
-const APP_URL = process.env.APP_URL as string;
+const DB_NAME = "authx";
+const USERS_COLLECTION = "users";
 
-export async function hashPassword(password: string) {
-  return await bcrypt.hash(password, 10);
+// ==========================
+// 🧾 JWT Utilities
+// ==========================
+export function signToken(payload: object): string {
+  return jwt.sign(payload, JWT_AUTH_SECRET, { expiresIn: JWT_EXPIRY });
 }
 
-export async function comparePassword(password: string, hash: string) {
-  return await bcrypt.compare(password, hash);
+export function signResetPasswordToken(payload: object): string {
+  return jwt.sign(payload, JWT_AUTH_SECRET, { expiresIn: "15m" });
 }
 
-export function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET) as { userId: string };
+export function verifyToken(token: string): { userId: string } {
+  return jwt.verify(token, JWT_AUTH_SECRET) as { userId: string };
 }
 
-export function signToken(payload: object) {
-  return jwt.sign(
-    payload,
-    JWT_SECRET,
-    {expiresIn: JWT_EXPIRY}
-  )
-}
-
-export function signResetPasswordToken(payload: object) {
-  return jwt.sign(
-    payload,
-    JWT_SECRET,
-    { expiresIn: "15m" }
-  )
-}
-
-export function getResetPasswordURL(token: string) {
-  return `${APP_URL}/reset-password?token=${token}`;
-}
-
+// ==========================
+// 👤 User Data Utilities
+// ==========================
 export async function getUserById(userId: string) {
   try {
     const client = await clientPromise;
-    const db = client.db("authx");
-    return await db.collection("users").findOne({ _id: new ObjectId(userId) });
-  } catch (err) {
-    console.error("❌ Error findng user by ID:", err);
+    const db = client.db(DB_NAME);
+    return db.collection(USERS_COLLECTION).findOne({ _id: new ObjectId(userId) });
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") 
+      console.error("❌ Error finding user by ID:", error);
     return null;
   }
 }
 
-// Also check existing email (in sign up page)
 export async function getUserByEmail(email: string) {
-  try {
-    const client = await clientPromise;
-    const db = client.db("authx");
-    return await db.collection("users").findOne({ email });
-  } catch (err) {
-    console.error("❌ Error finding user by email:", err);
-    return null;
-  }
-}
-
-export async function updatePassword(userId: string, newPassword: string) {
-  const hashed = await hashPassword(newPassword);
   const client = await clientPromise;
-  const db = client.db("authx");
-  await db.collection("users").updateOne(
-    { _id: new ObjectId(userId) },
-    { $set: { password: hashed } }
-  );
+  const db = client.db(DB_NAME);
+  return db.collection(USERS_COLLECTION).findOne({ email });
 }
 
-export function makeNewSession(response: NextResponse, token: string) {
-  response.cookies.set("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 60 * 60, // 1 hour
-    path: "/",
-  })
-}
-
-export async function makeUser(
-  userName: string,
-  email: string,
-  hashedPassword: string,
-) {
+export async function createUser(userName: string, email: string, password: string) {
+  const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = {
     userName,
     email,
@@ -98,11 +56,39 @@ export async function makeUser(
   };
 
   const client = await clientPromise;
-  const db = client.db("authx");
-  return await db.collection("users").insertOne(newUser);
+  const db = client.db(DB_NAME);
+  return db.collection(USERS_COLLECTION).insertOne(newUser);
 }
 
-export function invalidateSession(response: NextResponse) {
+export async function updatePassword(userId: string, newPassword: string): Promise<void> {
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const client = await clientPromise;
+  const db = client.db(DB_NAME);
+
+  await db.collection(USERS_COLLECTION).updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { password: hashedPassword, updatedAt: new Date() } }
+  );
+}
+
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+// ==========================
+// 🍪 Session Management
+// ==========================
+export function createSession(response: NextResponse, token: string): void {
+  response.cookies.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 60 * 60, // 1 hour
+    path: "/",
+  });
+}
+
+export function destroySession(response: NextResponse): void {
   response.cookies.set("token", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

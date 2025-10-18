@@ -1,17 +1,22 @@
+// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/utils/authHelpers";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const isDev = process.env.NODE_ENV === "development";
 
-  // ✅ Must be async — since we await getToken()
-  const nextAuthToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  // Fetch tokens
   const manualToken = req.cookies.get("token")?.value;
+  const nextAuthToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  console.log("Middleware Path:", pathname);
-  console.log("➡️ Manual JWT:", manualToken ? "Present" : "Absent");
-  console.log("➡️ NextAuth JWT:", nextAuthToken ? "Present" : "Absent");
+  // 🔍 Log only in dev mode
+  isDev && console.log("🧭 [Middleware]", {
+    path: pathname,
+    manualJWT: !!manualToken,
+    nextAuthJWT: !!nextAuthToken,
+  });
 
   // ----------------------------
   // 1️⃣ PUBLIC ROUTES (login/signup)
@@ -20,11 +25,10 @@ export async function middleware(req: NextRequest) {
     if (manualToken || nextAuthToken) {
       try {
         if (manualToken) verifyToken(manualToken);
-        console.log("🔁 Already logged in → redirecting to /dashboard");
+        isDev && console.log("🔁 [Middleware] Already logged in → redirecting to /dashboard");
         return NextResponse.redirect(new URL("/dashboard", req.url));
       } catch {
-        // Invalid manual token — let user proceed
-        return NextResponse.next();
+        // Invalid token → allow access to login/signup
       }
     }
     return NextResponse.next();
@@ -34,45 +38,47 @@ export async function middleware(req: NextRequest) {
   // 2️⃣ PROTECTED ROUTES (/dashboard)
   // ----------------------------
   if (pathname.startsWith("/dashboard")) {
-    // If no token of any kind → redirect
     if (!manualToken && !nextAuthToken) {
-      console.warn("❌ No auth token found");
+      isDev && console.warn("❌ [Middleware] No auth|credential token found");
       return NextResponse.redirect(new URL("/login?error=unauthorized", req.url));
     }
 
     try {
-      // Verify manual token if present
       if (manualToken) verifyToken(manualToken);
-      // Otherwise, just trust NextAuth token (already validated by next-auth)
       return NextResponse.next();
-    } catch (err: any) {
-      console.error("❌ Invalid or expired token:", err.message);
+    } catch {
+      isDev && console.error("❌ [Middleware] Invalid or expired token");
       return NextResponse.redirect(new URL("/login?error=token_expired", req.url));
     }
   }
 
   // ----------------------------
-  // 3️⃣ API ROUTES
+  // 3️⃣ API ROUTES (protected)
   // ----------------------------
-  if (pathname.startsWith("/api/dashboard/") || pathname.startsWith("/api/auth/change-password/")) {
+  if (
+    pathname.startsWith("/api/dashboard/") ||
+    pathname.startsWith("/api/auth/change-password/") ||
+    pathname.startsWith("/api/auth/reset-password/")
+  ) {
     if (!manualToken && !nextAuthToken) {
-      console.warn("❌ No auth token found for API");
-      return NextResponse.json({ message: "❌ Unauthorized" }, { status: 401 });
+      isDev && console.warn("❌ [Middleware] Token not found for API");
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     try {
       if (manualToken) verifyToken(manualToken);
       return NextResponse.next();
-    } catch (err: any) {
-      console.error("❌ Invalid or expired token:", err.message);
-      return NextResponse.json({ message: "❌ Invalid or expired token" }, { status: 401 });
+    } catch {
+      isDev && console.error("❌ [Middleware] Invalid or expired token for API");
+      return NextResponse.json({ message: "Invalid or expired token" }, { status: 401 });
     }
   }
 
-  return NextResponse.next(); // Default fallback
+  // Default fallback
+  return NextResponse.next();
 }
 
-// ✅ Config — async safe, correct matcher
+// ✅ Matcher configuration
 export const config = {
   matcher: [
     "/login",
@@ -85,32 +91,3 @@ export const config = {
   ],
   runtime: "nodejs",
 };
-
-
-// // middleware.ts
-// import { getToken } from "next-auth/jwt";
-// import { NextRequest, NextResponse } from "next/server";
-
-// export async function middleware(req: NextRequest) {
-//   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-//   const { pathname } = req.nextUrl;
-
-//   console.log("Middleware - Path:", pathname, "Token:", token ? "Present" : "Absent");
-
-//   // If logged in user tries to access login/signup → redirect
-//   if ((pathname.startsWith("/login") || pathname.startsWith("/signup")) && token) {
-//     return NextResponse.redirect(new URL("/dashboard", req.url));
-//   }
-
-//   // Protect dashboard routes
-//   if (pathname.startsWith("/dashboard") && !token) {
-//     return NextResponse.redirect(new URL("/login?error=unauthorized", req.url));
-//   }
-
-//   return NextResponse.next();
-// }
-
-// export const config = {
-//   matcher: ["/login", "/signup", "/dashboard/:path*"],
-// };
-

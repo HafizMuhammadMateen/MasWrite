@@ -1,38 +1,39 @@
 import { NextRequest } from "next/server";
-import { comparePassword, updatePassword, invalidateSession } from "@/utils/authHelpers";
+import { comparePassword, updatePassword, destroySession } from "@/utils/authHelpers";
 import { validatePassword } from "@/utils/validators";
 import { success, error } from "@/utils/apiResponse";
-import { getAuthenticatedUser } from "@/utils/getAuthenticatedUser";
+import { getAuthenticatedUser } from "@/lib/authenticateUser";
 
 export async function POST(req: NextRequest) {
+  const isDev = process.env.NODE_ENV === "development";
+  
   try {
     const { currentPassword, newPassword } = await req.json();
 
-    // ✅ Authenticate user (works for manual + OAuth)
+    // Authenticate user (manual + OAuth)
     const user = await getAuthenticatedUser(req);
-    if (!user) return error("❌ Unauthorized", 401);
+    if (!user) return error("Unauthorized", 401);
 
-    // ❌ OAuth users can’t change password (no password field)
-    if (!user.password) 
-      return error("❌ Password change not allowed for Google/GitHub users", 400);
+    // Disallow OAuth users from changing password
+    if (!user.password)
+      return error("Password change not allowed for Google/GitHub users", 403);
 
-    // ✅ Compare old password
     const isMatch = await comparePassword(currentPassword, user.password);
-    if (!isMatch) return error("❌ Incorrect current password", 400);
+    if (!isMatch) return error("Incorrect current password", 400);
 
-    // ✅ Validate and update new password
     const passwordError = validatePassword(newPassword, true);
     if (passwordError) return error(passwordError, 400);
 
     await updatePassword(user._id.toString(), newPassword);
 
-    // ✅ Invalidate old session
-    const res = success("✅ Password updated successfully. Please login again.", 200);
-    invalidateSession(res);
+    isDev && console.log("🔑 [ChangePasswordAPI] Password updated for:", user.email);
+    const res = success("Password updated successfully. Please login again.", 200);
+    destroySession(res);
+
     return res;
 
   } catch (err: any) {
-    console.error("❌ Change password failed:", err.message);
-    return error(err.message || "❌ Server error", 500);
+    isDev && console.error("❌ [ChangePasswordAPI] Failed:", err.message || err);
+    return error(err.message || "Server error", 500);
   }
 }

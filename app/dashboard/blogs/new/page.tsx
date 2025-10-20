@@ -1,15 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { FaRegEye, FaUpload } from "react-icons/fa";
 
 
+
 export default function NewBlogPage() {
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+    ],
+    content: "",
+    immediatelyRender: false,
+  });
 
   // Toolbar button helper
   const Button = ({ onClick, isActive, children }: any) => (
@@ -72,7 +83,16 @@ export default function NewBlogPage() {
           </button>
         </div>
       </div>
-
+      
+      <div
+        className="flex-1 overflow-y-auto border rounded-md p-4 cursor-text"
+        onClick={() => editor?.chain().focus().run()}
+      >
+        <EditorContent
+          editor={editor}
+          className=" w-full border-none min-h-full outline-none focus:outline-none p-2"
+        />
+      </div>
       
 
     </div>

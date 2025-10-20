@@ -11,6 +11,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Image from "@tiptap/extension-image";
+import toast from "react-hot-toast";
 import {
   List,
   ListOrdered,
@@ -23,6 +24,7 @@ import {
 
 
 export default function NewBlogPage() {
+  const isDev = process.env.NODE_ENV === "production";
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [focused, setFocused] = useState(false);
@@ -70,7 +72,7 @@ export default function NewBlogPage() {
       return;
     }
 
-    const content = editor?.getHTML() || "";
+    const content = editor?.getText() || "";
 
     setLoading(true);
 
@@ -82,14 +84,15 @@ export default function NewBlogPage() {
       });
 
       if (res.ok) {
+        toast.success("Blog published successfully.");
         router.push("/dashboard/blogs");
       } else {
         const error = await res.json();
-        alert(error.message || "Failed to publish blog.");
+        toast.error(error.message || "Failed to publish blog.");
       }
     } catch (err) {
-      console.error("Publish error:", err);
-      alert("Something went wrong while publishing.");
+      isDev && console.error("Publish error:", err);
+      toast.error("Something went wrong while publishing.");
     } finally {
       setLoading(false);
     }

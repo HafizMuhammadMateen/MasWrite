@@ -35,6 +35,38 @@ export default function NewBlogPage() {
     </button>
   );
 
+    // Handle publish click
+  const handlePublish = async () => {
+    if (!title.trim()) {
+      alert("Please enter a title before publishing.");
+      return;
+    }
+
+    const content = editor?.getHTML() || "";
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content }),
+      });
+
+      if (res.ok) {
+        router.push("/dashboard/blogs");
+      } else {
+        const error = await res.json();
+        alert(error.message || "Failed to publish blog.");
+      }
+    } catch (err) {
+      console.error("Publish error:", err);
+      alert("Something went wrong while publishing.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen p-8 bg-gray-50 flex flex-col items-center">
       {/* Title Bar */}
@@ -77,6 +109,7 @@ export default function NewBlogPage() {
           </button>
           <button
             disabled={loading}
+            onClick={handlePublish}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             <FaUpload /> {loading ? "Publishing..." : "Publish"}

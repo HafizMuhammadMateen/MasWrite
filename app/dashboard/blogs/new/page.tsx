@@ -1,27 +1,89 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import StarterKit from "@tiptap/starter-kit";
+import { FaRegEye, FaUpload } from "react-icons/fa";
+import Underline from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
+import BulletList from "@tiptap/extension-bullet-list";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import Image from "@tiptap/extension-image";
 
-export default function NewBlog() {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+
+export default function NewBlogPage() {
   const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await fetch("/api/blogs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content }),
-    });
-    router.push("/dashboard/blogs");
-  };
+
+
+  // Toolbar button helper
+  const Button = ({ onClick, isActive, children }: any) => (
+    <button
+      onClick={onClick}
+      className={`px-2 py-1 text-sm rounded transition cursor-pointer ${
+        isActive ? "bg-blue-100 text-blue-700" : "hover:bg-gray-100"
+      }`}
+      type="button"
+    >
+      {children}
+    </button>
+  );
 
   return (
-    <form onSubmit={handleSubmit} className="p-4">
-      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" className="border p-2 w-full mb-2" />
-      <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Content" className="border p-2 w-full mb-2" />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2">Create</button>
-    </form>
+    <div className="min-h-screen p-8 bg-gray-50 flex flex-col items-center">
+      {/* Title Bar */}
+      <div className="w-full flex items-center justify-between mb-8 relative">
+        {/* Title Input */}
+        <div className="relative w-full mr-6">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            className="w-full bg-transparent border-b-2 border-gray-300 focus:outline-none text-3xl font-semibold pb-2 transition-colors"
+          />
+          {/* Floating placeholder */}
+          <label
+            className={`absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none transition-all duration-300 ${
+              focused || title
+                ? "text-sm -top-2 pb-17 text-gray-700"
+                : "text-2xl top-1/2"
+            }`}
+          >
+            Title
+          </label>
+
+          {/* Bottom border animation */}
+          <span
+            className={`absolute bottom-0 left-1/2 h-[2px] bg-gray-600 transition-all duration-400 transform -translate-x-1/2 ${
+              focused ? "w-full scale-x-100" : "w-0 scale-x-0"
+            } origin-center`}
+          ></span>
+        </div>
+
+        {/* Right side buttons */}
+        <div className="flex items-center gap-3">
+          <button
+            className="flex items-center gap-2 px-4 py-2 border border-gray-400 text-gray-700 rounded-md hover:bg-gray-100 cursor-pointer  transition"
+          >
+            <FaRegEye className="text-gray-600" /> Preview
+          </button>
+          <button
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+          >
+            <FaUpload /> {loading ? "Publishing..." : "Publish"}
+          </button>
+        </div>
+      </div>
+
+      
+
+    </div>
   );
 }

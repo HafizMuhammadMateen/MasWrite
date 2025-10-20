@@ -14,16 +14,17 @@
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
-    "mongodb": "^6.20.0",
+    "mongodb": "^5.9.2",
+    "mongoose": "^8.19.1",
     "next": "15.5.4",
     "next-auth": "^4.24.11",
-    "nodemailer": "^7.0.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
     "resend": "^6.1.2",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

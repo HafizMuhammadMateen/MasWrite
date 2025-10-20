@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { validateEmail, validatePassword } from "@/utils/validators";
+import { loginSchema } from "@/lib/validation/zodSchemas";
 import { FormErrors } from "@/utils/types";
 import { FaEyeSlash, FaEye, FaGithub, FaGoogle } from "react-icons/fa";
-import toast from "react-hot-toast";
 import { getProviders, signIn } from "next-auth/react";
+import { z } from "zod";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import Spinner from "@/components/ui/Spinner";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -22,12 +24,7 @@ export default function LoginForm() {
     getProviders().then((res) => setProviders(res));
   }, []);
 
-  if (!providers)
-    return (
-      <div className="flex justify-center items-center py-10">
-        <span className="w-6 h-6 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
-      </div>
-    );
+  if (!providers) return <Spinner />;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,46 +32,40 @@ export default function LoginForm() {
     else if (name === "password") setPassword(value);
   };
 
-  const handleBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name } = e.target;
-    if (name === "email") {
-      const validationError = validateEmail(email);
-      setErrors((prev) => ({ ...prev, email: validationError }));
-    } else if (name === "password") {
-      const validationError = validatePassword(password);
-      setErrors((prev) => ({ ...prev, password: validationError }));
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    // validation again on submit not just on blur
-    const emailError = validateEmail(email);
-    const passwordError = validatePassword(password);
-    if (emailError || passwordError) {
-      setErrors({ email: emailError, password: passwordError });
+    // Validate form fields with Zod
+    const result = loginSchema.safeParse({ email, password });
+
+    if (!result.success) {
+      const { fieldErrors } = z.flattenError(result.error);
+      setErrors({
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+      });
+      setLoading(false);
       return;
     }
 
+    setErrors({}); // Clear old errors if validation passed
+
     try {
-      setLoading(true);
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
+      const signInResult = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
       });
 
-      if (!response.ok) throw new Error("Incorrect username or password!");
-
-      const data = await response.json();
-      console.log("Login successful:", data);
-      toast.success("Login successful!");
-      router.push("/dashboard");
-    } catch (err: any) {
-      toast.error(err.message || "Login failed!");
-      setErrors((prev) => ({ ...prev, formError: err.message }));
+      if (signInResult?.error) {
+        toast.error(signInResult.error);
+      } else {
+        toast.success("Login successful!");
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      toast.error("Login failed!");
     } finally {
       setLoading(false);
     }
@@ -82,8 +73,6 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* <h2 className="text-2xl font-semibold text-center mb-4">Sign in to AuthX</h2> */}
-
       {/* Email */}
       <div>
         <label className="block font-medium mb-1">Email</label>
@@ -93,9 +82,7 @@ export default function LoginForm() {
           value={email}
           placeholder="Enter your email"
           required
-          autoComplete="email"
           onChange={handleChange}
-          onBlur={handleBlur}
           className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-gray-800 focus:outline-none"
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -111,9 +98,7 @@ export default function LoginForm() {
             value={password}
             placeholder="Enter your password"
             required
-            autoComplete="current-password"
             onChange={handleChange}
-            onBlur={handleBlur}
             className="w-full border border-gray-300 rounded px-3 py-2 pr-10 focus:ring-2 focus:ring-gray-800 focus:outline-none"
           />
           <button
@@ -137,9 +122,9 @@ export default function LoginForm() {
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading || Boolean(errors.email) || Boolean(errors.password)}
+        disabled={loading}
         className={`w-full bg-gray-700 text-white rounded py-2 font-semibold flex justify-center items-center gap-2 transition ${
-          loading ? "opacity-70 cursor-not-allowed" : "hover:bg-gray-900 cursor-pointer transition"
+          loading ? "opacity-70 cursor-not-allowed" : "hover:bg-gray-900"
         }`}
       >
         {loading ? (
@@ -177,7 +162,7 @@ export default function LoginForm() {
               key={provider.name}
               onClick={() => signIn(provider.id)}
               type="button"
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded py-2 font-medium text-gray-700 hover:border-gray-800 transition-colors duration-200 cursor-pointer hover:shadow-sm"
+              className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded py-2 font-medium text-gray-700 hover:border-gray-800 transition-colors duration-200 hover:shadow-sm"
             >
               {Icon && <Icon className="text-lg" />}
               {provider.name}
@@ -188,7 +173,7 @@ export default function LoginForm() {
 
       {/* Signup */}
       <p className="text-center text-sm text-gray-700 mt-4">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link href="/signup" className="text-blue-600 hover:underline font-medium">
           Sign up
         </Link>

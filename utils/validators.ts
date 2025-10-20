@@ -3,9 +3,6 @@ const USERNAME_MIN_LENGTH = 3;
 const USERNAME_MAX_LENGTH = 50;
 const PASSWORD_MIN_LENGTH = 8;
 
-// ==========================
-// 👤 Username Validation
-// ==========================
 export function validateUsername(userName: string): string | null {
   if (!userName) return "Username is required.";
   if (userName.length < USERNAME_MIN_LENGTH) return `Username must be at least ${USERNAME_MIN_LENGTH} characters long.`;
@@ -13,18 +10,12 @@ export function validateUsername(userName: string): string | null {
   return null;
 }
 
-// ==========================
-// 📧 Email Validation
-// ==========================
 export function validateEmail(email: string): string | null {
   if (!email) return "Email is required.";
   if (!EMAIL_REGEX.test(email)) return "Please enter a valid email address.";
   return null;
 }
 
-// ==========================
-// 🔐 Password Validation
-// ==========================
 export function validatePassword(password: string, isSignup: boolean = false): string | null {
   if (!password) return "Password is required.";
 

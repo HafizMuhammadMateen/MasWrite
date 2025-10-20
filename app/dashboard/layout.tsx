@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       <Header onToggleSidebar={handleToggleSidebar} />
 
-      <main className="flex flex-1 transition-all duration-300 ease-in-out">
+      <main className="flex flex-1 overflow-hidden transition-all duration-300 ease-in-out">
         <aside
           className={`bg-white shadow-[4px_0_6px_-1px_rgba(0,0,0,0.1)]
             transition-all duration-300 ease-in-out

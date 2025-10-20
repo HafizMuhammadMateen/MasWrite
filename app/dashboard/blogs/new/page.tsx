@@ -1,11 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { FaRegEye, FaUpload } from "react-icons/fa";
-
+import Underline from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
+import BulletList from "@tiptap/extension-bullet-list";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import Image from "@tiptap/extension-image";
+import {
+  List,
+  ListOrdered,
+  CheckSquare,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Undo2,
+  Redo2,
+} from "lucide-react";
 
 
 export default function NewBlogPage() {
@@ -17,10 +31,24 @@ export default function NewBlogPage() {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Underline,
+      Link.configure({
+        openOnClick: true,
+      }),
+      BulletList,
+      TaskList,
+      TaskItem,
+      Image,
     ],
     content: "",
     immediatelyRender: false,
   });
+
+  useEffect(() => {
+    if (editor) {
+      editor.commands.focus("end"); // focus with blinking cursor
+    }
+  }, [editor]);
 
   // Toolbar button helper
   const Button = ({ onClick, isActive, children }: any) => (
@@ -35,7 +63,7 @@ export default function NewBlogPage() {
     </button>
   );
 
-    // Handle publish click
+  // Handle publish click
   const handlePublish = async () => {
     if (!title.trim()) {
       alert("Please enter a title before publishing.");
@@ -108,25 +136,114 @@ export default function NewBlogPage() {
             <FaRegEye className="text-gray-600" /> Preview
           </button>
           <button
-            disabled={loading}
             onClick={handlePublish}
+            disabled={loading}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             <FaUpload /> {loading ? "Publishing..." : "Publish"}
           </button>
         </div>
       </div>
-      
-      <div
-        className="flex-1 overflow-y-auto border rounded-md p-4 cursor-text"
-        onClick={() => editor?.chain().focus().run()}
-      >
-        <EditorContent
-          editor={editor}
-          className=" w-full border-none min-h-full outline-none focus:outline-none p-2"
-        />
+
+      {/* Editor */}
+      <div className="w-full max-w-6xl bg-white rounded-lg shadow-md p-6 flex flex-col h-[calc(100vh-180px)]">
+        {/* Toolbar */}
+        {editor && (
+          <div className="flex flex-wrap gap-4 border-b pb-3 mb-4">
+            <Button
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              isActive={editor.isActive("bold")}
+            >
+              <b>B</b>
+            </Button>
+            <Button
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              isActive={editor.isActive("italic")}
+            >
+              <i>I</i>
+            </Button>
+            <Button
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              isActive={editor.isActive("underline")}
+            >
+              <u>U</u>
+            </Button>
+
+            {/* Headings */}
+            {[1, 2, 3].map((level) => (
+              <Button
+                key={level}
+                onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
+                isActive={editor.isActive("heading", { level })}
+              >
+                H<sub className="text-xs ml-0.5">{level}</sub>
+              </Button>
+            ))}
+
+            {/* Lists */}
+            <Button
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              isActive={editor.isActive("bulletList")}
+            >
+              <List className="w-4 h-4" />
+            </Button>
+
+            <Button
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              isActive={editor.isActive("orderedList")}
+            >
+              <ListOrdered className="w-4 h-4" />
+            </Button>
+
+            <Button
+              onClick={() => editor.chain().focus().toggleTaskList().run()}
+              isActive={editor.isActive("taskList")}
+            >
+              <CheckSquare className="w-4 h-4" />
+            </Button>
+
+            {/* Link */}
+            <Button
+              onClick={() => {
+                const url = prompt("Enter link URL:");
+                if (url) editor.chain().focus().setLink({ href: url }).run();
+              }}
+              isActive={editor.isActive("link")}
+            >
+              <LinkIcon className="w-4 h-4" />
+            </Button>
+
+            {/* Image */}
+            <Button
+              onClick={() => {
+                const url = prompt("Enter image URL:");
+                if (url) editor.chain().focus().setImage({ src: url }).run();
+              }}
+            >
+              <ImageIcon className="w-4 h-4" />
+            </Button>
+
+            {/* Undo / Redo */}
+            <Button onClick={() => editor.chain().focus().undo().run()}>
+              <Undo2 className="w-4 h-4" />
+            </Button>
+            <Button onClick={() => editor.chain().focus().redo().run()}>
+              <Redo2 className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* Actual Editor */}
+        <div
+          className="flex-1 overflow-y-auto border rounded-md p-4 cursor-text"
+          onClick={() => editor?.chain().focus().run()}
+        >
+          <EditorContent
+            editor={editor}
+            className=" w-full border-none min-h-full outline-none focus:outline-none p-2"
+          />
+        </div>
       </div>
-      
 
     </div>
   );

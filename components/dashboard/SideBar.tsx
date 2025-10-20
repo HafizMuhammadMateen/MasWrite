@@ -32,9 +32,11 @@ export default function SideBar() {
   return (
     <div className="flex flex-col h-full p-4 space-y-3 bg-gray-50 shadow text-lg">
       {/* New Post */}
-      <Button className="flex items-center gap-2 my-4 rounded-full px-4 py-5 cursor-pointer text-lg" variant="default">
-        <Plus className="w-4 h-4" /> New Post
-      </Button>
+      <Link href="/dashboard/blogs/new">
+        <Button className="flex items-center gap-2 my-4 rounded-full px-4 py-5 cursor-pointer text-lg" variant="default">
+          <Plus className="w-4 h-4" /> New Post
+        </Button>
+      </Link>
 
       <Separator />
 

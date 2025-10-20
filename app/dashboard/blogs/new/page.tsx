@@ -1,19 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import StarterKit from "@tiptap/starter-kit";
+import { useState } from "react";
 import { FaRegEye, FaUpload } from "react-icons/fa";
-import Underline from "@tiptap/extension-underline";
-import Link from "@tiptap/extension-link";
-import BulletList from "@tiptap/extension-bullet-list";
-import TaskList from "@tiptap/extension-task-list";
-import TaskItem from "@tiptap/extension-task-item";
-import Image from "@tiptap/extension-image";
 
 
 export default function NewBlogPage() {
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);

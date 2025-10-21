@@ -1,82 +1,88 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import BlogCard from "@/components/blogs/BlogCard";
 import { Blog } from "@/lib/types/blog";
+import ManageBlogHeader from "@/components/blogs/ManageBlogHeader";
 
 export default function ManageBlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    q: "",
+    status: "",
+    category: "",
+  });
+  const [loading, setLoading] = useState(false);
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
 
+  // Fetch blogs whenever filters change
   useEffect(() => {
-    fetch("/api/blogs")
-      .then((res) => res.json())
-      .then((data) => setBlogs(data.blogs || []));
-  }, []);
+    console.log("Filters changed:", filters) // <— Add this
+    const fetchBlogs = async () => {
+      setLoading(true);
 
-  // Filtered blogs (based on header search input later)
-  const filteredBlogs = blogs.filter((blog) =>
-    blog.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      const params = new URLSearchParams({
+        ...(filters.q ? { q: filters.q } : {}),
+        ...(filters.status ? { status: filters.status } : {}),
+        ...(filters.category ? { category: filters.category } : {}),
+      });
+      console.log("Query params:", params.toString()); // <— Add this
+
+
+      const res = await fetch(`/api/blogs?${params.toString()}`);
+      const data = await res.json();
+      setBlogs(data.blogs || []);
+      setLoading(false);
+    };
+
+    fetchBlogs();
+  }, [filters]);
 
   const handleDelete = async (slug: string) => {
     setDeletingSlug(slug);
 
     const res = await fetch(`/api/blogs/${slug}`, { method: "DELETE" });
     if (res.ok) {
-      setBlogs(prev => prev.filter(blog => blog.slug !== slug)); // remove instantly
+      setBlogs((prev) => prev.filter((blog) => blog.slug !== slug));
     }
 
     setDeletingSlug(null);
   };
 
   return (
-      <div className="p-6 flex flex-col h-full overflow-hidden">
-        {/* Static header (non-scrollable) */}
-        <div className="flex items-center justify-between mb-6 flex-shrink-0">
-          <h1 className="text-2xl font-bold text-gray-800">Manage Blogs</h1>
-          <Link
-            href="/dashboard/blogs/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            + New Post
-          </Link>
-        </div>
+    <div className="p-6 flex flex-col h-full overflow-hidden">
+      <ManageBlogHeader onFilterChange={setFilters} />
 
-        {/* Filter Info */}
-        <div className="mb-4 text-sm text-gray-500 flex-shrink-0">
-          Use the top search box to filter blogs by title or content.
-        </div>
-
-        {/* Blog list (scrollable) */}
+      {loading ? (
+        <p>Loading blogs...</p>
+      ) : blogs.length > 0 ? (
         <div className="flex-1 overflow-y-auto space-y-4 p-2">
-          {filteredBlogs.length > 0 ? (
-            filteredBlogs.map((blog) => (
-              <BlogCard
-                key={blog._id || blog.slug}
-                title={blog.title}
-                slug={blog.slug}
-                authorName={
-                  typeof blog.author === "string" ? blog.author : blog.author?.userName
-                }
-                excerpt={blog.content?.slice(0, 100)} // optional short preview
-                publishedAt={blog.publishedAt}
-                readingTime={blog.readingTime}
-                views={blog.views}
-                tags={blog.tags}
-                isDashboardBlogs
-                onDelete={handleDelete}
-                deleting={deletingSlug === blog.slug}
-              />
-            ))
-          ) : (
-            <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">
-              No blog posts yet.
-            </div>
-          )}
+          {blogs.map((blog) => (
+            <BlogCard
+              key={blog._id || blog.slug}
+              title={blog.title}
+              slug={blog.slug}
+              authorName={
+                typeof blog.author === "string"
+                  ? blog.author
+                  : blog.author?.userName
+              }
+              excerpt={blog.content?.slice(0, 100)}
+              publishedAt={blog.publishedAt}
+              readingTime={blog.readingTime}
+              views={blog.views}
+              tags={blog.tags}
+              isDashboardBlogs
+              onDelete={handleDelete}
+              deleting={deletingSlug === blog.slug}
+            />
+          ))}
         </div>
-      </div>
-    );
+      ) : (
+        <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">
+          No blog posts found.
+        </div>
+      )}
+    </div>
+  );
 }

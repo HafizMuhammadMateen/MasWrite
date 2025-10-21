@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EditorContent, useEditor } from "@tiptap/react";
-import { FaRegEye, FaUpload } from "react-icons/fa";
+import { FaSave, FaRegEye, FaUpload } from "react-icons/fa";
 import toast from "react-hot-toast";
 import LinkModal from "@/components/modals/LinkModal";
 
@@ -60,25 +60,15 @@ export default function NewBlogPage() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        heading: false, // disable built-in heading
-      }),
-      Heading.configure({
-        levels: [1, 2, 3],
-      }),
+      Heading.configure({ levels: [1, 2, 3], }),
+      StarterKit.configure({ heading: false, }), // disable built-in heading
       Underline,
-      Link.configure({
-        openOnClick: true,
-      }),
+      Link.configure({ openOnClick: true, }),
       BulletList,
       OrderedList,
       TaskList,
-      TaskItem.configure({
-        nested: true,
-      }),
-      Image.configure({
-        inline: false,
-      }),
+      TaskItem.configure({ nested: true, }),
+      Image.configure({ inline: false, }),
     ],
     content: "",
     immediatelyRender: false,
@@ -217,14 +207,14 @@ export default function NewBlogPage() {
           <button
             onClick={handleDraft}
             disabled={loading}
-            className={`flex  items-center gap-2 whitespace-nowrap px-4 py-2 rounded-md border transition-all duration-200 
+            className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-md border transition-all duration-200 cursor-pointer
               ${loading
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
               } 
-              border-blue-400 text-blue-600 bg-white shadow-sm active:scale-[0.97]`}
+              border-blue-400 text-blue-600 bg-white active:scale-[0.97]`}
           >
-            <FaUpload className="text-blue-500" />
+            <FaSave className="text-blue-500" />
             {loading ? "Saving..." : "Save Draft"}
           </button>
           <button
@@ -328,7 +318,7 @@ export default function NewBlogPage() {
 
           {/* Actual Editor */}
           <div
-            className="flex flex-1 overflow-y-auto border rounded-md p-4 cursor-text"
+            className="flex flex-1 overflow-y-auto border rounded-md p-4 cursor-text prose prose-sm sm:prose lg:prose-lg w-full max-w-none"
             onClick={() => editor?.chain().focus().run()}
           >
             <EditorContent

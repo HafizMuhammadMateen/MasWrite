@@ -5,6 +5,7 @@ import { slugify } from "@/utils/blogsHelpers";
 import { verifyToken } from "@/utils/authHelpers";
 
 // Get all blogs
+// Get all blogs
 export async function GET(req: NextRequest) {
   await connectDB();
 
@@ -12,17 +13,21 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q") || "";
   const page = parseInt(searchParams.get("page") || "1");
-  const limit = 10; // you can change this later
+  const limit = 10;
   const author = searchParams.get("author");
   const tags = searchParams.get("tags")?.split(",") || [];
   const sort = searchParams.get("sort") || "publishedAt";
+  const status = searchParams.get("status") || "";
+  const category = searchParams.get("category") || "";
 
   // Build filter
   const filter: any = {};
 
-  if (q) filter.$text = { $search: q };
+if (q) filter.title = { $regex: q, $options: "i" };
   if (author) filter.author = author;
   if (tags.length > 0) filter.tags = { $in: tags };
+  if (status) filter.status = status;
+  if (category) filter.category = category;
 
   // Pagination setup
   const total = await Blog.countDocuments(filter);
@@ -47,9 +52,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   await connectDB();
 
-  const { title, content, tags, status } = await req.json();
+  const { title, content, tags, category, status } = await req.json();
 
-  if (!title || !content || !tags?.length) {
+  if (!title || !content || !tags?.length || !category || !status) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
   }
 
@@ -77,6 +82,7 @@ export async function POST(req: NextRequest) {
     author: decodedToken.userId,
     publishedAt: new Date(),
     readingTime,
+    category,
     status,
     tags,
   });

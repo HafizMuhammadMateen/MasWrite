@@ -29,6 +29,25 @@ export default function NewBlogPage() {
   const [title, setTitle] = useState("");
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [category, setCategory] = useState("Web Development");
+
+  // Tag input handler
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && tagInput.trim()) {
+      e.preventDefault();
+      if (!tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]);
+      }
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter((t) => t !== tag));
+  };
+
 
   const editor = useEditor({
     extensions: [
@@ -67,10 +86,9 @@ export default function NewBlogPage() {
 
   // Handle publish click
   const handlePublish = async () => {
-    if (!title.trim()) {
-      alert("Please enter a title before publishing.");
-      return;
-    }
+    if (!title.trim()) return toast.error("Please enter a title.");
+    if (!tags.length) return toast.error("Please add at least one tag.");
+    if (!category) return toast.error("Please select a category.");
 
     const content = editor?.getText() || "";
 
@@ -148,10 +166,14 @@ export default function NewBlogPage() {
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="w-full max-w-6xl bg-white rounded-lg shadow-md p-6 flex flex-col h-[calc(100vh-180px)]">
-        {/* Toolbar */}
-        {editor && (
+{/* Editor + Sidebar */}
+<div className="w-full max-w-6xl bg-white rounded-lg shadow-md p-6 flex gap-6 h-[calc(100vh-180px)]">
+  {/* Left: Editor */}
+  <div className="flex-1 flex flex-col">
+    {/* Toolbar */}
+    {editor && (
+      <div className="flex flex-wrap gap-4 border-b pb-3 mb-4">
+                {editor && (
           <div className="flex flex-wrap gap-4 border-b pb-3 mb-4">
             <Button
               onClick={() => editor.chain().focus().toggleBold().run()}
@@ -235,18 +257,80 @@ export default function NewBlogPage() {
             </Button>
           </div>
         )}
-
-        {/* Actual Editor */}
-        <div
-          className="flex-1 overflow-y-auto border rounded-md p-4 cursor-text"
-          onClick={() => editor?.chain().focus().run()}
-        >
-          <EditorContent
-            editor={editor}
-            className=" w-full border-none min-h-full outline-none focus:outline-none p-2"
-          />
-        </div>
       </div>
+    )}
+
+    {/* Actual Editor */}
+    <div
+      className="flex-1 overflow-y-auto border rounded-md p-4 cursor-text"
+      onClick={() => editor?.chain().focus().run()}
+    >
+      <EditorContent
+        editor={editor}
+        className="w-full border-none min-h-full outline-none focus:outline-none p-2"
+      />
+    </div>
+  </div>
+
+  {/* Right: Meta Panel (Tags + Category) */}
+  <div className="w-[30%] flex flex-col gap-6 border-l pl-6">
+    {/* Category */}
+    <div>
+      <label className="block text-sm font-semibold mb-2 text-gray-700">Category</label>
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {[
+          "Web Development",
+          "UI/UX",
+          "JavaScript",
+          "React",
+          "Next.js",
+          "Backend",
+          "Databases",
+          "DevOps",
+          "AI/ML",
+          "Other",
+        ].map((cat) => (
+          <option key={cat} value={cat}>{cat}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* Tags */}
+    <div>
+      <label className="block text-sm font-semibold mb-2 text-gray-700">Tags</label>
+      <div className="flex flex-wrap gap-2 mb-2">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-sm flex items-center gap-1"
+          >
+            {tag}
+            <button
+              type="button"
+              onClick={() => removeTag(tag)}
+              className="text-xs text-gray-600 hover:text-red-500"
+            >
+              ✕
+            </button>
+          </span>
+        ))}
+      </div>
+      <input
+        type="text"
+        value={tagInput}
+        onChange={(e) => setTagInput(e.target.value)}
+        onKeyDown={handleTagKeyDown}
+        placeholder="Type and press Enter"
+        className="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+  </div>
+</div>
+
 
     </div>
   );

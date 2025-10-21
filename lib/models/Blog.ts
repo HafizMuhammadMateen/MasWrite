@@ -8,13 +8,30 @@ const blogSchema = new Schema(
     content: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
     author: { type: Types.ObjectId, ref: "User", required: true },
-    publishedAt: { type: Date, default: null }, // Only set when the post is actually published
+    publishedAt: { type: Date, default: null },
     views: { type: Number, default: 0 },
     readingTime: { type: Number },
-    tags: [{ type: String }],
+    tags: [{ type: String, required: true }], // Must have at least one tag
+    category: {
+      type: String,
+      enum: [
+        "Web Development",
+        "UI/UX",
+        "JavaScript",
+        "React",
+        "Next.js",
+        "Backend",
+        "Databases",
+        "DevOps",
+        "AI/ML",
+        "Other",
+      ],
+      required: true,
+    },
   },
   { timestamps: true }
 );
+
 
 // Add index
 blogSchema.index({ createdAt: -1 }); // for sorting/pagination

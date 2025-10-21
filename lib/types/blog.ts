@@ -8,8 +8,10 @@ export interface Blog {
   createdAt?: string;
   readingTime?: number;
   views?: number;
-  tags?: string[];
+  tags: string[];
+  category: string;
 }
+
 
 export interface BlogCardProps {
   title: string;

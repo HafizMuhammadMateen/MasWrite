@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
 import { slugify } from "@/utils/blogsHelpers";
-import { error } from "console";
 import { verifyToken } from "@/utils/authHelpers";
 
 // Get all blogs
@@ -48,7 +47,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   await connectDB();
 
-  const { title, content, tags } = await req.json();
+  const { title, content, tags, status } = await req.json();
 
   if (!title || !content || !tags?.length) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
@@ -78,6 +77,7 @@ export async function POST(req: NextRequest) {
     author: decodedToken.userId,
     publishedAt: new Date(),
     readingTime,
+    status,
     tags,
   });
 

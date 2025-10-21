@@ -59,9 +59,9 @@ export default function ManageBlogsPage() {
                 title={blog.title}
                 slug={blog.slug}
                 authorName={
-                  typeof blog.author === "string" ? blog.author : blog.author.userName
+                  typeof blog.author === "string" ? blog.author : blog.author?.userName
                 }
-              excerpt={blog.content.slice(0, 100)} // optional short preview
+                excerpt={blog.content?.slice(0, 100)} // optional short preview
                 publishedAt={blog.publishedAt}
                 readingTime={blog.readingTime}
                 views={blog.views}

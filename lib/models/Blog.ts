@@ -11,7 +11,8 @@ const blogSchema = new Schema(
     publishedAt: { type: Date, default: null },
     views: { type: Number, default: 0 },
     readingTime: { type: Number },
-    tags: [{ type: String, required: true }], // Must have at least one tag
+    tags: [{ type: String }],
+    status: { type: String, enum: ["draft", "published"], default: "darft" },
     category: {
       type: String,
       enum: [

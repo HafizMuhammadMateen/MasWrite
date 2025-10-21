@@ -3,15 +3,19 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import { FaRegEye, FaUpload } from "react-icons/fa";
+import toast from "react-hot-toast";
+import LinkModal from "@/components/modals/LinkModal";
+
+import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
-import BulletList from "@tiptap/extension-bullet-list";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import Heading from "@tiptap/extension-heading";
 import Image from "@tiptap/extension-image";
-import toast from "react-hot-toast";
 import {
   List,
   ListOrdered,
@@ -20,11 +24,14 @@ import {
   Image as ImageIcon,
   Undo2,
   Redo2,
+  BoldIcon,
+  ItalicIcon,
+  UnderlineIcon,
 } from "lucide-react";
+import ImageModal from "@/components/modals/ImageModal";
 
 
 export default function NewBlogPage() {
-  const isDev = process.env.NODE_ENV === "production";
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [focused, setFocused] = useState(false);
@@ -32,6 +39,9 @@ export default function NewBlogPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [category, setCategory] = useState("Web Development");
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [, forceUpdate] = useState({});
+  const [showImageModal, setShowImageModal] = useState(false);
 
   // Tag input handler
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,25 +60,58 @@ export default function NewBlogPage() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: false, // disable built-in heading
+      }),
+      Heading.configure({
+        levels: [1, 2, 3],
+      }),
       Underline,
       Link.configure({
         openOnClick: true,
       }),
       BulletList,
+      OrderedList,
       TaskList,
-      TaskItem,
-      Image,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Image.configure({
+        inline: false,
+      }),
     ],
     content: "",
     immediatelyRender: false,
   });
 
   useEffect(() => {
+    if (!editor) return;
+    const update = () => forceUpdate({});
+    editor.on("selectionUpdate", update);
+    editor.on("update", update);
+    return () => {
+      editor.off("selectionUpdate", update);
+      editor.off("update", update);
+    };
+  }, [editor]);
+
+  useEffect(() => {
     if (editor) {
       editor.commands.focus("end"); // focus with blinking cursor
     }
   }, [editor]);
+
+  // Add keyboard shortcut for Ctrl + K
+  useEffect(() => {
+    const handleShortcut = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowLinkModal(true);
+      }
+    };
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
 
   // Toolbar button helper
   const Button = ({ onClick, isActive, children }: any) => (
@@ -83,7 +126,23 @@ export default function NewBlogPage() {
     </button>
   );
 
-  // Handle publish click
+  const handleDraft = async () => {
+    if (!title.trim()) return toast.error("Please enter a title.");
+
+    const content = editor?.getHTML() || "";
+    try {
+      const res = await fetch("/api/blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, tags, category, status: "draft" }),
+      });
+      if (res.ok) toast.success("Draft saved successfully!");
+      else toast.error("Failed to save draft.");
+    } catch (err) {
+      toast.error("Error saving draft.");
+    }
+  };
+
   const handlePublish = async () => {
     if (!title.trim()) return toast.error("Please enter a title.");
     if (!tags.length) return toast.error("Please add at least one tag.");
@@ -108,7 +167,7 @@ export default function NewBlogPage() {
         toast.error(error.message || "Failed to publish blog.");
       }
     } catch (err) {
-      isDev && console.error("Publish error:", err);
+      console.error("Publish error:", err);
       toast.error("Something went wrong while publishing.");
     } finally {
       setLoading(false);
@@ -156,6 +215,19 @@ export default function NewBlogPage() {
             <FaRegEye className="text-gray-600" /> Preview
           </button>
           <button
+            onClick={handleDraft}
+            disabled={loading}
+            className={`flex  items-center gap-2 whitespace-nowrap px-4 py-2 rounded-md border transition-all duration-200 
+              ${loading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
+              } 
+              border-blue-400 text-blue-600 bg-white shadow-sm active:scale-[0.97]`}
+          >
+            <FaUpload className="text-blue-500" />
+            {loading ? "Saving..." : "Save Draft"}
+          </button>
+          <button
             onClick={handlePublish}
             disabled={loading}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
@@ -176,28 +248,30 @@ export default function NewBlogPage() {
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 isActive={editor.isActive("bold")}
               >
-                <b>B</b>
+                <BoldIcon className="w-4 h-4"/>
               </Button>
+
               <Button
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 isActive={editor.isActive("italic")}
               >
-                <i>I</i>
+                <ItalicIcon className="w-4 h-4"/>
               </Button>
               <Button
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
                 isActive={editor.isActive("underline")}
               >
-                <u>U</u>
+                <UnderlineIcon className="w-4 h-4"/>
               </Button>
 
               {/* Headings */}
               {[1, 2, 3].map((level) => (
                 <Button
-                  key={level}
-                  onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
-                  isActive={editor.isActive("heading", { level })}
+                key={level}
+                onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
+                isActive={editor.isActive("heading", { level })}
                 >
+                  {/* <Heading1Icon className="w-4 h-4"/> */}
                   H<sub className="text-xs ml-0.5">{level}</sub>
                 </Button>
               ))}
@@ -226,24 +300,21 @@ export default function NewBlogPage() {
 
               {/* Link */}
               <Button
-                onClick={() => {
-                  const url = prompt("Enter link URL:");
-                  if (url) editor.chain().focus().setLink({ href: url }).run();
-                }}
+                onClick={() => setShowLinkModal(true)}
                 isActive={editor.isActive("link")}
+                title="Insert Link (Ctrl + K)"
               >
                 <LinkIcon className="w-4 h-4" />
               </Button>
 
+              {showLinkModal && <LinkModal editor={editor} onClose={() => setShowLinkModal(false)} />}
+
               {/* Image */}
-              <Button
-                onClick={() => {
-                  const url = prompt("Enter image URL:");
-                  if (url) editor.chain().focus().setImage({ src: url }).run();
-                }}
-              >
-                <ImageIcon className="w-4 h-4" />
+              <Button onClick={() => setShowImageModal(true)}>
+                <ImageIcon className="w-4 h-4"/>
               </Button>
+              {showImageModal && <ImageModal editor={editor} open={showImageModal} onClose={() => setShowImageModal(false)} />}
+
 
               {/* Undo / Redo */}
               <Button onClick={() => editor.chain().focus().undo().run()}>

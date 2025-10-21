@@ -48,7 +48,6 @@ export default function NewBlogPage() {
     setTags(tags.filter((t) => t !== tag));
   };
 
-
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -98,7 +97,7 @@ export default function NewBlogPage() {
       const res = await fetch("/api/blogs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ title, content, tags }),
       });
 
       if (res.ok) {

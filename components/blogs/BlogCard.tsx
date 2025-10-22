@@ -47,11 +47,23 @@ export default function BlogCard({
               {/* Tags */}
               {tags && tags.length > 0 && (
                 <div className="flex mt-2 gap-2 cursor-default">
-                  {tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-sm text-blue-700 border border-blue-300 bg-blue-100">
+                  {tags.slice(0, 3).map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="text-sm text-blue-700 border border-blue-300 bg-blue-100"
+                    >
                       {tag}
                     </Badge>
                   ))}
+                  {tags.length > 3 && (
+                    <Badge
+                      variant="outline"
+                      className="text-sm text-gray-600 border border-gray-300 bg-gray-100"
+                    >
+                      +{tags.length - 3} more
+                    </Badge>
+                  )}
                 </div>
               )}
 

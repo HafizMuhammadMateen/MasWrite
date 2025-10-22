@@ -40,13 +40,13 @@ export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: 
           placeholder="Search by title..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 rounded px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         {/* Status Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-sm">
+            <Button variant="outline" className="cursor-pointer">
               {status ? `Status: ${status}` : "Status"}
               <ChevronDown /> 
             </Button>
@@ -61,7 +61,7 @@ export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: 
         {/* Category Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-md">
+            <Button variant="outline" className="cursor-pointer">
               {category ? `Category: ${category}` : "Category"}
               <ChevronDown /> 
             </Button>

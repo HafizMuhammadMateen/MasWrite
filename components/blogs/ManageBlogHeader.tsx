@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { ChevronDown } from "lucide-react"
 
 export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: (filters: any) => void }) {
   const [status, setStatus] = useState("")
@@ -46,7 +47,8 @@ export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="text-sm">
-              {status ? `Status: ${status}` : "Filter by Status"}
+              {status ? `Status: ${status}` : "Status"}
+              <ChevronDown /> 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -59,8 +61,9 @@ export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: 
         {/* Category Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-sm">
-              {category ? `Category: ${category}` : "Filter by Category"}
+            <Button variant="outline" className="text-md">
+              {category ? `Category: ${category}` : "Category"}
+              <ChevronDown /> 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-h-64 overflow-y-auto">
@@ -75,12 +78,12 @@ export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: 
         </DropdownMenu>
 
         {/* New Post Button */}
-        <Link
-          href="/dashboard/blogs/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
-          + New Post
+        <Link href="/dashboard/blogs/new">
+          <Button variant="newPostButton">
+            + New Post
+          </Button>
         </Link>
+
       </div>
     </div>
   )

@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
   const { title, content, tags, category, status } = await req.json();
 
-  if (!title || !content || !tags?.length || !category || !status) {
+  if (!title || !content || !tags?.length || !category) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
   }
 

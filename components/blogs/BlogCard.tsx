@@ -13,7 +13,7 @@ interface ExtendedBlogCardProps extends BlogCardProps {
   isDashboardBlogs?: boolean;
   onDelete?: (slug: string) => void;
   deleting?: boolean;
-  status?: "Published" | "Draft"; // optional status prop
+  status: "published" | "draft"; // optional status prop
 }
 
 export default function BlogCard({
@@ -28,7 +28,7 @@ export default function BlogCard({
   isDashboardBlogs,
   onDelete,
   deleting = false,
-  status = "Draft",
+  status
 }: ExtendedBlogCardProps) {
   const router = useRouter();
 
@@ -61,8 +61,8 @@ export default function BlogCard({
                 variant="blogStatus"
                 size="sm"
                 className={cn(
-                  "cursor-default disabled:pointer-events-auto disabled:opacity-100",
-                  status === "Published"
+                  "cursor-default disabled:pointer-events-auto disabled:opacity-100 capitalize",
+                  status === "published"
                     ? "bg-green-500 hover:bg-green-600"
                     : "text-blue-700 border border-blue-300 bg-blue-100 hover:bg-blue-200 opacity-100"
                 )}

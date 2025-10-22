@@ -75,6 +75,7 @@ export default function ManageBlogsPage() {
               isDashboardBlogs
               onDelete={handleDelete}
               deleting={deletingSlug === blog.slug}
+              status={blog.status as "published" | "draft"}
             />
           ))}
         </div>

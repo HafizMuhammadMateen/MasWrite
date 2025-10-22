@@ -20,7 +20,7 @@ export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: 
     onFilterChange?.(updated)
   }
 
-  // 🕐 Debounce title input
+  // Debounce title input
   useEffect(() => {
     const delay = setTimeout(() => {
       handleChange({ q })
@@ -51,8 +51,8 @@ export default function ManageBlogHeader({ onFilterChange }: { onFilterChange?: 
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => { setStatus(""); handleChange({ status: "" }) }}>All</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => { setStatus("Published"); handleChange({ status: "Published" }) }}>Published</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => { setStatus("Draft"); handleChange({ status: "Draft" }) }}>Draft</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setStatus("published"); handleChange({ status: "published" }) }}>Published</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setStatus("draft"); handleChange({ status: "draft" }) }}>Draft</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 

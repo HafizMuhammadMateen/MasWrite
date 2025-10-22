@@ -12,7 +12,7 @@ const blogSchema = new Schema(
     views: { type: Number, default: 0 },
     readingTime: { type: Number },
     tags: [{ type: String }],
-    status: { type: String, enum: ["draft", "published"], default: "darft" },
+    status: { type: String, enum: ["draft", "published"], default: "draft" },
     category: {
       type: String,
       enum: [

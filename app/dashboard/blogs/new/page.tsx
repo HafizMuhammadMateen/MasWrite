@@ -146,7 +146,7 @@ export default function NewBlogPage() {
       const res = await fetch("/api/blogs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, tags }),
+        body: JSON.stringify({ title, content, tags, category, status: "published" }),
       });
 
       if (res.ok) {

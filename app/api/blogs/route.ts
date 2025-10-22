@@ -58,12 +58,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
   }
 
-  const slug = slugify(title);
-  const isExisting = await Blog.findOne({ slug });
-  if (isExisting) {
-    return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
-  }
-
   const token = req.cookies.get("token")?.value;
   if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
@@ -72,20 +66,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Invalid token" }, { status: 401 });
   }
 
+  const slug = slugify(title);
+
+  let blog = await Blog.findOne({ slug, author: decodedToken.userId });
+
   const words = content.split(/\s+/).length; 
   const readingTime = Math.max(1, Math.round(words / 200));
 
-  const blog = await Blog.create({
-    title,
-    content,
-    slug,
-    author: decodedToken.userId,
-    publishedAt: new Date(),
-    readingTime,
-    category,
-    status,
-    tags,
-  });
+  if (blog) {
+    blog.content = content;
+    blog.tags = tags;
+    blog.category = category;
+    blog.status = status;
+    blog.readingTime = readingTime;
+    if (status === "published" && !blog.publishedAt) {
+      blog.publishedAt = new Date();
+    }
+
+    await blog.save();
+  } else {
+    // Create new blog
+    // Ensure slug is unique globally
+    const isExisting = await Blog.findOne({ slug });
+    if (isExisting) {
+      return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
+    }
+
+    blog = await Blog.create({
+      title,
+      content,
+      slug,
+      author: decodedToken.userId,
+      publishedAt: new Date(),
+      readingTime,
+      category,
+      status,
+      tags,
+    });
+  }  
 
   return NextResponse.json(blog);
 }

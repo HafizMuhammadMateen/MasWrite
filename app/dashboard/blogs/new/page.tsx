@@ -118,6 +118,8 @@ export default function NewBlogPage() {
 
   const handleDraft = async () => {
     if (!title.trim()) return toast.error("Please enter a title.");
+    if (!tags.length) return toast.error("Please add at least one tag.");
+    if (!category) return toast.error("Please select a category.");
 
     const content = editor?.getHTML() || "";
     try {

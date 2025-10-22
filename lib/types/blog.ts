@@ -8,9 +8,9 @@ export interface Blog {
   createdAt?: string;
   readingTime?: number;
   views?: number;
-  tags?: string[];
+  tags: string[];
   status: string;
-  category?: string;
+  category: string;
 }
 
 

@@ -46,12 +46,12 @@ export default function BlogCard({
               
               {/* Tags */}
               {tags && tags.length > 0 && (
-                <div className="flex mt-2 gap-2 cursor-default">
+                <div className="flex mt-2 gap-2">
                   {tags.slice(0, 3).map((tag) => (
                     <Badge
                       key={tag}
                       variant="outline"
-                      className="text-sm text-blue-700 border border-blue-300 bg-blue-100"
+                      className="text-sm text-blue-700 border border-blue-300 bg-blue-100 cursor-default"
                     >
                       {tag}
                     </Badge>
@@ -59,7 +59,7 @@ export default function BlogCard({
                   {tags.length > 3 && (
                     <Badge
                       variant="outline"
-                      className="text-sm text-gray-600 border border-gray-300 bg-gray-100"
+                      className="text-sm text-gray-600 border border-gray-300 bg-gray-100 cursor-default"
                     >
                       +{tags.length - 3} more
                     </Badge>
@@ -68,25 +68,25 @@ export default function BlogCard({
               )}
 
             </div>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="blogStatus"
-                size="sm"
-                className={cn(
-                  "cursor-default disabled:pointer-events-auto disabled:opacity-100 capitalize",
-                  status === "published"
-                    ? "bg-green-500 hover:bg-green-600"
-                    : "text-blue-700 border border-blue-300 bg-blue-100 hover:bg-blue-200 opacity-100"
-                )}
-                disabled
-              >
-                {status}
-              </Button>
-                  
-              {isDashboardBlogs && ( <Separator orientation="vertical"/> )}
-
-              {isDashboardBlogs && (
-                <div className="flex items-center gap-2">
+            {isDashboardBlogs && (
+              <div className="flex items-center gap-4">
+                <div className="">
+                  <Button
+                    variant="blogStatus"
+                    size="sm"
+                    className={cn(
+                      "cursor-default disabled:pointer-events-auto disabled:opacity-100 capitalize",
+                      status === "published"
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "text-blue-700 border border-blue-300 bg-blue-100 hover:bg-blue-200 opacity-100"
+                    )}
+                    disabled
+                  >
+                    {status}
+                  </Button>
+                </div>
+                <Separator orientation="vertical"/> 
+                <div className="flex items-center gap-2">  
                   <Button
                     variant="outline"
                     size="sm"
@@ -117,8 +117,8 @@ export default function BlogCard({
                     {deleting ? "Deleting..." : "Delete"}
                   </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </CardHeader>
 

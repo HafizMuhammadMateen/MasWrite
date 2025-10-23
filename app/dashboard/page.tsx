@@ -2,23 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
-import toast from "react-hot-toast";
-import { Blog } from "@/lib/types/blog";
-import RecentBlogs from "@/components/dashboard/RecentBlogs";
-
-export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const router = useRouter();
-  
-  // Redirect if unauthorized
-  useEffect(() => {
-    if (data?.error) {
-      setTimeout(() => router.push("/login"), 800);
-    }
-  }, [data, router]);
-=======
 import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
 import toast from "react-hot-toast";
 
@@ -26,7 +9,6 @@ export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
->>>>>>> oauth-origin/OAuth-Feature
 
   // Fetch dashboard data
   useEffect(() => {
@@ -55,14 +37,6 @@ export default function DashboardPage() {
     fetchDashboard();
   }, []);
 
-<<<<<<< HEAD
-  // Fetch blogs
-  useEffect(() => {
-    fetch("/api/blogs")
-    .then((res) => res.json())
-    .then((data) => setBlogs(data.blogs || []));
-  }, []);
-=======
   // Redirect if unauthorized
   useEffect(() => {
     if (data?.error) {
@@ -88,7 +62,6 @@ export default function DashboardPage() {
       toast.error("Something went wrong while logging out");
     }
   }
->>>>>>> oauth-origin/OAuth-Feature
 
   // Loading state
   if (!data) {
@@ -111,22 +84,6 @@ export default function DashboardPage() {
 
   // Main dashboard view
   return (
-<<<<<<< HEAD
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      <main className="flex flex-1 ">
-        {/* Blogs */}
-        <div className="flex-1">
-          <h2 className="text-xl font-bold text-gray-800 my-4 text-center">Recent Blog Posts</h2>
-            <section className="shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)] max-h-[calc(100vh-150px)] p-6">
-              <RecentBlogs blogs={blogs} />
-            </section>
-        </div>
-      </main>
-    </div>
-  );
-
-}
-=======
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-xl">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
@@ -644,4 +601,3 @@ export default function DashboardPage() {
 //     </div>
 //   )
 // }
->>>>>>> oauth-origin/OAuth-Feature

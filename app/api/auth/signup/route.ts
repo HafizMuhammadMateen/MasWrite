@@ -1,32 +1,33 @@
 import { validateEmail, validatePassword } from "@/utils/validators";
-import { getUserByEmail, hashPassword, makeUser } from "@/utils/authHelpers";
+import { getUserByEmail, createUser } from "@/utils/authHelpers";
 import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: Request) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
     const { userName, email, password } = await req.json();
-
-    // Basic validation
-    if (!userName || !email || !password) return error("⚠️ All fields are required", 422);
+    if (!userName || !email || !password) return error("All fields are required", 400);
 
     const emailError = validateEmail(email);
-    if (emailError) return error(emailError, 400);
-    
+    if (emailError) return error(emailError, 422);
+
     const passwordError = validatePassword(password, true);
-    if (passwordError) return error(passwordError, 400);
-    
-    // Check duplicates
+    if (passwordError) return error(passwordError, 422);
+
     const existingUser = await getUserByEmail(email);
-    if (existingUser) return error("⚠️ Email already registered" , 409); // Conflict error code
+    if (existingUser) {
+      if (!existingUser.password)
+        return error("Email registered via Google/GitHub. Sign in using that provider.", 409);
+      return error("Email already registered", 409);
+    }
 
-    const hashedPassword = await hashPassword(password);
-    await makeUser(userName, email, hashedPassword);
+    await createUser(userName, email, password);
 
-    console.log("✅ User created", email);
-
-    return success("✅ User created successfully", 201, { userName, email });
-  } catch (err) {
-    console.error("❌ Signup error:", err);
-    return error("❌ Something went wrong", 500);
+    isDev && console.log("✅ [SignupAPI] New user registered:", email);
+    return success("Account created successfully", 201, { userName, email });
+  } catch (err: any) {
+    isDev && console.error("❌ [SignupAPI] Error:", err.message || err);
+    return error(err.message || "Server error", 500);
   }
 }

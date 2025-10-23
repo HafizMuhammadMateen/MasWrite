@@ -53,7 +53,7 @@ export default function BlogCard({
                   variant="outline"
                   size="sm"
                   className="cursor-pointer"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.preventDefault();
                     router.push(`/dashboard/blogs/${slug}/edit`);
                   }}
@@ -66,7 +66,7 @@ export default function BlogCard({
                   size="sm"
                   className="cursor-pointer hover:bg-red-700"
                   disabled={deleting}
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.preventDefault();
                     onDelete?.(slug);
                   }}

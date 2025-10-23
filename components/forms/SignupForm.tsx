@@ -7,75 +7,6 @@ import { validateUsername, validateEmail, validatePassword } from "@/utils/valid
 import { FormErrors } from "@/utils/types";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import toast from "react-hot-toast";
-<<<<<<< HEAD
-
-export default function SignupForm() {
-  const[email, setEmail] = useState("");
-  const[userName, setUsername] = useState("");
-  const[password, setPassword] = useState("");
-  const[loading, setLoading] = useState(false);
-  const[errors, setErrors] = useState<FormErrors>({});
-  const router = useRouter();
-  const[showPassword, setShowPassword] = useState(false);
-
-  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.name === "userName") {
-      setUsername(e.target.value);
-    } else if(e.target.name === "email") {
-      setEmail(e.target.value);
-    } else if(e.target.name === "password") {
-      setPassword(e.target.value);
-    }
-  }
-
-  const handleBlur = (e:React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.name === "userName") {
-      const validationError = validateUsername(e.currentTarget.value);
-      setErrors((prev) => ({...prev, userName: validationError}));
-    } else if(e.target.name === "email") {
-      const validationError = validateEmail(e.target.value);
-      setErrors((prev) => ({...prev, email: validationError}));
-    } else if(e.target.name === "password") {
-      const validationError = validatePassword(e.target.value, true); //calling strict check for signup page
-      setErrors((prev) => ({...prev, password: validationError}));
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // validation again on submit not just on blur
-    const userNameError = validateUsername(userName);
-    const emailError = validateEmail(email);
-    const passwordError = validatePassword(password, true);
-
-    if(userNameError || emailError || passwordError) {
-      setErrors({userName: userNameError, email: emailError, password: passwordError});
-      return;
-    }
-    
-    setErrors({});
-    // setErrors({ email: "", userName: "", password: "" });
-    console.log("Form submitted with: ", {userName, email, password});
-
-    try {
-      setLoading(true);
-      
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-type": "application/json"},
-        body: JSON.stringify({ userName, email, password }),
-        // credentials: "include" // No need in signup page bcz cookies are not setting in signup page
-      })
-
-      if(!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Some thing went wrong!");
-      }
-
-      const data = await response.json();
-      console.log("Signup successful:", data);
-=======
 import { signupSchema } from "@/lib/validation/zodSchemas";
 import { z } from "zod";
 
@@ -149,22 +80,10 @@ export default function SignupForm() {
 
       const data = await response.json();
       isDev && console.log("[SignupForm Page] Signup successful:", data);
->>>>>>> oauth-origin/OAuth-Feature
 
       toast.success("Signup successful! Please log in.");
       router.push("/login");
 
-<<<<<<< HEAD
-    } catch(err:any) {
-      // backend error message
-      toast.error(err.message || "Signup failed. Please try again.");
-      setErrors((prev) => ({ ...prev, formError: err.message}))
-    } finally {
-      setLoading(false);
-    }
-
-  }
-=======
     } catch (err: any) {
       // ✅ 4. Handle network or backend errors
       const message = err instanceof Error ? err.message : "Signup failed!";
@@ -174,7 +93,6 @@ export default function SignupForm() {
       setLoading(false);
     }
   };
->>>>>>> oauth-origin/OAuth-Feature
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

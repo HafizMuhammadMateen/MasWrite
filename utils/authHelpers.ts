@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 const JWT_AUTH_SECRET = process.env.JWT_AUTH_SECRET!;
 const JWT_EXPIRY = "1h";
-const DB_NAME = "authx";
+const DB_NAME = "auth-module";
 const USERS_COLLECTION = "users";
 
 // ==========================

@@ -6,12 +6,12 @@ import { FaRegEye, FaSave, FaUpload } from "react-icons/fa"
 interface TitleInputProps {
   title: string
   setTitle: (val: string) => void
-  loading: boolean
+  loading: null | "draft" | "published"
   handleSave: (status: "draft" | "published") => void
 }
 
 export default function TitleInput({ title, setTitle, loading, handleSave }: TitleInputProps) {
-  const [focused, setFocused] = useState(false)
+  const [focused, setFocused] = useState(false);
 
   return (
     <div className="flex min-w-full justify-center items-end mb-6">
@@ -49,7 +49,7 @@ export default function TitleInput({ title, setTitle, loading, handleSave }: Tit
 
         <button
           onClick={() => handleSave("draft")}
-          disabled={loading}
+          disabled={loading === "draft"}
           className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-md border transition-all duration-200 cursor-pointer
             ${
               loading
@@ -59,15 +59,15 @@ export default function TitleInput({ title, setTitle, loading, handleSave }: Tit
             border-blue-400 text-blue-600 bg-white active:scale-[0.97]`}
         >
           <FaSave className="text-blue-500" />
-          {loading ? "Saving..." : "Save Draft"}
+          {loading === "draft" ? "Saving..." : "Save Draft"}
         </button>
 
         <button
           onClick={() => handleSave("published")}
-          disabled={loading}
+          disabled={loading === "published"}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
-          <FaUpload /> {loading ? "Publishing..." : "Publish"}
+          <FaUpload /> {loading === "published" ? "Publishing..." : "Publish"}
         </button>
       </div>
     </div>

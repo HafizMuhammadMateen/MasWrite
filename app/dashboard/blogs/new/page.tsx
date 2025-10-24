@@ -27,7 +27,7 @@ import {
 export default function NewBlogPage() {
   const router = useRouter()
   const [title, setTitle] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<null | "draft" | "published">(null)
   const [tags, setTags] = useState<string[]>([])
   const [category, setCategory] = useState("Web Development")
   const [showLinkModal, setShowLinkModal] = useState(false)
@@ -70,7 +70,7 @@ export default function NewBlogPage() {
     if (!category) return toast.error("Please select a category.")
 
     const content = editor?.getHTML() || ""
-    setLoading(true)
+    setLoading(status)
 
     try {
       const res = await fetch("/api/blogs", {
@@ -85,7 +85,7 @@ export default function NewBlogPage() {
     } catch {
       toast.error("Something went wrong.")
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 

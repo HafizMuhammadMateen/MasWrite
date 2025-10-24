@@ -42,6 +42,7 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
                 readingTime={blog.readingTime}
                 views={blog.views}
                 tags={blog.tags}
+                id={blog._id}
               />
             ))}
           </div>

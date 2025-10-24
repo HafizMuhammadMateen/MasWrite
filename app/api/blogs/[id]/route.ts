@@ -3,40 +3,36 @@ import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
 import { slugify } from "@/utils/blogsHelpers";
 
-// Get single blog
-export async function GET(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
+// GET single blog
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   await connectDB();
-  const { slug } = await context.params;
-  const blog = await Blog.findOne({ slug });
+  const { id } = params;
+
+  const blog = await Blog.findById(id); // if default _id
+  // OR: const blog = await Blog.findOne({ id }); // if custom string id
+
   return NextResponse.json(blog);
 }
 
-// Update single blog
-export async function PUT(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
+// PUT single blog
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   await connectDB();
-  const { slug } = await context.params; // old slug
+  const { id } = params;
 
   const data = await req.json() as { title: string; content: string };
-
-  const newSlug = slugify(data.title);
   const words = data.content.split(/\s+/).length;
   const readingTime = Math.max(1, Math.round(words / 200));
 
-  const blog = await Blog.findOneAndUpdate(
-    { slug }, // find by old slug
-    { 
-      ...data, 
-      slug: newSlug, 
-      readingTime,
-      publishedAt: new Date(),
-    },
+  const blog = await Blog.findByIdAndUpdate(
+    id, // default _id
+    { ...data, readingTime, publishedAt: new Date() },
     { new: true }
   );
 
   return NextResponse.json(blog);
 }
 
-// Delete single blog
+// DELETE single blog
 export async function DELETE(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
   await connectDB();
   const { slug } = await context.params;

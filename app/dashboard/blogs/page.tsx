@@ -76,6 +76,7 @@ export default function ManageBlogsPage() {
               onDelete={handleDelete}
               deleting={deletingSlug === blog.slug}
               status={blog.status as "published" | "draft"}
+              id={blog._id}
             />
           ))}
         </div>

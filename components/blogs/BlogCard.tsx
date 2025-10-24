@@ -13,7 +13,8 @@ interface ExtendedBlogCardProps extends BlogCardProps {
   isDashboardBlogs?: boolean;
   onDelete?: (slug: string) => void;
   deleting?: boolean;
-  status: "published" | "draft"; // optional status prop
+  status?: "published" | "draft"; // optional status prop
+  id?: string
 }
 
 export default function BlogCard({
@@ -28,13 +29,14 @@ export default function BlogCard({
   isDashboardBlogs,
   onDelete,
   deleting = false,
-  status
+  status,
+  id
 }: ExtendedBlogCardProps) {
   const router = useRouter();
 
   return (
     <Card className="bg-gray-100 pb-4 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1]">
-      <Link href={`/dashboard/blogs/${slug}`}>
+      <Link href={`/dashboard/blogs/${id}`}>
         <CardHeader>
           <div className="flex justify-between">
             <div>
@@ -93,7 +95,7 @@ export default function BlogCard({
                     className="cursor-pointer"
                     onClick={(e) => {
                       e.preventDefault();
-                      router.push(`/dashboard/blogs/${slug}/edit`);
+                      router.push(`/dashboard/blogs/${id}/edit`);
                     }}
                   >
                     <Edit className="w-4 h-4 mr-1" /> Update

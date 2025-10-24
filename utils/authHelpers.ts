@@ -1,11 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-// import crypto from "crypto";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_AUTH_SECRET = process.env.JWT_AUTH_SECRET as string;
 const JWT_EXPIRY = "1h";
 const AUTH_MODULE_APP_URL = process.env.AUTH_MODULE_APP_URL as string;
 
@@ -18,13 +17,13 @@ export async function comparePassword(password: string, hash: string) {
 }
 
 export function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET) as { userId: string };
+  return jwt.verify(token, JWT_AUTH_SECRET) as { userId: string };
 }
 
 export function signToken(payload: object) {
   return jwt.sign(
     payload,
-    JWT_SECRET,
+    JWT_AUTH_SECRET,
     {expiresIn: JWT_EXPIRY}
   )
 }
@@ -32,7 +31,7 @@ export function signToken(payload: object) {
 export function signResetPasswordToken(payload: object) {
   return jwt.sign(
     payload,
-    JWT_SECRET,
+    JWT_AUTH_SECRET,
     { expiresIn: "15m" }
   )
 }

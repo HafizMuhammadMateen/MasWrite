@@ -4,17 +4,19 @@ import { useParams } from "next/navigation";
 import { Blog } from "@/lib/types/blog";
 
 export default function SingleBlog() {
-  const { slug } = useParams();
+  const { id } = useParams();
   const [blog, setBlog] = useState<Blog | null>(null);
 
   // Views counter
   useEffect(() => {
-    fetch(`/api/blogs/${slug}/view`, { method: "POST" });
-  }, [slug]);
+    fetch(`/api/blogs/${id}/view`, { method: "POST" });
+  }, [id]);
 
   useEffect(() => {
-    fetch(`/api/blogs/${slug}`).then(res => res.json()).then(setBlog);
-  }, [slug]);
+    fetch(`/api/blogs/${id}`)
+      .then(res => res.json())
+      .then(setBlog);
+  }, [id]);
 
   if (!blog) return <p>Loading...</p>;
 

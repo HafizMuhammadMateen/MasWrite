@@ -19,7 +19,7 @@ export default function BlogPage() {
       {/* <Link href="/blog/new" className="text-blue-500">+ New Blog</Link> */}
       <ul className="mt-4 space-y-2">
         {blogs.map(blog => (
-          <li key={blog.slug || blog._id}>
+          <li key={blog._id}>
             <Link href={`blogs/${blog.slug}`} className="font-semibold">{blog.title}</Link>
           </li>
         ))}

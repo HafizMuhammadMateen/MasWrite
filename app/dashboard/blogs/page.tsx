@@ -59,7 +59,7 @@ export default function ManageBlogsPage() {
         <div className="flex-1 overflow-y-auto space-y-4 p-2">
           {blogs.map((blog) => (
             <BlogCard
-              key={blog._id || blog.slug}
+              key={blog._id}
               title={blog.title}
               slug={blog.slug}
               authorName={

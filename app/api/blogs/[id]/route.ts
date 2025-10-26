@@ -3,7 +3,7 @@ import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
 import { slugify } from "@/utils/blogsHelpers";
 
-// GET single blog
+// GET single blog (READ)
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   await connectDB();
   const { id } = await context.params;
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
   return NextResponse.json(blog);
 }
 
-// PUT single blog
+// PUT single blog (UPDATE)
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   await connectDB();
   const { id } = await context.params;
@@ -27,10 +27,9 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
   
   const titleWords = title.trim().split(/\s+/).length;
   
-  if (titleWords > 10) {
-    return NextResponse.json({ message: "Title should be less than 10 words" }, { status: 400 });
-  }
-  
+  if (titleWords > 10) return NextResponse.json({ message: "Title should be less than 10 words" }, { status: 400 });
+
+  const slug = slugify(title);
   const contentWords = content.split(/\s+/).length;
   const readingTime = Math.max(1, Math.round(contentWords / 200));
 
@@ -39,6 +38,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
     { 
       title,
       content,
+      slug,
       tags,
       category,
       status, 

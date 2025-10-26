@@ -52,9 +52,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 }
 
 // DELETE single blog
-export async function DELETE(req: NextRequest, context: { params: Promise<{ slug: string }> }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  console.log("DELETE request received");
   await connectDB();
-  const { slug } = await context.params;
-  await Blog.findOneAndDelete({ slug });
+  const { id } = await context.params;
+  await Blog.findByIdAndDelete(id);
   return NextResponse.json({ message: "Blog Deleted" });
 }

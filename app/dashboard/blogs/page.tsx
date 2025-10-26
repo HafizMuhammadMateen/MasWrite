@@ -13,7 +13,7 @@ export default function ManageBlogsPage() {
     category: "",
   });
   const [loading, setLoading] = useState(false);
-  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Fetch blogs whenever filters change
   useEffect(() => {
@@ -38,15 +38,15 @@ export default function ManageBlogsPage() {
     fetchBlogs();
   }, [filters]);
 
-  const handleDelete = async (slug: string) => {
-    setDeletingSlug(slug);
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
 
-    const res = await fetch(`/api/blogs/${slug}`, { method: "DELETE" });
+    const res = await fetch(`/api/blogs/${id}`, { method: "DELETE" });
     if (res.ok) {
-      setBlogs((prev) => prev.filter((blog) => blog.slug !== slug));
+      setBlogs((prev) => prev.filter((blog) => blog._id !== id));
     }
 
-    setDeletingSlug(null);
+    setDeletingId(null);
   };
 
   return (
@@ -74,7 +74,7 @@ export default function ManageBlogsPage() {
               tags={blog.tags}
               isDashboardBlogs
               onDelete={handleDelete}
-              deleting={deletingSlug === blog.slug}
+              deleting={deletingId === blog._id}
               status={blog.status as "published" | "draft"}
               id={blog._id}
             />

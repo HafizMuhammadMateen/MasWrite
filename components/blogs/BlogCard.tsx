@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 
 interface ExtendedBlogCardProps extends BlogCardProps {
   isDashboardBlogs?: boolean;
-  onDelete?: (slug: string) => void;
+  onDelete?: (id: string) => void;
   deleting?: boolean;
   status?: "published" | "draft"; // optional status prop
-  id?: string
+  id: string
 }
 
 export default function BlogCard({
@@ -108,7 +108,7 @@ export default function BlogCard({
                     disabled={deleting}
                     onClick={(e) => {
                       e.preventDefault();
-                      onDelete?.(slug);
+                      onDelete?.(id);
                     }}
                   >
                     {deleting ? (

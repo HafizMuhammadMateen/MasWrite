@@ -79,7 +79,7 @@ export default function SideBar() {
       <Button
         variant="ghost"
         onClick={handleLogout}
-        className="flex items-center gap-2 text-destructive hover:text-destructive hover:bg-muted mt-auto  cursor-pointer"
+        className="flex items-center gap-2 text-md text-destructive hover:text-destructive hover:bg-muted mt-auto cursor-pointer"
       >
         <LogOut className="w-5 h-5" /> Logout
       </Button>

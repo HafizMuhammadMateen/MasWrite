@@ -10,7 +10,13 @@ export default function SingleBlog() {
   const [blog, setBlog] = useState<Blog | null>(null);
 
   useEffect(() => {
-    fetch(`/api/blogs/${id}`).then(res => res.json()).then(setBlog);
+    // Fetch blog data
+    fetch(`/api/blogs/${id}`)
+      .then(res => res.json())
+      .then(setBlog);
+
+    // Increment views
+    fetch(`/api/blogs/${id}/view`, { method: "POST" });
   }, [id]);
 
   const handleDelete = async () => {

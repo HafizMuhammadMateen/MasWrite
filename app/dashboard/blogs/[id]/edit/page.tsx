@@ -38,7 +38,8 @@ export default function EditBlogPage() {
 
   // Fetch blog data and populate fields
   useEffect(() => {
-    if (!params.id) return
+    if (!params.id) return;
+    
     const fetchBlog = async () => {
       try {
         const res = await fetch(`/api/blogs/${params.id}`)

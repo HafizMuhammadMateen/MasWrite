@@ -59,40 +59,44 @@ export async function POST(req: NextRequest) {
   }
 
   const titleWords = title.trim().split(/\s+/).length;
-
   if (titleWords > 10) {
-    return NextResponse.json({ message: "Title should be less than 10 characters" }, { status: 400 });
+    return NextResponse.json({ message: "Title should be less than 10 words" }, { status: 400 });
   }
 
   const token = req.cookies.get("token")?.value;
   if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   const decodedToken = verifyToken(token);
-  if (!decodedToken || !decodedToken.userId) {
-    return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-  }
+  if (!decodedToken?.userId) return NextResponse.json({ message: "Invalid token" }, { status: 401 });
 
   const slug = slugify(title);
-
   let blog = await Blog.findOne({ slug, author: decodedToken.userId });
 
-  const contentWords = content.split(/\s+/).length; 
+  const contentWords = content.split(/\s+/).length;
   const readingTime = Math.max(1, Math.round(contentWords / 200));
 
+  const now = new Date();
+
   if (blog) {
+    // Update existing blog
     blog.content = content;
     blog.tags = tags;
     blog.category = category;
     blog.status = status;
     blog.readingTime = readingTime;
+    blog.updatedAt = now;
+
+    // Only set publishedAt if changing to published and it wasn't already published
     if (status === "published" && !blog.publishedAt) {
-      blog.publishedAt = new Date();
+      blog.publishedAt = now;
     }
+
+    // Optional: if switching from published back to draft, we can clear publishedAt
+    if (status === "draft") blog.publishedAt = null;
 
     await blog.save();
   } else {
     // Create new blog
-    // Ensure slug is unique globally
     const isExisting = await Blog.findOne({ slug });
     if (isExisting) {
       return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
@@ -103,15 +107,14 @@ export async function POST(req: NextRequest) {
       content,
       slug,
       author: decodedToken.userId,
-      publishedAt: new Date(),
-      updatedAt: new Date(),
-      readingTime,
-      category,
       status,
       tags,
+      category,
+      readingTime,
+      updatedAt: now,
+      publishedAt: status === "published" ? now : null, // ✅ only set if published
     });
-  }  
+  }
 
   return NextResponse.json(blog);
 }
-

@@ -4,9 +4,9 @@ import Blog from "@/lib/models/Blog";
 import { slugify } from "@/utils/blogsHelpers";
 
 // GET single blog
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   await connectDB();
-  const { id } = params;
+  const { id } = await context.params;
 
   const blog = await Blog.findById(id); // if default _id
   // OR: const blog = await Blog.findOne({ id }); // if custom string id
@@ -15,9 +15,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // PUT single blog
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   await connectDB();
-  const { id } = params;
+  const { id } = await context.params;
 
   const data = await req.json() as { title: string; content: string };
   const words = data.content.split(/\s+/).length;

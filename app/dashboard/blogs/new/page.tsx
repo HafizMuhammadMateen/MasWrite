@@ -69,6 +69,10 @@ export default function NewBlogPage() {
       // updating handled in edit page
     } else {
     if (!title.trim()) return toast.error("Please enter a title.");
+    
+    const words = title.trim().split(/\s+/).length;
+    if (words > 10) return toast.error("Title should be less than 10 words.");
+    
     if (!tags.length) return toast.error("Please add at least one tag.");
     if (!category) return toast.error("Please select a category.");
     

@@ -79,9 +79,13 @@ export default function EditBlogPage() {
   }, [])
 
   const handleUpdate = async () => {
-    if (!title.trim()) return toast.error("Please enter a title.")
-    if (!tags.length) return toast.error("Please add at least one tag.")
-    if (!category) return toast.error("Please select a category.")
+    if (!title.trim()) return toast.error("Please enter a title.");
+    
+    const words = title.trim().split(/\s+/).length;
+    if (words > 10) return toast.error("Title should be less than 10 words.");
+    
+    if (!tags.length) return toast.error("Please add at least one tag.");
+    if (!category) return toast.error("Please select a category.");
 
     const content = editor?.getHTML() || ""
     setLoading("updating")
@@ -92,13 +96,13 @@ export default function EditBlogPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content, tags, category }),
       })
-      if (!res.ok) throw new Error("Failed to update blog")
-      toast.success("Blog updated successfully!")
-      router.push("/dashboard/blogs")
+      if (!res.ok) throw new Error("Failed to update blog");
+      toast.success("Blog updated successfully!");
+      router.push("/dashboard/blogs");
     } catch {
-      toast.error("Something went wrong.")
+      toast.error("Something went wrong.");
     } finally {
-      setLoading(null)
+      setLoading(null);
     }
   }
 

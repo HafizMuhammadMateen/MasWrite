@@ -21,12 +21,18 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
   const { title, content, tags, category, status } = await req.json();
 
-  if (title || content || tags?.length || category) {
+  if (!title || !content || !tags?.length || !category) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
   }
   
-  const words = content.split(/\s+/).length;
-  const readingTime = Math.max(1, Math.round(words / 200));
+  const titleWords = title.trim().split(/\s+/).length;
+  
+  if (titleWords > 10) {
+    return NextResponse.json({ message: "Title should be less than 10 words" }, { status: 400 });
+  }
+  
+  const contentWords = content.split(/\s+/).length;
+  const readingTime = Math.max(1, Math.round(contentWords / 200));
 
   const blog = await Blog.findByIdAndUpdate(
     id,

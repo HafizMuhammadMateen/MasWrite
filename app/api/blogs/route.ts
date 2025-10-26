@@ -58,6 +58,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
   }
 
+  const titleWords = title.trim().split(/\s+/).length;
+
+  if (titleWords > 10) {
+    return NextResponse.json({ message: "Title should be less than 10 characters" }, { status: 400 });
+  }
+
   const token = req.cookies.get("token")?.value;
   if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
@@ -70,8 +76,8 @@ export async function POST(req: NextRequest) {
 
   let blog = await Blog.findOne({ slug, author: decodedToken.userId });
 
-  const words = content.split(/\s+/).length; 
-  const readingTime = Math.max(1, Math.round(words / 200));
+  const contentWords = content.split(/\s+/).length; 
+  const readingTime = Math.max(1, Math.round(contentWords / 200));
 
   if (blog) {
     blog.content = content;

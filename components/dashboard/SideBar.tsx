@@ -5,11 +5,15 @@ import { useRouter, usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Home, Edit, Settings, LogOut, Plus } from "lucide-react";
+import { VscLayoutSidebarLeftOff } from "react-icons/vsc";
+import { FaBars } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { useState } from "react";
 
 export default function SideBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
 
   // Logout handler
   async function handleLogout() {
@@ -18,7 +22,6 @@ export default function SideBar() {
         method: "POST",
         credentials: "include",
       });
-
       if (res.ok) {
         toast.success("Logged out successfully");
         router.push("/login");
@@ -38,51 +41,75 @@ export default function SideBar() {
   ];
 
   return (
-    <div className="flex flex-col h-full p-4 bg-background shadow-sm border-r text-base">
+    <aside
+      className={`flex flex-col h-full p-4 bg-background border-t shadow-sm text-base transition-all duration-300 ease-in-out
+        ${collapsed ? "w-20" : "w-64"}
+      `}
+    >
       {/* Top Section */}
-      <div className="flex flex-col flex-1">
-        {/* New Post Button */}
-        <Link href="/dashboard/blogs/new" className="mb-4">
-          <Button
-            variant="default"
-            className="flex items-center gap-2 w-full justify-center rounded-full py-5 text-base cursor-pointer"
-          >
-            <Plus className="w-5 h-5" /> New Post
-          </Button>
-        </Link>
+      <div className="flex items-center justify-between mb-4">
+        {!collapsed && <span className="font-semibold text-xl">Menu</span>}
 
-        <Separator className="mb-3" />
+        <button
+          onClick={() => setCollapsed((prev) => !prev)}
+          className="p-2 rounded hover:bg-muted transition cursor-col-resize"
+        >
+          {/* Responsive icons */}
+          <FaBars size={18} className="block md:hidden" />
+          <VscLayoutSidebarLeftOff size={20} className="hidden md:block" />
+        </button>
+      </div>
 
-        {/* Menu buttons */}
-        <nav className="flex flex-col gap-1">
-          {menuItems.map(({ href, label, icon: Icon }) => {
-            // const isActive = pathname.startsWith(href);
-            const isActive = pathname === href; // ✅ exact match only
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+      {/* New Post */}
+      <Link href="/dashboard/blogs/new" className="mb-4">
+        <Button
+          variant="default"
+          className={`flex items-center justify-center gap-2 w-full rounded-full py-5 text-base transition-all cursor-pointer ${
+            collapsed ? "px-0 justify-center" : "px-4"
+          }`}
+        >
+          <Plus className="w-5 h-5" />
+          {!collapsed && "New Post"}
+        </Button>
+      </Link>
+
+      <Separator className="mb-3" />
+
+      {/* Menu Buttons */}
+      <nav className="flex flex-col gap-1 flex-1">
+        {menuItems.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors
+                ${
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <Icon className="w-5 h-5" /> {label}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+                }
+                ${collapsed ? "justify-center" : ""}
+              `}
+            >
+              <Icon className="w-5 h-5" />
+              {!collapsed && <span>{label}</span>}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* Logout at bottom */}
       <Button
         variant="ghost"
         onClick={handleLogout}
-        className="flex items-center gap-2 text-md text-destructive hover:text-destructive hover:bg-muted mt-auto cursor-pointer"
+        className={`flex items-center gap-2 text-md text-destructive hover:text-destructive hover:bg-muted mt-auto cursor-pointer transition-all
+          ${collapsed ? "justify-center" : ""}
+        `}
       >
-        <LogOut className="w-5 h-5" /> Logout
+        <LogOut className="w-5 h-5" />
+        {!collapsed && "Logout"}
       </Button>
-    </div>
+    </aside>
   );
 }

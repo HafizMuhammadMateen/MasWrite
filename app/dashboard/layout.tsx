@@ -12,24 +12,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="h-screen bg-white flex flex-col overflow-hidden">
-      <Header onToggleSidebar={handleToggleSidebar} />
+<Header />
+<main className="flex flex-1 overflow-hidden transition-all duration-300 ease-in-out">
+  <aside
+    className={`flex shadow-[4px_0_6px_-1px_rgba(0,0,0,0.1)]
+      transition-all duration-300 ease-in-out
+      ${isSidebarOpen ? "translate-x-0" : "w-0 -translate-x-full pointer-events-none overflow-hidden"}
+    `}
+  >
+    <div
+      className={`transition-opacity duration-300 ${
+        isSidebarOpen ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      <Sidebar />
+    </div>
+  </aside>
 
-      <main className="flex flex-1 overflow-hidden transition-all duration-300 ease-in-out">
-        {/* Sidebar */}
-        <aside
-          className={`transition-all duration-300 ease-in-out shadow-[4px_0_6px_-1px_rgba(0,0,0,0.1)]
-            ${isSidebarOpen ? "w-1/8" : "w-0"}
-          `}
-        >
-          {/* Make sidebar fill width & height */}
-          <div className={`h-full ${isSidebarOpen ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}>
-            <Sidebar />
-          </div>
-        </aside>
+  <div className="flex-1 overflow-y-auto">{children}</div>
+</main>
 
-        {/* Main content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
-      </main>
 
       <Footer />
     </div>

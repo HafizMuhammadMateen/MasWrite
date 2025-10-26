@@ -1,28 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { FaBars } from "react-icons/fa";
 import { FaUserCircle } from "react-icons/fa";
 import ProfileModal from "@/components/modals/ProfileModal";
+import Link from "next/link";
 
-export default function Header({ onToggleSidebar }: { onToggleSidebar: () => void }) {
+export default function Header() {
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   return (
-    <header className="flex items-center justify-between px-4 py-2 bg-white shadow-sm">
-      {/* Left: Navbar toggle + logo */}
+    <header className="flex items-center justify-between px-4 py-2 bg-white shadow-sm w-full">
+      {/* Left: Title */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={onToggleSidebar}
-          className="p-2 rounded hover:bg-gray-100 transition cursor-pointer"
-        >
-          <FaBars size={20} />
-        </button>
-        <span className="font-semibold text-lg">Dashboard</span>
+        <Link href="/" className="font-semibold text-xl px-14">Auth-Module</Link>
       </div>
 
-      {/* Middle: Search bar */}
-      <div className="flex-1 max-w-md mx-4">
+      {/* Middle: Search bar (hidden on small screens) */}
+      <div className="flex-1 max-w-md mx-4 hidden sm:block">
         <input
           type="text"
           placeholder="Search..."
@@ -34,7 +28,7 @@ export default function Header({ onToggleSidebar }: { onToggleSidebar: () => voi
       <div className="relative">
         <button
           onClick={() => setShowProfileModal((prev) => !prev)}
-          className="p-2 rounded-full hover:bg-gray-100"
+          className="p-2 rounded-full hover:bg-gray-100 transition"
         >
           <FaUserCircle size={26} />
         </button>

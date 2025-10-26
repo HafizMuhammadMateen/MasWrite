@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
       slug,
       author: decodedToken.userId,
       publishedAt: new Date(),
+      updatedAt: new Date(),
       readingTime,
       category,
       status,

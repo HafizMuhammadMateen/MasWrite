@@ -7,6 +7,7 @@ const blogSchema = new Schema(
     slug: { type: String, required: true, unique: true },
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     publishedAt: { type: Date, default: null },
+    updatedAt: { type: Date, default: null },
     views: { type: Number, default: 0 },
     readingTime: { type: Number },
     tags: [{ type: String }],

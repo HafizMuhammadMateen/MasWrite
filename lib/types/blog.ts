@@ -5,6 +5,7 @@ export interface Blog {
   content?: string;
   author: { _id: string; userName: string } | string;
   publishedAt?: string;
+  updatedAt?: string;
   createdAt?: string;
   readingTime?: number;
   views?: number;

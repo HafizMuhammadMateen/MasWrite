@@ -19,13 +19,26 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
   await connectDB();
   const { id } = await context.params;
 
-  const data = await req.json() as { title: string; content: string };
-  const words = data.content.split(/\s+/).length;
+  const { title, content, tags, category, status } = await req.json();
+
+  if (title || content || tags?.length || category) {
+    return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+  }
+  
+  const words = content.split(/\s+/).length;
   const readingTime = Math.max(1, Math.round(words / 200));
 
   const blog = await Blog.findByIdAndUpdate(
-    id, // default _id
-    { ...data, readingTime, publishedAt: new Date() },
+    id,
+    { 
+      title,
+      content,
+      tags,
+      category,
+      status, 
+      readingTime, 
+      updatedAt: new Date() 
+    },
     { new: true }
   );
 

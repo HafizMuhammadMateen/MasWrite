@@ -7,7 +7,7 @@ interface TitleInputProps {
   title: string
   setTitle: (val: string) => void
   loading: null | "draft" | "published" | "updating"
-  handleSave: (status: "draft" | "published") => Promise<void | string>
+  handleSave: (status: "draft" | "published" | "updating") => Promise<void | string>
   isEdit?: boolean
 }
 
@@ -50,7 +50,7 @@ export default function TitleInput({ title, setTitle, loading, handleSave, isEdi
         {isEdit ? (
           // Edit Mode: Show Update Button
           <button
-            onClick={() => handleSave("draft")}
+            onClick={() => handleSave("updating")}
             disabled={loading === "updating"}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >

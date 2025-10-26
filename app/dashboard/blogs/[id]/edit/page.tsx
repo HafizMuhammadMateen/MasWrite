@@ -109,8 +109,8 @@ export default function EditBlogPage() {
         title={title}
         setTitle={setTitle}
         loading={loading}
-        handleSave={() => handleUpdate()}
-        isEdit // optional prop to switch buttons to Update
+        handleSave={handleUpdate}
+        isEdit={true}
       />
 
       {/* Editor + Sidebar */}

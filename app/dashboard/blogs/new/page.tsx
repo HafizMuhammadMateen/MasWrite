@@ -27,7 +27,7 @@ import {
 export default function NewBlogPage() {
   const router = useRouter()
   const [title, setTitle] = useState("")
-  const [loading, setLoading] = useState<null | "draft" | "published">(null)
+  const [loading, setLoading] = useState<null | "draft" | "published" | "updating">(null)
   const [tags, setTags] = useState<string[]>([])
   const [category, setCategory] = useState("Web Development")
   const [showLinkModal, setShowLinkModal] = useState(false)
@@ -64,28 +64,32 @@ export default function NewBlogPage() {
     return () => window.removeEventListener("keydown", handleShortcut)
   }, [])
 
-  const handleSave = async (status: "draft" | "published") => {
-    if (!title.trim()) return toast.error("Please enter a title.")
-    if (!tags.length) return toast.error("Please add at least one tag.")
-    if (!category) return toast.error("Please select a category.")
+  const handleSave = async (status: "draft" | "published" | "updating") => {
+    if (status === "updating") {
+      // updating handled in edit page
+    } else {
+    if (!title.trim()) return toast.error("Please enter a title.");
+    if (!tags.length) return toast.error("Please add at least one tag.");
+    if (!category) return toast.error("Please select a category.");
+    
+    const content = editor?.getHTML() || "";
+    
+    setLoading(status);
+      try {
+        const res = await fetch("/api/blogs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, content, tags, category, status }),
+        })
 
-    const content = editor?.getHTML() || ""
-    setLoading(status)
-
-    try {
-      const res = await fetch("/api/blogs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, tags, category, status }),
-      })
-
-      if (!res.ok) throw new Error("Failed to save blog")
-      toast.success(status === "draft" ? "Draft saved!" : "Blog published!")
-      if (status === "published") router.push("/dashboard/blogs")
-    } catch {
-      toast.error("Something went wrong.")
-    } finally {
-      setLoading(null)
+        if (!res.ok) throw new Error("Failed to save blog");
+        toast.success(status === "draft" ? "Draft saved!" : "Blog published!");
+        if (status === "published") router.push("/dashboard/blogs");
+      } catch {
+        toast.error("Something went wrong.");
+      } finally {
+        setLoading(null);
+      }
     }
   }
 

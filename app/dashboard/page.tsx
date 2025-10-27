@@ -22,7 +22,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchDashboard() {
       try {
-        const res = await fetch("/api/dashboard", {
+        const res = await fetch("/api/auth/me", {
           method: "GET",
           credentials: "include", // ensures cookies are sent
         });

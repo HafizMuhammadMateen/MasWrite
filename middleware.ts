@@ -36,7 +36,7 @@ export function middleware(req: NextRequest) {
   }
 
   // API Routes
-  if (pathname.startsWith("/api/auth/") || pathname.startsWith("/api/dashboard/")) {
+  if (pathname.startsWith("/api/auth/") || pathname.startsWith("/api/auth/me")) {
     if (!token) {
       console.warn("❌ No token found");
       return NextResponse.json({ message: "❌ Unauthorized" }, { status: 401 });
@@ -59,7 +59,7 @@ export const config = {
     "/reset-password/:path*",
     "/api/auth/change-password/:path*",
     "/api/auth/reset-password/:path*",
-    "/api/dashboard/:path*",
+    "/api/auth/me/:path*",
   ],
   runtime: "nodejs",
 };

@@ -22,7 +22,7 @@ export default function ProfileModal({
       {/* User info */}
       <div className="mb-3">
         <p className="font-medium">{user?.userName || user?.name || "Unknown User"}</p>
-        <p className="text-sm text-gray-500">{user?.email || "No email"}</p>
+        <p className="text-sm text-gray-500 break-words">{user?.email || "No email"}</p>
       </div>
 
       <div className="border-t my-2"></div>

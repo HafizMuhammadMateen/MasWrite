@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Home, Edit, Settings, LogOut, Plus } from "lucide-react";
+import { Home, Edit, Settings, LogOut } from "lucide-react";
+import { TbBrandBlogger } from "react-icons/tb";
 import { VscLayoutSidebarLeftOff } from "react-icons/vsc";
 import { FaBars } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -36,7 +37,7 @@ export default function SideBar() {
   // Sidebar menu items
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
-    { href: "/dashboard/blogs", label: "Manage Blogs", icon: Edit },
+    { href: "/dashboard/blogs", label: "Manage Blogs", icon: TbBrandBlogger },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
@@ -52,7 +53,7 @@ export default function SideBar() {
 
         <button
           onClick={() => setCollapsed((prev) => !prev)}
-          className="p-2 rounded hover:bg-muted transition cursor-col-resize"
+          className="p-2 pl-4 rounded hover:bg-muted transition cursor-col-resize"
         >
           {/* Responsive icons */}
           <FaBars size={18} className="block md:hidden" />
@@ -68,7 +69,7 @@ export default function SideBar() {
             collapsed ? "px-0 justify-center" : "px-4"
           }`}
         >
-          <Plus className="w-5 h-5" />
+          <Edit className="w-5 h-5"/>
           {!collapsed && "New Post"}
         </Button>
       </Link>

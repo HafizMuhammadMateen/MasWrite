@@ -4,6 +4,16 @@ import { useEffect, useState } from "react";
 import BlogCard from "@/components/blogs/BlogCard";
 import { Blog } from "@/lib/types/blog";
 import ManageBlogHeader from "@/components/blogs/ManageBlogHeader";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+
+interface ManageBlogHeaderProps {
+  onFilterChange: (filters: {
+    q: string;
+    status: string;
+    category: string;
+    sort: string;
+  }) => void;
+}
 
 export default function ManageBlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -11,42 +21,65 @@ export default function ManageBlogsPage() {
     q: "",
     status: "",
     category: "",
+    sort: "",
   });
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch blogs whenever filters change
   useEffect(() => {
-    console.log("Filters changed:", filters) // <— Add this
-    const fetchBlogs = async () => {
+  setPage(1);
+}, [filters]);
+
+
+// Fetch blogs whenever filters or page change
+useEffect(() => {
+  const fetchBlogs = async () => {
+    try {
       setLoading(true);
 
       const params = new URLSearchParams({
         ...(filters.q ? { q: filters.q } : {}),
         ...(filters.status ? { status: filters.status } : {}),
         ...(filters.category ? { category: filters.category } : {}),
+        ...(filters.sort ? { sort: filters.sort } : {}),
+        page: page.toString(),
       });
-      console.log("Query params:", params.toString()); // <— Add this
 
+      const res = await fetch(`/api/blogs?${params.toString()}`, {
+        cache: "no-store",
+      });
 
-      const res = await fetch(`/api/blogs?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch blogs");
+
       const data = await res.json();
       setBlogs(data.blogs || []);
+      setTotalPages(data.totalPages);
+    } catch (err) {
+      console.error("Error fetching blogs:", err);
+      setBlogs([]);
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
-    fetchBlogs();
-  }, [filters]);
+  fetchBlogs();
+}, [filters, page]); // 👈 include `page` here
+
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
-
-    const res = await fetch(`/api/blogs/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      setBlogs((prev) => prev.filter((blog) => blog._id !== id));
+    try {
+      const res = await fetch(`/api/blogs/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setBlogs((prev) => prev.filter((blog) => blog._id !== id));
+      }
+    } catch (err) {
+      console.error("Error deleting blog:", err);
+    } finally {
+      setDeletingId(null);
     }
-
-    setDeletingId(null);
   };
 
   return (
@@ -79,6 +112,31 @@ export default function ManageBlogsPage() {
               id={blog._id}
             />
           ))}
+
+          <div className="flex justify-center gap-4 mt-4">
+            <button
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+              className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            >
+              <FiChevronLeft className="w-4 h-4" /> Prev
+            </button>
+
+            <span className="text-gray-700 font-medium">
+              {page} / {totalPages}
+            </span>
+
+            <button
+              onClick={() =>
+                setPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={page === totalPages}
+              className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            >
+              Next <FiChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
         </div>
       ) : (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">

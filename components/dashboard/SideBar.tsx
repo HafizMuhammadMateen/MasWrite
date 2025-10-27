@@ -43,7 +43,7 @@ export default function SideBar() {
 
   return (
     <aside
-      className={`flex flex-col h-full p-4 bg-background border-t shadow-sm text-base transition-all duration-300 ease-in-out
+      className={`flex flex-col h-full p-4 bg-background border-t shadow-sm text-base text-lg transition-all duration-300 ease-in-out
         ${collapsed ? "w-20" : "w-64"}
       `}
     >
@@ -62,14 +62,14 @@ export default function SideBar() {
       </div>
 
       {/* New Post */}
-      <Link href="/dashboard/blogs/new" className="mb-4">
+      <Link href="/dashboard/blogs/new" className="mb-4 ">
         <Button
           variant="default"
-          className={`flex items-center justify-center gap-2 w-full rounded-full py-5 text-base transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-3   w-full rounded-full py-5 text-base text-lg font-bold transition-all cursor-pointer ${
             collapsed ? "px-0 justify-center" : "px-4"
           }`}
         >
-          <Edit className="w-5 h-5"/>
+          <Edit className="w-5 h-5" strokeWidth={2}/>
           {!collapsed && "New Post"}
         </Button>
       </Link>
@@ -77,7 +77,7 @@ export default function SideBar() {
       <Separator className="mb-3" />
 
       {/* Menu Buttons */}
-      <nav className="flex flex-col gap-1 flex-1">
+      <nav className="flex flex-col gap-2 flex-1">
         {menuItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
           return (

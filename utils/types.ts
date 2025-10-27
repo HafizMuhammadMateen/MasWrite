@@ -1,16 +1,16 @@
 export type FormErrors = {
-  email?: string | null;
-  password?: string | null;
-  currentPassword?: string | null;
-  newPassword?: string | null;
-  confirmPassword?: string | null;
-  userName?: string| null;
-  formError?: string | null;
+  email?: string;
+  password?: string;
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+  userName?: string;
+  formError?: string;
 };
 
 export type ChangePasswordModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  isResetFlow?: boolean;
+  isResetPasswordFlow?: boolean;
   token?: string | null;
 }

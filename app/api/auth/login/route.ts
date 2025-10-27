@@ -1,41 +1,28 @@
-import { comparePassword, getUserByEmail, signToken, makeNewSession } from "@/utils/authHelpers";
+import { comparePassword, getUserByEmail, signToken, createSession } from "@/utils/authHelpers";
 import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: Request) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
     const { email, password } = await req.json();
-    
-    if (!email || !password) {
-      console.log("⚠️ Missing email or password");
-      // return NextResponse.json({ error: "⚠️ Email & password required" }, { status: 400 });
-      return error("⚠️ Email & password required", 422);
-    }
+    if (!email || !password) return error("Email & password required", 400);
 
-    // Verify user
     const user = await getUserByEmail(email);
-    if (!user) { 
-      console.log("❌ No user found for email:", email)
-      return error("❌ Invalid credentials", 401);
-    }
+    if (!user) return error("Invalid credentials", 401);
+    if (!user.password) return error("This account uses OAuth. Sign in with Google or GitHub.", 403);
 
-    // Verify password
-    const valid = await comparePassword(password, user.password);
-    if (!valid){
-      console.log("❌ Incorrect password for:", email);  
-      return error("❌ Invalid credentials", 401);
-    }
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) return error("Invalid credentials", 401);
 
-    // Sign JWT
     const token = signToken({ userId: user._id.toString(), email: user.email });
-    console.log("🆔 JWT generated for user:", user._id.toString());
+    const res = success("Login successful", 200);
+    createSession(res, token);
 
-    const response = success( "✅ Login successful", 200);
-    makeNewSession(response, token);
-
-    console.log("✅ User logged in:", user.email);
-    return response;
+    isDev && console.log("✅ [LoginAPI] User logged in:", user.email);
+    return res;
   } catch (err: any) {
-    console.error(err);
-    return error(err.message || "❌ Something went wrong", 500);
+    isDev && console.error("❌ [LoginAPI] Error:", err.message || err);
+    return error(err.message || "Server error", 500);
   }
 }

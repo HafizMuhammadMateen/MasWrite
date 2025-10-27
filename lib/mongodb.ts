@@ -11,6 +11,7 @@ let clientPromise: Promise<MongoClient> | undefined;
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
+export {};
 
 // let clientPromise;
 if (process.env.NODE_ENV === "development") {

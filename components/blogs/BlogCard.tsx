@@ -36,7 +36,10 @@ export default function BlogCard({
 
   return (
     <Card className="bg-gray-100 pb-4 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1]">
-      <Link href={`/dashboard/blogs/${id}`}>
+      <Link 
+        href={`/dashboard/blogs/${slug}`}
+        target="_blank"
+      >
         <CardHeader>
           <div className="flex justify-between">
             <div>

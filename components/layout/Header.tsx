@@ -19,10 +19,12 @@ export default function Header() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        console.log("Fetching user data...");
         const res = await fetch("/api/auth/me", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
-          setUser(data.user);
+          console.log("Fetched user data:", data.data?.user);
+          setUser(data.data?.user);
         } else {
           setUser(null);
         }

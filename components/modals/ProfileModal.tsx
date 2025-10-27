@@ -2,6 +2,7 @@
 
 interface ProfileModalProps {
   user?: {
+    name?: string;
     userName?: string;
     email?: string;
   };
@@ -20,7 +21,7 @@ export default function ProfileModal({
     <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg p-4 z-50">
       {/* User info */}
       <div className="mb-3">
-        <p className="font-medium">{user?.userName || "Unknown User"}</p>
+        <p className="font-medium">{user?.userName || user?.name || "Unknown User"}</p>
         <p className="text-sm text-gray-500">{user?.email || "No email"}</p>
       </div>
 

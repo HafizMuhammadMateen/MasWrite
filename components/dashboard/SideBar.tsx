@@ -104,7 +104,7 @@ export default function SideBar() {
       <Button
         variant="ghost"
         onClick={handleLogout}
-        className={`flex items-center gap-2 text-md text-destructive hover:text-destructive hover:bg-muted mt-auto cursor-pointer transition-all
+        className={`flex items-center gap-2 text-md text-destructive hover:text-destructive hover:bg-red-50 mt-auto cursor-pointer transition-all
           ${collapsed ? "justify-center" : ""}
         `}
       >

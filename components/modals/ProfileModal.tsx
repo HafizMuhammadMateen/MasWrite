@@ -54,7 +54,7 @@ export default function ProfileModal({
       {/* Logout */}
       <button
         onClick={onLogout}
-        className="w-full text-left text-red-600 hover:bg-gray-100 px-2 py-1 rounded cursor-pointer"
+        className="w-full text-left text-red-600 hover:bg-red-50 px-2 py-1 rounded cursor-pointer"
       >
         Logout
       </button>

@@ -53,7 +53,7 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+                className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
               >
                 <FiChevronLeft className="w-4 h-4" /> Prev
               </button>
@@ -67,7 +67,7 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+                className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
               >
                 Next <FiChevronRight className="w-4 h-4" />
               </button>

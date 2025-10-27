@@ -24,6 +24,7 @@ import {
   UnderlineIcon,
 } from "lucide-react"
 import { Blog } from "@/lib/types/blog"
+import StatusSelector from "@/components/blogs/StatusSelector"
 
 export default function EditBlogPage() {
   const router = useRouter()
@@ -34,6 +35,7 @@ export default function EditBlogPage() {
   const [category, setCategory] = useState("Web Development")
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
+  const [status, setStatus] = useState("draft")
   const editor = useTiptapEditor()
 
   // Fetch blog data and populate fields
@@ -95,7 +97,7 @@ export default function EditBlogPage() {
       const res = await fetch(`/api/blogs/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, tags, category }),
+        body: JSON.stringify({ title, content, tags, category, status }),
       })
       if (!res.ok) throw new Error("Failed to update blog");
       toast.success("Blog updated successfully!");
@@ -150,6 +152,7 @@ export default function EditBlogPage() {
         <div className="w-[30%] flex flex-col gap-6 border-l pl-6">
           <CategorySelector value={category} onChange={setCategory} />
           <TagsInput tags={tags} setTags={setTags} />
+          <StatusSelector value={status} onChange={setStatus} />
         </div>
       </div>
     </div>

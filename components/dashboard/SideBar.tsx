@@ -81,10 +81,13 @@ export default function SideBar() {
       <nav className="flex flex-col gap-2 flex-1">
         {menuItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
+          const isPublicBlogs = href === "/blogs";
+
           return (
             <Link
               key={href}
               href={href}
+              target= {isPublicBlogs ? "_blank" : "_self"}
               className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors
                 ${
                   isActive

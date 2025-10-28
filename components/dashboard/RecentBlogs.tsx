@@ -1,22 +1,15 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
 import BlogCard from "@/components/blogs/BlogCard";
 import { Blog } from "@/lib/types/blog";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 interface RecentBlogsProps {
   blogs: Blog[];
+  page: number;
+  totalPages: number;
 }
 
-export default function RecentBlogs({ blogs }: RecentBlogsProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const blogsPerPage = 6; // show 6 blogs per page (2 rows × 3 per row)
-
-  const totalPages = Math.ceil(blogs.length / blogsPerPage);
-  const startIndex = (currentPage - 1) * blogsPerPage;
-  const currentBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
-
+export default function RecentBlogs({ blogs, page, totalPages }: RecentBlogsProps) {
   return (
     <section className="min-h-screen md:col-span-2">
       {blogs.length === 0 ? (
@@ -27,7 +20,7 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
         <>
           {/* Blog grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {currentBlogs.map((blog) => (
+            {blogs.map((blog) => (
               <BlogCard
                 key={blog._id}
                 title={blog.title}
@@ -47,30 +40,44 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Server-side Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-6">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
-              >
-                <FiChevronLeft className="w-4 h-4" /> Prev
-              </button>
+              {page > 1 ? (
+                <Link
+                  href={`/dashboard?page=${page - 1}`}
+                  className="inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
+                >
+                  <FiChevronLeft className="w-4 h-4" /> Prev
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="inline-flex items-center px-3 py-1 bg-gray-200 rounded opacity-50 cursor-not-allowed"
+                >
+                  <FiChevronLeft className="w-4 h-4" /> Prev
+                </button>
+              )}
 
               <span className="text-gray-700 font-medium">
-                {currentPage} / {totalPages}
+                {page} / {totalPages}
               </span>
 
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-                className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
-              >
-                Next <FiChevronRight className="w-4 h-4" />
-              </button>
+              {page < totalPages ? (
+                <Link
+                  href={`/dashboard?page=${page + 1}`}
+                  className="inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
+                >
+                  Next <FiChevronRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="inline-flex items-center px-3 py-1 bg-gray-200 rounded opacity-50 cursor-not-allowed"
+                >
+                  Next <FiChevronRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           )}
         </>

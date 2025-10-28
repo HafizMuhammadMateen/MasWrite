@@ -1,89 +1,52 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Blog } from "@/lib/types/blog";
 import RecentBlogs from "@/components/dashboard/RecentBlogs";
 
-export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const router = useRouter();
-  
-  // Redirect if unauthorized
-  useEffect(() => {
-    if (data?.error) {
-      setTimeout(() => router.push("/login"), 800);
-    }
-  }, [data, router]);
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = Number((await searchParams).page) || 1;
+  const blogsPerPage = 6;
 
-  // Fetch dashboard data
-  useEffect(() => {
-    async function fetchDashboard() {
-      try {
-        const res = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include", // ensures cookies are sent
-        });
+  const token = (await cookies()).get("token")?.value;
+  if (!token) redirect("/login");
 
-        if (!res.ok) {
-          const errData = await res.json();
-          toast.error(errData.error || "Unauthorized access");
-          setData({ error: errData.error || "Unauthorized" });
-          return;
-        }
+  try {
+    const [userRes, blogsRes] = await Promise.all([
+      fetch(`${process.env.NEXTAUTH_URL}/api/auth/me`, {
+        headers: { Cookie: `token=${token}` },
+        cache: "no-store",
+      }),
+      fetch(`${process.env.NEXTAUTH_URL}/api/manage-blogs?page=${page}&limit=${blogsPerPage}`, {
+        next: { revalidate: 60 },
+      }),
+    ]);
 
-        const result = await res.json();
-        setData(result.data);
-        toast.success("Dashboard loaded successfully");
-      } catch {
-        toast.error("Failed to load dashboard");
-        setData({ error: "Failed to load dashboard" });
-      }
-    }
-    fetchDashboard();
-  }, []);
+    if (!userRes.ok) redirect("/login");
 
-  // Fetch blogs
-  useEffect(() => {
-    fetch("/api/blogs")
-    .then((res) => res.json())
-    .then((data) => setBlogs(data.blogs || []));
-  }, []);
+    const userData = await userRes.json();
+    const user = userData.data?.user;
 
-  // Loading state
-  if (!data) {
+    const blogsData = await blogsRes.json();
+    const blogs: Blog[] = blogsData.blogs || [];
+    const totalPages = blogsData.totalPages || 1;
+
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
-        <span className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></span>
-        <p className="text-gray-600 text-lg font-medium">Loading Dashboard...</p>
-      </div>
-    );
-  }
+      <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+        <main className="flex flex-1">
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-gray-800 my-4 text-center">
+              Welcome, {user?.userName || "User"} 👋
+            </h2>
 
-  // Redirecting state
-  if (data?.error) {
-    return (
-      <div className="flex flex-col justify-center items-center min-h-screen text-gray-600">
-        <p>Redirecting to login...</p>
-      </div>
-    );
-  }
-
-  // Main dashboard view
-  return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      <main className="flex flex-1 ">
-        {/* Blogs */}
-        <div className="flex-1">
-          <h2 className="text-xl font-bold text-gray-800 my-4 text-center">Recent Blog Posts</h2>
             <section className="shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)] max-h-[calc(100vh-150px)] p-6">
-              <RecentBlogs blogs={blogs} />
+              <RecentBlogs blogs={blogs} page={page} totalPages={totalPages}/>
             </section>
-        </div>
-      </main>
-    </div>
-  );
-
+          </div>
+        </main>
+      </div>
+    );
+  } catch (err) {
+    console.error("Dashboard Error:", err);
+    redirect("/login"); // fallback if something fails server-side
+  }
 }

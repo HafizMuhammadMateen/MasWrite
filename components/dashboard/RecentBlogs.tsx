@@ -45,7 +45,7 @@ export default function RecentBlogs({ blogs, page, totalPages }: RecentBlogsProp
             <div className="flex justify-center items-center gap-2 mt-6">
               {page > 1 ? (
                 <Link
-                  href={`/dashboard?page=${page - 1}`}
+                  href={`/dashboard/${page - 1}`}
                   className="inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
                 >
                   <FiChevronLeft className="w-4 h-4" /> Prev
@@ -65,7 +65,7 @@ export default function RecentBlogs({ blogs, page, totalPages }: RecentBlogsProp
 
               {page < totalPages ? (
                 <Link
-                  href={`/dashboard?page=${page + 1}`}
+                  href={`/dashboard/${page + 1}`}
                   className="inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition"
                 >
                   Next <FiChevronRight className="w-4 h-4" />

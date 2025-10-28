@@ -37,7 +37,7 @@ export default function SideBar() {
   // Sidebar menu items
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/blogs", label: "Manage Blogs", icon: NotebookPen },
+    { href: "/dashboard/manage-blogs", label: "Manage Blogs", icon: NotebookPen },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
     { href: "/blogs", label: "Public Blogs", icon: TbBrandBlogger },
   ];
@@ -63,7 +63,7 @@ export default function SideBar() {
       </div>
 
       {/* New Post */}
-      <Link href="/dashboard/blogs/new" className="mb-4 ">
+      <Link href="/dashboard/manage-blogs/new" className="mb-4 ">
         <Button
           variant="default"
           className={`flex items-center justify-center gap-3   w-full rounded-full py-5 text-base text-lg font-bold transition-all cursor-pointer ${

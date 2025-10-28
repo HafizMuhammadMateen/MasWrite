@@ -37,7 +37,7 @@ export default function BlogCard({
   return (
     <Card className="bg-gray-100 pb-4 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1]">
       <Link 
-        href={`/dashboard/blogs/${slug}`}
+        href={`/dashboard/manage-blogs/${slug}`}
         target="_blank"
       >
         <CardHeader>
@@ -98,7 +98,7 @@ export default function BlogCard({
                     className="cursor-pointer"
                     onClick={(e) => {
                       e.preventDefault();
-                      router.push(`/dashboard/blogs/${id}/edit`);
+                      router.push(`/dashboard/manage-blogs/${id}/edit`);
                     }}
                   >
                     <Edit className="w-4 h-4 mr-1" /> Update

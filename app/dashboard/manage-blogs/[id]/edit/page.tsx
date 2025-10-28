@@ -44,7 +44,7 @@ export default function EditBlogPage() {
     
     const fetchBlog = async () => {
       try {
-        const res = await fetch(`/api/blogs/${params.id}`)
+        const res = await fetch(`/api/manage-blogs/${params.id}`)
         const data: Blog = await res.json()
         setTitle(data.title)
         setTags(data.tags || [])
@@ -94,14 +94,14 @@ export default function EditBlogPage() {
     setLoading("updating")
 
     try {
-      const res = await fetch(`/api/blogs/${params.id}`, {
+      const res = await fetch(`/api/manage-blogs/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content, tags, category, status }),
       })
       if (!res.ok) throw new Error("Failed to update blog");
       toast.success("Blog updated successfully!");
-      router.push("/dashboard/blogs");
+      router.push("/dashboard/manage-blogs");
     } catch {
       toast.error("Something went wrong.");
     } finally {

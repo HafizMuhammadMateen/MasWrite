@@ -110,7 +110,7 @@ export default function ManageBlogHeader({
         </DropdownMenu>
 
         {/* New Post Button */}
-        <Link href="/dashboard/blogs/new">
+        <Link href="/dashboard/manage-blogs/new">
           <Button variant="newPostButton" className="text-md">
             <Edit2 className="w-5 h-5" /> New Post
           </Button>

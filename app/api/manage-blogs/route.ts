@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q") || "";
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = 10;
+    const limit = 6;
     const author = searchParams.get("author");
     const tags = searchParams.get("tags")?.split(",") || [];
     const sort = searchParams.get("sort") || "publishedAt";

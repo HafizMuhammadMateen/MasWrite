@@ -80,7 +80,7 @@ export default function NewBlogPage() {
     
     setLoading(status);
       try {
-        const res = await fetch("/api/blogs", {
+        const res = await fetch("/api/manage-blogs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title, content, tags, category, status }),
@@ -88,7 +88,7 @@ export default function NewBlogPage() {
 
         if (!res.ok) throw new Error("Failed to save blog");
         toast.success(status === "draft" ? "Draft saved!" : "Blog published!");
-        if (status === "published") router.push("/dashboard/blogs");
+        if (status === "published") router.push("/dashboard/manage-blogs");
       } catch {
         toast.error("Something went wrong.");
       } finally {

@@ -47,7 +47,7 @@ useEffect(() => {
         page: page.toString(),
       });
 
-      const res = await fetch(`/api/blogs?${params.toString()}`, {
+      const res = await fetch(`/api/manage-blogs?${params.toString()}`, {
         cache: "no-store",
       });
 
@@ -71,7 +71,7 @@ useEffect(() => {
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/blogs/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/manage-blogs/${id}`, { method: "DELETE" });
       if (res.ok) {
         setBlogs((prev) => prev.filter((blog) => blog._id !== id));
       }

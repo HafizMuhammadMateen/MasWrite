@@ -8,7 +8,7 @@ export default function BlogPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
 
   useEffect(() => {
-    fetch("/api/blogs")
+    fetch("/api/manage-blogs")
       .then(res => res.json())
       .then((data) => setBlogs(data.blogs || []));
   }, []);

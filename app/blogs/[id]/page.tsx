@@ -9,12 +9,12 @@ export default function SingleBlog() {
 
   useEffect(() => {
     // Fetch blog data
-    fetch(`/api/blogs/${id}`)
+    fetch(`/api/manage-blogs/${id}`)
       .then(res => res.json())
       .then(setBlog);
 
     // Increment views
-    fetch(`/api/blogs/${id}/view`, { method: "POST" });
+    fetch(`/api/manage-blogs/${id}/view`, { method: "POST" });
   }, [id]);
 
   if (!blog) return <p>Loading...</p>;

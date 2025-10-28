@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Home, Edit, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Edit, Settings, LogOut, NotebookPen } from "lucide-react";
 import { TbBrandBlogger } from "react-icons/tb";
 import { VscLayoutSidebarLeftOff } from "react-icons/vsc";
 import { FaBars } from "react-icons/fa";
@@ -36,9 +36,10 @@ export default function SideBar() {
 
   // Sidebar menu items
   const menuItems = [
-    { href: "/dashboard", label: "Dashboard", icon: Home },
-    { href: "/dashboard/blogs", label: "Manage Blogs", icon: TbBrandBlogger },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/blogs", label: "Manage Blogs", icon: NotebookPen },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
+    { href: "/blogs", label: "Public Blogs", icon: TbBrandBlogger },
   ];
 
   return (

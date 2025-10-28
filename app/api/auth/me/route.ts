@@ -6,8 +6,8 @@ export async function GET(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
 
   if (!token) {
-    console.log("❌ No token found in cookies");
-    return error("❌ Unauthorized", 401, "No token found in cookies");
+    console.log("[me API route] No token found in cookies");
+    return error("Unauthorized", 401, "No token found in cookies");
   }
 
   try {
@@ -15,14 +15,14 @@ export async function GET(req: NextRequest) {
     const user = await getUserById(userId);
 
     if (!user) {
-      console.log("❌ User not found in DB");
-      return error("❌ User not found", 404);
+      console.log("[me API route] User not found in DB");
+      return error("User not found", 404);
     }
     
-    console.log("✅ Dashboard access granted for:", user.email);
-    return success("✅ Access granted", 200, { user });
+    console.log("[me API route] Dashboard access granted for:", user.email);
+    return success("Access granted", 200, { user });
   } catch (err: any) {
-    console.error("❌ JWT verification failed:", err.message);
-    return error("❌ Invalid or expired token", 401, err.message);
+    console.error("[me API route] JWT verification failed:", err.message);
+    return error("Invalid or expired token", 401, err.message);
   }
 }

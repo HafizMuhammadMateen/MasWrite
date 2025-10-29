@@ -81,7 +81,7 @@ export default function Header() {
       {/* Left: Title */}
       <div className="flex items-center gap-3">
         <Link href="/" className="font-semibold text-xl px-14">
-          Auth-Module
+          MasWrite
         </Link>
       </div>
 

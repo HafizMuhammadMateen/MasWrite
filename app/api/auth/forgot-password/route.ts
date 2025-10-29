@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     // Send reset email
     await resend.emails.send({
-      // from: '"Auth Module" <no-reply@auth-module.com>',
+      // from: '"Auth Module" <no-reply@maswrite.com>',
       from: "Acme <onboarding@resend.dev>",
       to: email,
       subject: "Password Reset Request",

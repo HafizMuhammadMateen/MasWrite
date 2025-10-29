@@ -6,7 +6,7 @@ import Sidebar from "@/components/dashboard/SideBar";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-screen bg-white flex flex-col overflow-hidden">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
       <Header />
 
       <main className="flex flex-1 overflow-hidden transition-all duration-300 ease-in-out">

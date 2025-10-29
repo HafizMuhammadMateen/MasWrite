@@ -33,8 +33,8 @@ export default async function DashboardPage({ params }: { params: { page: string
   } = await res.json();
 
   return (
-    <div className="h-screen bg-gray-50 p-6 flex flex-col flex-grow overflow-hidden">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Dashboard Overview</h2>
+    <div className="h-screen p-6 flex flex-col flex-grow">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Dashboard</h2>
 
       <SummaryCards
         totalBlogs={totalBlogs || 0}

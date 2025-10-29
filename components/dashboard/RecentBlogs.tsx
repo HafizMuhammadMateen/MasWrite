@@ -11,7 +11,8 @@ interface RecentBlogsProps {
 
 export default function RecentBlogs({ blogs, page, totalPages }: RecentBlogsProps) {
   return (
-    <section className="min-h-screen md:col-span-2">
+    <section className="h-screen md:col-span-2 bg-white p-6 rounded-lg shadow-md overflow-y-auto">
+      <h2 className="text-2xl text-center font-semibold mb-4">Recent Blogs</h2>
       {blogs.length === 0 ? (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">
           No blog posts yet.

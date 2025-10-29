@@ -44,7 +44,7 @@ export default function SideBar() {
 
   return (
     <aside
-      className={`flex flex-col h-full p-4 bg-background border-t shadow-sm text-base text-lg transition-all duration-300 ease-in-out
+      className={`flex flex-col h-full p-4 bg-sidebar border-t border-sidebar-border shadow-sm text-base text-lg transition-all duration-300 ease-in-out
         ${collapsed ? "w-20" : "w-64"}
       `}
     >

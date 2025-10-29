@@ -80,7 +80,9 @@ export default function SideBar() {
       {/* Menu Buttons */}
       <nav className="flex flex-col gap-2 flex-1">
         {menuItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
+          // Match only /dashboard or /dashboard/<number>
+          const isDashboardMain = /^\/dashboard(\/\d+)?$/.test(pathname);
+          const isActive = href === "/dashboard" ? isDashboardMain : pathname === href;
           const isPublicBlogs = href === "/blogs";
 
           return (

@@ -1,5 +1,6 @@
 import { Blog } from "@/lib/types/blog";
 import RecentBlogs from "@/components/dashboard/RecentBlogs";
+import { cookies } from "next/headers";
 
 export const revalidate = 60; // for SSG incremental updates
 
@@ -13,7 +14,10 @@ export default async function DashboardPage({ params }: Props) {
 
   const res = await fetch(
     `${process.env.NEXTAUTH_URL}/api/manage-blogs?page=${page}&limit=${blogsPerPage}`,
-    { next: { revalidate: 60 } }
+    { 
+      next: { revalidate: 60 } ,
+      headers: { Cookie: cookies().toString(), },
+    }
   );
 
   if (!res.ok) {

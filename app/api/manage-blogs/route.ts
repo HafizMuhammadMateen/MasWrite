@@ -3,6 +3,7 @@ import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
 import { slugify } from "@/utils/blogsHelpers";
 import { verifyToken } from "@/utils/authHelpers";
+import { error } from "@/utils/apiResponse";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -10,6 +11,13 @@ const isDev = process.env.NODE_ENV === "development";
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
+
+    // Verify token to get user
+    const token = req.cookies.get("token")?.value;
+    if (!token) return error("Unauthorized", 401);
+
+    const decodedToken = verifyToken(token);
+    if (!decodedToken?.userId) return error("Invalid token", 401);
 
     // Extract query params
     const { searchParams } = new URL(req.url);
@@ -23,7 +31,7 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get("category") || "";
 
     // Build filter
-    const filter: any = {};
+    const filter: any = { author: decodedToken.userId }; // ensure only user's blogs
     if (q) filter.title = { $regex: q, $options: "i" };
     if (author) filter.author = author;
     if (tags.length > 0) filter.tags = { $in: tags };

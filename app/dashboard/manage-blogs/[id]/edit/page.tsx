@@ -9,7 +9,7 @@ import ImageModal from "@/components/modals/ImageModal"
 import CategorySelector from "@/components/blogs/CategorySelector"
 import TagsInput from "@/components/blogs/TagsInput"
 import ToolbarButton from "@/components/blogs/ToolbarButton"
-import TitleInput from "@/components/blogs/NewBlogHeader"
+import EditorHeader from "@/components/blogs/EditorHeader"
 import { useTiptapEditor } from "@/hooks/blogs/useTiptapEditor"
 import {
   List,
@@ -112,7 +112,7 @@ export default function EditBlogPage() {
   return (
     <div className="h-full p-6 flex flex-col justify-center items-center overflow-hidden">
       {/* Title + Buttons */}
-      <TitleInput
+      <EditorHeader
         title={title}
         setTitle={setTitle}
         loading={loading}

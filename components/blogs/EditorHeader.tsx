@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { FaRegEye, FaSave, FaUpload } from "react-icons/fa"
 
-interface TitleInputProps {
+interface EditorHeaderProps {
   title: string
   setTitle: (val: string) => void
   loading: null | "draft" | "published" | "updating"
@@ -11,33 +11,49 @@ interface TitleInputProps {
   isEdit?: boolean
 }
 
-export default function TitleInput({ title, setTitle, loading, handleSave, isEdit = false }: TitleInputProps) {
+export default function EditorHeader({ 
+  title, 
+  setTitle, 
+  loading, 
+  handleSave, 
+  isEdit = false 
+}: EditorHeaderProps) {
   const [focused, setFocused] = useState(false)
+  const TITLE_MAX_LENGHT = 100
 
   return (
-    <div className="flex min-w-full justify-center items-end mb-6">
+    <div className="flex min-w-full justify-center items-start mb-6">
       {/* Title input */}
       <div className="relative w-full mr-6">
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX_LENGHT))}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className="w-full bg-transparent border-b-2 border-gray-300 focus:outline-none text-3xl font-semibold pb-2 transition-colors"
+          className="w-full bg-transparent border-b-2 border-gray-300 focus:border-blue-600 focus:outline-none text-3xl font-semibold pb-2 transition-colors"
         />
+
+        {/* Floating label */}
         <label
-          className={`absolute left-0 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none transition-all duration-300 ${
-            focused || title ? "text-sm -top-2 text-gray-700" : "text-2xl top-1/2"
-          }`}
+          className={`absolute left-0 text-gray-400 pointer-events-none transition-all duration-300
+            ${
+              focused || title
+                ? "text-sm -top-5 text-gray-700"
+                : "text-2xl top-[6px]" // anchor near input baseline, not centered
+            }`}
         >
           Title
         </label>
-        <span
-          className={`absolute bottom-0 left-1/2 h-[2px] bg-gray-600 transition-all transform -translate-x-1/2 ${
-            focused ? "w-full" : "w-0"
+
+        {/* Character counter */}
+        <div
+          className={`text-sm mt-1 text-right ${
+            title.length >= TITLE_MAX_LENGHT ? "text-red-500" : "text-gray-500"
           }`}
-        />
+        >
+          {title.length}/{TITLE_MAX_LENGHT} characters
+        </div>
       </div>
 
       {/* Action buttons */}

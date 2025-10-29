@@ -12,55 +12,64 @@ export async function GET(req: NextRequest) {
   try {
     await connectDB();
 
-    // Verify token to get user
+    // 1. Verify user token
     const token = req.cookies.get("token")?.value;
     if (!token) return error("Unauthorized", 401);
 
     const decodedToken = verifyToken(token);
     if (!decodedToken?.userId) return error("Invalid token", 401);
 
-    // Extract query params
+    // 2. Extract and parse query parameters
     const { searchParams } = new URL(req.url);
-    const q = searchParams.get("q") || "";
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = 6;
-    const author = searchParams.get("author");
-    const tags = searchParams.get("tags")?.split(",") || [];
-    const sort = searchParams.get("sort") || "publishedAt";
-    const status = searchParams.get("status") || "";
-    const category = searchParams.get("category") || "";
+    const searchQuery = searchParams.get("q") || "";
+    const currentPage = parseInt(searchParams.get("page") || "1", 10);
+    const blogsPerPage = parseInt(searchParams.get("limit") || "6", 10);
+    const authorParam = searchParams.get("author");
+    const tagsParam = searchParams.get("tags")?.split(",") || [];
+    const sortBy = searchParams.get("sort") || "publishedAt";
+    const statusParam = searchParams.get("status") || "";
+    const categoryParam = searchParams.get("category") || "";
 
-    // Build filter
-    const filter: any = { author: decodedToken.userId }; // ensure only user's blogs
-    if (q) filter.title = { $regex: q, $options: "i" };
-    if (author) filter.author = author;
-    if (tags.length > 0) filter.tags = { $in: tags };
-    if (status) filter.status = status;
-    if (category) filter.category = category;
+    // 3. Build MongoDB filter — only user's blogs
+    const filter: Record<string, any> = { author: decodedToken.userId };
 
-    // Pagination setup
-    const total = await Blog.countDocuments(filter);
-    const totalPages = Math.ceil(total / limit);
+    if (searchQuery) filter.title = { $regex: searchQuery, $options: "i" };
+    if (authorParam) filter.author = authorParam;
+    if (tagsParam.length > 0) filter.tags = { $in: tagsParam };
+    if (statusParam) filter.status = statusParam;
+    if (categoryParam) filter.category = categoryParam;
 
-    // Query blogs
+    // 4. Pagination calculations
+    const totalBlogs = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(totalBlogs / blogsPerPage);
+
+    // 5. Fetch paginated blogs
     const blogs = await Blog.find(filter)
       .populate("author", "userName email")
-      .sort({ [sort]: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+      .sort({ [sortBy]: -1 })
+      .skip((currentPage - 1) * blogsPerPage)
+      .limit(blogsPerPage);
 
+    // 6. Counts for summary cards
+    const [publishedCount, draftCount] = await Promise.all([
+      Blog.countDocuments({ author: decodedToken.userId, status: "published" }),
+      Blog.countDocuments({ author: decodedToken.userId, status: "draft" }),
+    ]);
+
+    // 7. Send structured response
     return NextResponse.json({
       blogs,
-      page,
+      currentPage,
       totalPages,
-      total,
+      totalBlogs,
+      publishedCount,
+      draftCount,
     });
   } catch (err) {
-    isDev && console.error("[GET API] Fetch all blogs error:", err);
+    isDev && console.error("[GET /api/manage-blogs] Error:", err);
     return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
   }
 }
-
 
 // Create new blog(s)
 export async function POST(req: NextRequest) {

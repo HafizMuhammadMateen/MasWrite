@@ -1,22 +1,18 @@
-import { Blog } from "@/lib/types/blog";
-import RecentBlogs from "@/components/dashboard/RecentBlogs";
 import { cookies } from "next/headers";
+import SummaryCards from "@/components/dashboard/SummaryCards";
+import RecentBlogs from "@/components/dashboard/RecentBlogs";
+import { FaFileAlt, FaCheckCircle, FaRegEdit } from "react-icons/fa";
 
-export const revalidate = 60; // for SSG incremental updates
+export const revalidate = 60; // ISR (but effectively SSR due to cookies)
 
-interface Props {
-  params: { page: string };
-}
-
-export default async function DashboardPage({ params }: Props) {
+export default async function DashboardPage({ params }: { params: { page: string } }) {
   const page = Number((await params).page) || 1;
   const blogsPerPage = 6;
 
   const res = await fetch(
     `${process.env.NEXTAUTH_URL}/api/manage-blogs?page=${page}&limit=${blogsPerPage}`,
     { 
-      next: { revalidate: 60 } ,
-      headers: { Cookie: cookies().toString(), },
+      headers: { Cookie: (await cookies()).toString() }, // Dynamic SSR
     }
   );
 
@@ -28,23 +24,32 @@ export default async function DashboardPage({ params }: Props) {
     );
   }
 
-  const blogsData = await res.json();
-  const blogs: Blog[] = blogsData.blogs || [];
-  const totalPages = blogsData.totalPages || 1;
+  const { 
+    blogs = [], 
+    totalPages, 
+    totalBlogs, 
+    publishedCount, 
+    draftCount 
+  } = await res.json();
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      <main className="flex flex-1">
-        <div className="flex-1">
-          <h2 className="text-xl font-bold text-gray-800 my-4 text-center">
-            Dashboard - Page {page}
-          </h2>
+    <div className="h-screen bg-gray-50 p-6 flex flex-col flex-grow overflow-hidden">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Dashboard Overview</h2>
 
-          <section className="shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)] max-h-[calc(100vh-150px)] p-6">
-            <RecentBlogs blogs={blogs} page={page} totalPages={totalPages} />
-          </section>
-        </div>
-      </main>
+      <SummaryCards
+        totalBlogs={totalBlogs || 0}
+        published={publishedCount || 0}
+        drafts={draftCount || 0}
+        icons={[
+          <FaFileAlt key="total" className="w-6 h-6" />,
+          <FaCheckCircle key="published" className="w-6 h-6 text-green-500" />,
+          <FaRegEdit key="draft" className="w-6 h-6 text-yellow-500" />,
+        ]}
+      />
+
+      <section className="mt-8">
+        <RecentBlogs blogs={blogs} page={page} totalPages={totalPages} />
+      </section>
     </div>
   );
 }

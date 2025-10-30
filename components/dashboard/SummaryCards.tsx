@@ -1,4 +1,4 @@
-"use client";
+"use client"; // just to use react-countup
 
 import { ReactNode } from "react";
 import CountUp from "react-countup";
@@ -38,7 +38,7 @@ export default function SummaryCards({
           <div>
             <h3 className="text-md text-gray-600 font-medium">{card.title}</h3>
             <p className="text-2xl font-bold text-gray-900">
-              <CountUp end={card.value + 1000} duration={1.5} />
+              <CountUp end={card.value} duration={1.5} />
             </p>
           </div>
         </div>

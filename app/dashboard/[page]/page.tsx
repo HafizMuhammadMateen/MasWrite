@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import SummaryCards from "@/components/dashboard/SummaryCards";
 import RecentBlogs from "@/components/dashboard/RecentBlogs";
 import { FaFileAlt, FaCheckCircle, FaRegEdit } from "react-icons/fa";
+import ChartsWrapper from "@/components/dashboard/ChartsWrapper";
 
 export const revalidate = 60; // ISR (but effectively SSR due to cookies)
 
@@ -32,6 +33,32 @@ export default async function DashboardPage({ params }: { params: { page: string
     draftCount 
   } = await res.json();
 
+  // Chart 1: Views per published date
+  const viewsData = blogs
+    .filter((b: any) => b.publishedAt && b.views != null)
+    .map((b: any) => ({
+      date: new Date(b.publishedAt).toLocaleDateString(),
+      views: b.views,
+    }));
+
+  // Chart 2: Published count per day
+  const publishedCountMap = blogs.reduce((acc: any, b: any) => {
+    if (b.publishedAt) {
+      const date = new Date(b.publishedAt).toLocaleDateString();
+      acc[date] = (acc[date] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  const publishedData = Object.entries(publishedCountMap).map(([date, count]) => ({
+    date,
+    count,
+  }));
+
+  const chartData = { viewsData, publishedData };
+  console.log("Chart Data Received:", chartData);
+
+
   return (
     <div className="h-screen p-6 flex flex-col flex-grow">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Dashboard</h2>
@@ -46,6 +73,8 @@ export default async function DashboardPage({ params }: { params: { page: string
           <FaRegEdit key="draft" className="w-6 h-6 text-yellow-500" />,
         ]}
       />
+
+      <ChartsWrapper chartData={chartData} />
 
       <section className="mt-8">
         <RecentBlogs blogs={blogs} page={page} totalPages={totalPages} />

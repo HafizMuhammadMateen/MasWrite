@@ -20,7 +20,7 @@ export default function BlogPage() {
       <ul className="mt-4 space-y-2">
         {blogs.map(blog => (
           <li key={blog._id}>
-            <Link href={`blogs/${blog.slug}`} className="font-semibold">{blog.title}</Link>
+            <Link href={`blogs/${blog._id}`} className="font-semibold">{blog.title}</Link>
           </li>
         ))}
       </ul>

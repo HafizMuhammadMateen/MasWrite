@@ -35,13 +35,13 @@ export default function BlogCard({
   const router = useRouter();
 
   return (
-    <Card className="bg-gray-100 pb-4 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1]">
+    <Card className="flex flex-col justify-between h-full bg-gray-100 pb-4 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1]">
       <Link 
         href={`/dashboard/manage-blogs/${slug}`}
         target="_blank"
       >
         <CardHeader>
-          <div className="flex justify-between">
+          <div className="flex justify-between h-full">
             <div>
               <CardTitle className="text-2xl font-semibold text-gray-800 hover:underline">
                 {title}
@@ -129,8 +129,8 @@ export default function BlogCard({
 
         <CardContent>
           <Separator className="my-1" />
-          <div className="flex items-center justify-between text-md text-gray-500  mt-2">
-            <div className="flex items-center gap-4 cursor-default">
+          <div className="flex flex-wrap items-center justify-between text-md text-gray-500 mt-2">
+            <div className="flex flex-wrap items-center gap-4 cursor-default">
               <div className="flex items-center gap-1">
                 <User className="w-4 h-4" />
                 <span>{authorName}</span>
@@ -145,7 +145,7 @@ export default function BlogCard({
               </div>
             </div>
             {publishedAt && (
-              <div className="flex items-center gap-1 text-gray-400 cursor-default">
+              <div className="flex flex-wrap items-center gap-1 text-gray-400 cursor-default">
                 <Calendar className="w-4 h-4" />
                 <span>{new Date(publishedAt).toLocaleDateString()}</span>
               </div>

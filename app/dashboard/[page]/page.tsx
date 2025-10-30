@@ -56,11 +56,9 @@ export default async function DashboardPage({ params }: { params: { page: string
   }));
 
   const chartData = { viewsData, publishedData };
-  console.log("Chart Data Received:", chartData);
-
 
   return (
-    <div className="h-screen p-6 flex flex-col flex-grow">
+    <div className="h-full p-6 flex flex-col flex-grow">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Dashboard</h2>
 
       <SummaryCards
@@ -76,7 +74,7 @@ export default async function DashboardPage({ params }: { params: { page: string
 
       <ChartsWrapper chartData={chartData} />
 
-      <section className="mt-8">
+      <section className="my-8">
         <RecentBlogs blogs={blogs} page={page} totalPages={totalPages} />
       </section>
     </div>

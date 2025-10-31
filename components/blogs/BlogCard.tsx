@@ -37,7 +37,7 @@ export default function BlogCard({
   return (
     <Card className="bg-gray-100 pb-4 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1]">
       <Link 
-        href={`/dashboard/manage-blogs/${id}`}
+        href={`/dashboard/manage-blogs/${slug}`}
         target="_blank"
       >
         <CardHeader>
@@ -98,7 +98,7 @@ export default function BlogCard({
                     className="cursor-pointer"
                     onClick={(e) => {
                       e.preventDefault();
-                      router.push(`/dashboard/manage-blogs/${id}/edit`);
+                      router.push(`/dashboard/manage-blogs/${slug}/edit`);
                     }}
                   >
                     <Edit className="w-4 h-4 mr-1" /> Update
@@ -111,7 +111,7 @@ export default function BlogCard({
                     disabled={deleting}
                     onClick={(e) => {
                       e.preventDefault();
-                      onDelete?.(id);
+                      onDelete?.(slug);
                     }}
                   >
                     {deleting ? (

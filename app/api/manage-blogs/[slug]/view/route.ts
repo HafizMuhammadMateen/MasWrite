@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
 
-export async function POST(_: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === "development";
+
+// GET single blog (READ)
+export async function POST(_: NextRequest, context: { params: Promise<{ slug: string }> }) {
   try {
     await connectDB();
-    const { id } = await context.params;
+    const { slug } = await context.params;
 
-    const blog = await Blog.findByIdAndUpdate(
-      id,
+    const blog = await Blog.findOneAndUpdate(
+      { slug },
       { $inc: { views: 1 } },
       { new: true, projection: { views: 1 } } // return only views field
     );
@@ -18,7 +20,7 @@ export async function POST(_: NextRequest, context: { params: Promise<{ id: stri
 
     return NextResponse.json({ views: blog.views });
   } catch (err) {
-    isDev && console.error("[POST API] Increment blog views error:", err);
+    isDev && console.error("[POST API] Blog views-inc error:", err);
     return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
   }
 }

@@ -23,7 +23,7 @@ export default function RecentBlogs({ blogs, page, totalPages }: RecentBlogsProp
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {blogs.map((blog) => (
               <BlogCard
-                key={blog._id}
+                key={blog._id || blog.slug}
                 title={blog.title}
                 excerpt={blog.content}
                 slug={blog.slug}

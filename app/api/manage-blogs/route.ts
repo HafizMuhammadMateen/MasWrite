@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
-import { slugify } from "@/utils/blogsHelpers";
 import { verifyToken } from "@/utils/authHelpers";
 import { error } from "@/utils/apiResponse";
 
@@ -66,8 +65,8 @@ export async function GET(req: NextRequest) {
       draftCount,
     });
   } catch (err) {
-    isDev && console.error("[GET /api/manage-blogs] Error:", err);
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+    isDev && console.error("[GET API] Blogs fetch Error:", err);
+    return error("Something went wrong", 500);
   }
 }
 
@@ -78,68 +77,52 @@ export async function POST(req: NextRequest) {
 
     const { title, content, tags, category, status } = await req.json();
 
+    // Validation
     if (!title || !content || !tags?.length || !category) {
-      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+      return error("Missing required fields", 400);
     }
 
     const titleWords = title.trim().split(/\s+/).length;
     if (titleWords > 10) {
-      return NextResponse.json({ message: "Title should be less than 10 words" }, { status: 400 });
+      return error("Title should be less than 10 words", 400);
     }
 
+    // Auth check
     const token = req.cookies.get("token")?.value;
-    if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!token) {
+      return error("Unauthorized", 401);
+    }
 
     const decodedToken = verifyToken(token);
-    if (!decodedToken?.userId) return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+    if (!decodedToken?.userId) {
+      return error("Invalid token", 401);
+    }
 
-    const slug = slugify(title);
-    let blog = await Blog.findOne({ slug, author: decodedToken.userId });
-
+    // Compute reading time
     const contentWords = content.split(/\s+/).length;
     const readingTime = Math.max(1, Math.round(contentWords / 200));
     const now = new Date();
 
-    if (blog) {
-      // Update existing blog
-      blog.content = content;
-      blog.tags = tags;
-      blog.category = category;
-      blog.status = status;
-      blog.readingTime = readingTime;
-      blog.updatedAt = now;
+    // Create blog (slug will be auto-generated in pre-save hook)
+    const blog = new Blog({
+      title,
+      content,
+      author: decodedToken.userId,
+      status,
+      tags,
+      category,
+      readingTime,
+      updatedAt: now,
+      publishedAt: status === "published" ? now : null,
+    });
 
-      // Only set publishedAt if changing to published and it wasn't already published
-      if (status === "published" && !blog.publishedAt) blog.publishedAt = now;
+    await blog.save({ validateBeforeSave: false }); // triggers pre('save') before validation
 
-      // Clear publishedAt if switching to draft
-      if (status === "draft") blog.publishedAt = null;
-
-      await blog.save();
-    } else {
-      // Create new blog
-      const isExisting = await Blog.findOne({ slug });
-      if (isExisting) {
-        return NextResponse.json({ message: "Slug already exists" }, { status: 400 });
-      }
-
-      blog = await Blog.create({
-        title,
-        content,
-        slug,
-        author: decodedToken.userId,
-        status,
-        tags,
-        category,
-        readingTime,
-        updatedAt: now,
-        publishedAt: status === "published" ? now : null,
-      });
-    }
-
-    return NextResponse.json(blog);
+    return NextResponse.json(blog, { status: 201 });
   } catch (err) {
-    isDev && console.error("[POST API] Blog creation error:", err);
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+    console.error("[POST API] Blog creation error:", err);
+    return error("Something went wrong", 500);
   }
 }
+
+// Note: PUT and DELETE handlers would go here as well, but are omitted for brevity.

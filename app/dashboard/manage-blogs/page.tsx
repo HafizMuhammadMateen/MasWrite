@@ -24,7 +24,7 @@ export default function ManageBlogsPage() {
     sort: "",
   });
   const [loading, setLoading] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -68,17 +68,17 @@ useEffect(() => {
 }, [filters, page]); // 👈 include `page` here
 
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
+  const handleDelete = async (slug: string) => {
+    setDeletingSlug(slug);
     try {
-      const res = await fetch(`/api/manage-blogs/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/manage-blogs/${slug}`, { method: "DELETE" });
       if (res.ok) {
-        setBlogs((prev) => prev.filter((blog) => blog._id !== id));
+        setBlogs((prev) => prev.filter((blog) => blog.slug !== slug));
       }
     } catch (err) {
       console.error("Error deleting blog:", err);
     } finally {
-      setDeletingId(null);
+      setDeletingSlug(null);
     }
   };
 
@@ -107,7 +107,7 @@ useEffect(() => {
               tags={blog.tags}
               isDashboardBlogs
               onDelete={handleDelete}
-              deleting={deletingId === blog._id}
+              deleting={deletingSlug === blog.slug}
               status={blog.status as "published" | "draft"}
               id={blog._id}
             />

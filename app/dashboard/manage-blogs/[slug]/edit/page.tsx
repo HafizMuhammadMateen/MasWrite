@@ -40,23 +40,24 @@ export default function EditBlogPage() {
 
   // Fetch blog data and populate fields
   useEffect(() => {
-    if (!params.id) return;
+    if (!params.slug) return console.error("Slug is undefined");
     
     const fetchBlog = async () => {
       try {
-        const res = await fetch(`/api/manage-blogs/${params.id}`)
+        const res = await fetch(`/api/manage-blogs/${params.slug}`)
         const data: Blog = await res.json()
         setTitle(data.title)
         setTags(data.tags || [])
         setCategory(data.category || "Web Development")
+        setStatus(data.status || "draft")
         editor?.commands.setContent(data.content || "")
       } catch (err) {
         console.error("Failed to fetch blog", err)
       }
     }
     fetchBlog()
-  }, [params.id, editor])
-
+  }, [params.slug, editor])
+    
   // Editor toolbar re-render
   useEffect(() => {
     if (!editor) return
@@ -94,7 +95,7 @@ export default function EditBlogPage() {
     setLoading("updating")
 
     try {
-      const res = await fetch(`/api/manage-blogs/${params.id}`, {
+      const res = await fetch(`/api/manage-blogs/${params.slug}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content, tags, category, status }),

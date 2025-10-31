@@ -20,7 +20,10 @@ export default function Header() {
     const fetchUser = async () => {
       try {
         console.log("Fetching user data...");
-        const res = await fetch("/api/auth/me", { credentials: "include" });
+        const res = await fetch("/api/auth/me", { 
+          method: "GET",
+          credentials: "include" 
+        });
         if (res.ok) {
           const data = await res.json();
           console.log("Fetched user data:", data.data?.user);

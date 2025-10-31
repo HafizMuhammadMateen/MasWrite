@@ -13,6 +13,7 @@ export default async function DashboardPage({ params }: { params: { page: string
   const res = await fetch(
     `${process.env.NEXTAUTH_URL}/api/manage-blogs?page=${page}&limit=${blogsPerPage}`,
     { 
+      method: "GET",
       headers: { Cookie: (await cookies()).toString() }, // Dynamic SSR
     }
   );

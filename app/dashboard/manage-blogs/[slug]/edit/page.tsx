@@ -44,7 +44,7 @@ export default function EditBlogPage() {
     
     const fetchBlog = async () => {
       try {
-        const res = await fetch(`/api/manage-blogs/${params.slug}`)
+        const res = await fetch(`/api/manage-blogs/${params.slug}`, { method: "GET" })
         const data: Blog = await res.json()
         setTitle(data.title)
         setTags(data.tags || [])

@@ -11,7 +11,7 @@ export default function SingleBlog() {
 
   useEffect(() => {
     // Fetch blog data
-    fetch(`/api/manage-blogs/${slug}`)
+    fetch(`/api/manage-blogs/${slug}`, { method: "GET" })
       .then(res => res.json())
       .then(setBlog);
 

@@ -48,6 +48,7 @@ useEffect(() => {
       });
 
       const res = await fetch(`/api/manage-blogs?${params.toString()}`, {
+        method: "GET",
         cache: "no-store",
       });
 

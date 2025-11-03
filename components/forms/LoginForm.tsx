@@ -149,7 +149,9 @@ export default function LoginForm() {
 
       {/* OAuth Buttons */}
       <div className="flex flex-col gap-3 mt-6">
-        {Object.values(providers).map((provider: any) => {
+        {Object.values(providers)
+          .filter((p: any) => p.id !== "credentials")
+          .map((provider: any) => {
           const Icon =
             provider.name === "Google"
               ? FaGoogle

@@ -7,7 +7,7 @@ import { ChangePasswordModalProps } from "../../utils/types"
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import { FormErrors } from "@/utils/types";
 
-export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = false, token }: ChangePasswordModalProps) {
+export default function ChangePasswordModal({ isOpen, onClose, isResetPasswordFlow = false, token }: ChangePasswordModalProps) {
   const[currentPassword, setCurrentPassword] = useState("");
   const[newPassword, setNewPassword] = useState("");
   const[confirmPassword, setConfirmPassword] = useState("");
@@ -21,7 +21,7 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   // handler if user press escape
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if(event.key === "Escape" && !isResetFlow) {
+      if(event.key === "Escape" && !isResetPasswordFlow) {
         onClose();
       }
     }
@@ -58,15 +58,16 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
 
     // validation again on submit not just on blur
     let currentPasswordError = null;
-    if(!isResetFlow) currentPasswordError = validatePassword(currentPassword, true);
+    if(!isResetPasswordFlow) currentPasswordError = validatePassword(currentPassword, true);
     const newPasswordError = validatePassword(newPassword, true);
     const confirmPasswordError = validatePassword(confirmPassword, true);
 
     if(currentPasswordError || newPasswordError || confirmPasswordError) {
       setErrors({
-        ...(isResetFlow? {} : {currentPassword: currentPasswordError}), 
-        newPassword: newPasswordError, 
-        confirmPassword: confirmPasswordError});
+        ...(isResetPasswordFlow? {} : {currentPassword: currentPasswordError || undefined}), 
+        newPassword: newPasswordError || undefined, 
+        confirmPassword: confirmPasswordError || undefined,
+      });
       return;
     }
 
@@ -80,8 +81,8 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
     try {
       setLoading(true);
 
-      const url = isResetFlow ? "/api/auth/reset-password" : "/api/auth/change-password";
-      const body = isResetFlow
+      const url = isResetPasswordFlow ? "/api/auth/reset-password" : "/api/auth/change-password";
+      const body = isResetPasswordFlow
       ? { token, newPassword }
       : { currentPassword, newPassword };
       
@@ -117,7 +118,7 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   }
 
   const handleCancel = () => {
-    if(isResetFlow) router.push("/login"); // Forgot(reset) password flow
+    if(isResetPasswordFlow) router.push("/login"); // Forgot(reset) password flow
     else onClose(); // if user was logged in (just close the opened modal)
   }
 
@@ -126,7 +127,7 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
   return (
     <div 
       className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
-      onClick={isResetFlow ? undefined : onClose} // click on backdrop closes the modal 
+      onClick={isResetPasswordFlow ? undefined : onClose} // click on backdrop closes the modal 
     >
       <div 
         className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm"
@@ -135,7 +136,7 @@ export default function ChangePasswordModal({ isOpen, onClose, isResetFlow = fal
 
         <h2 className="text-xl text-center font-semibold mb-4">Change Password</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isResetFlow && (
+          {!isResetPasswordFlow && (
             <>
             <label>Current Password</label>
             <div className="relative">

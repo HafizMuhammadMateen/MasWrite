@@ -1,40 +1,3 @@
-// "use client";
-// import { useEffect, useState } from "react";
-// import { useParams, useRouter } from "next/navigation";
-
-// export default function EditBlog() {
-//   const { slug } = useParams();
-//   const router = useRouter();
-//   const [title, setTitle] = useState("");
-//   const [content, setContent] = useState("");
-
-//   useEffect(() => {
-//     fetch(`/api/blogs/${slug}`).then(res => res.json()).then(data => {
-//       setTitle(data.title);
-//       setContent(data.content);
-//     });
-//   }, [slug]);
-
-//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     await fetch(`/api/blogs/${slug}`, {
-//       method: "PUT",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ title, content }),
-//     });
-//     router.push(`/dashboard/blogs/${slug}`);
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className="p-4">
-//       <input value={title} onChange={e => setTitle(e.target.value)} className="border p-2 w-full mb-2" />
-//       <textarea value={content} onChange={e => setContent(e.target.value)} className="border p-2 w-full mb-2" />
-//       <button className="bg-green-500 text-white px-4 py-2">Update</button>
-//     </form>
-//   );
-// }
-
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -46,7 +9,7 @@ import ImageModal from "@/components/modals/ImageModal"
 import CategorySelector from "@/components/blogs/CategorySelector"
 import TagsInput from "@/components/blogs/TagsInput"
 import ToolbarButton from "@/components/blogs/ToolbarButton"
-import TitleInput from "@/components/blogs/NewBlogHeader"
+import EditorHeader from "@/components/blogs/EditorHeader"
 import { useTiptapEditor } from "@/hooks/blogs/useTiptapEditor"
 import {
   List,
@@ -63,17 +26,16 @@ import {
 
 export default function NewBlogPage() {
   const router = useRouter()
+  const params = useParams()
   const [title, setTitle] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<null | "updating">(null)
   const [tags, setTags] = useState<string[]>([])
   const [category, setCategory] = useState("Web Development")
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
   const [, forceUpdate] = useState({})
-  const [blogData, setBlogData] = useState();
-  const { slug } = useParams();
-
-
+  const [blogData, setBlogData] = useState()
+  const { slug } = useParams()
   const editor = useTiptapEditor()
 
   // Auto fetch current blog's data
@@ -115,35 +77,38 @@ export default function NewBlogPage() {
     return () => window.removeEventListener("keydown", handleShortcut)
   }, [])
 
-  const handleUpdate = async (status: "draft" | "published") => {
-    if (!title.trim()) return toast.error("Please enter a title.")
-    if (!tags.length) return toast.error("Please add at least one tag.")
-    if (!category) return toast.error("Please select a category.")
+  const handleUpdate = async () => {
+    if (!title.trim()) return toast.error("Please enter a title.");
+    
+    const words = title.trim().split(/\s+/).length;
+    if (words > 10) return toast.error("Title should be less than 10 words.");
+    
+    if (!tags.length) return toast.error("Please add at least one tag.");
+    if (!category) return toast.error("Please select a category.");
 
     const content = editor?.getHTML() || ""
-    setLoading(true)
+    setLoading("updating")
 
     try {
-      const res = await fetch("/api/blogs", {
-        method: "POST",
+      const res = await fetch(`/api/manage-blogs/${params.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content, tags, category, status }),
       })
-
-      if (!res.ok) throw new Error("Failed to save blog")
-      toast.success(status === "draft" ? "Draft saved!" : "Blog published!")
-      if (status === "published") router.push("/dashboard/blogs")
+      if (!res.ok) throw new Error("Failed to update blog");
+      toast.success("Blog updated successfully!");
+      router.push("/dashboard/manage-blogs");
     } catch {
-      toast.error("Something went wrong.")
+      toast.error("Something went wrong.");
     } finally {
-      setLoading(false)
+      setLoading(null);
     }
   }
 
   return (
     <div className="h-full p-6 flex flex-col justify-center items-center overflow-hidden">
       {/* Title + Buttons */}
-      <TitleInput
+      <EditorHeader
         title={title}
         setTitle={setTitle}
         loading={loading}
@@ -157,58 +122,19 @@ export default function NewBlogPage() {
           {/* Toolbar */}
           {editor && (
             <div className="flex flex-wrap gap-4 border-b pb-3 mb-4">
-              {/* Text styles */}
-              <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive("bold")}>
-                <BoldIcon className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive("italic")}>
-                <ItalicIcon className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive("underline")}>
-                <UnderlineIcon className="w-4 h-4" />
-              </ToolbarButton>
-
-              {/* Headings */}
-              {[1, 2, 3].map((level) => (
-                <ToolbarButton
-                  key={level}
-                  onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
-                  isActive={editor.isActive("heading", { level })}
-                >
-                  H<sub className="text-xs ml-0.5">{level}</sub>
-                </ToolbarButton>
-              ))}
-
-              {/* Lists */}
-              <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive("bulletList")}>
-                <List className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive("orderedList")}>
-                <ListOrdered className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.chain().focus().toggleTaskList().run()} isActive={editor.isActive("taskList")}>
-                <CheckSquare className="w-4 h-4" />
-              </ToolbarButton>
-
-              {/* Link */}
-              <ToolbarButton onClick={() => setShowLinkModal(true)} isActive={editor.isActive("link")} title="Insert Link (Ctrl + K)">
-                <LinkIcon className="w-4 h-4" />
-              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive("bold")}><BoldIcon className="w-4 h-4" /></ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive("italic")}><ItalicIcon className="w-4 h-4" /></ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive("underline")}><UnderlineIcon className="w-4 h-4" /></ToolbarButton>
+              {([1, 2, 3] as const).map(l => <ToolbarButton key={l} onClick={() => editor.chain().focus().toggleHeading({ level: l }).run()} isActive={editor.isActive("heading", { level: l })}>H<sub className="text-xs">{l}</sub></ToolbarButton>)}
+              <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive("bulletList")}><List className="w-4 h-4" /></ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive("orderedList")}><ListOrdered className="w-4 h-4" /></ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleTaskList().run()} isActive={editor.isActive("taskList")}><CheckSquare className="w-4 h-4" /></ToolbarButton>
+              <ToolbarButton onClick={() => setShowLinkModal(true)} isActive={editor.isActive("link")}><LinkIcon className="w-4 h-4" /></ToolbarButton>
               {showLinkModal && <LinkModal editor={editor} onClose={() => setShowLinkModal(false)} />}
-
-              {/* Image */}
-              <ToolbarButton onClick={() => setShowImageModal(true)}>
-                <ImageIcon className="w-4 h-4" />
-              </ToolbarButton>
+              <ToolbarButton onClick={() => setShowImageModal(true)}><ImageIcon className="w-4 h-4" /></ToolbarButton>
               {showImageModal && <ImageModal editor={editor} open={showImageModal} onClose={() => setShowImageModal(false)} />}
-
-              {/* Undo / Redo */}
-              <ToolbarButton onClick={() => editor.chain().focus().undo().run()}>
-                <Undo2 className="w-4 h-4" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => editor.chain().focus().redo().run()}>
-                <Redo2 className="w-4 h-4" />
-              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().undo().run()}><Undo2 className="w-4 h-4" /></ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().redo().run()}><Redo2 className="w-4 h-4" /></ToolbarButton>
             </div>
           )}
 

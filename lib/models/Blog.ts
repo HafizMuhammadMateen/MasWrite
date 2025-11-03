@@ -1,13 +1,11 @@
-import mongoose, { Schema, Types } from "mongoose";
-import "@/lib/models/User";
-import "@/lib/models/Blog";
+import mongoose, { Schema } from "mongoose";
 
 const blogSchema = new Schema(
   {
     title: { type: String, required: true },
     content: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
-    author: { type: Types.ObjectId, ref: "User", required: true },
+    author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     publishedAt: { type: Date, default: null }, // Only set when the post is actually published
     views: { type: Number, default: 0 },
     readingTime: { type: Number },

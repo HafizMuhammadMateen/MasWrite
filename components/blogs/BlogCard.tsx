@@ -98,9 +98,9 @@ export default function BlogCard({
                   <div className="">
                     <Button
                       variant="blogStatus"
-                      size="sm"
+                      size="md"
                       className={cn(
-                        "cursor-default disabled:pointer-events-auto disabled:opacity-100 capitalize",
+                        "cursor-default disabled:pointer-events-auto disabled:opacity-100 capitalize text-md",
                         status === "published"
                           ? "bg-green-500 hover:bg-green-600"
                           : "text-blue-700 border border-blue-300 bg-blue-100 hover:bg-blue-200 opacity-100"
@@ -114,29 +114,28 @@ export default function BlogCard({
                   <div className="flex items-center gap-2">  
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       className="cursor-pointer"
                       onClick={(e) => {
                         e.preventDefault();
                         router.push(`/dashboard/manage-blogs/${slug}/edit`);
                       }}
                     >
-                      <Edit className="w-4 h-4 mr-1" /> Update
+                      <Edit className="w-6 h-6" />
                     </Button>
 
                     <Button
                       variant="destructive"
-                      size="sm"
+                      size="icon"
                       className="cursor-pointer hover:bg-red-700"
                       disabled={deleting}
                       onClick={handleClickDelete}
                     >
                       {deleting ? (
-                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        <Trash className="w-4 h-4 mr-1" />
+                        <Trash className="w-6 h-6" />
                       )}
-                      {deleting ? "Deleting..." : "Delete"}
                     </Button>
                   </div>
                 </div>

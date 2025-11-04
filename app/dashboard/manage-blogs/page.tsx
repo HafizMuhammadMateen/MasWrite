@@ -1,95 +1,45 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import BlogCard from "@/components/blogs/BlogCard";
 import { Blog } from "@/lib/types/blog";
-import ManageBlogHeader from "@/components/blogs/ManageBlogHeader";
+import ManageBlogHeaderWrapper from "@/components/blogs/ManageBlogHeaderWrapper";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { cookies } from "next/headers";
 
-interface ManageBlogHeaderProps {
-  onFilterChange: (filters: {
-    q: string;
-    status: string;
-    category: string;
-    sort: string;
-  }) => void;
-}
+const blogsPerPage = 6;
 
-export default function ManageBlogsPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [filters, setFilters] = useState({
-    q: "",
-    status: "",
-    category: "",
-    sort: "",
+export default async function ManageBlogsPage({ searchParams }: { searchParams: any }) {
+  const page = parseInt((await searchParams).page) || 1;
+  const q = (await searchParams).q || "";
+  const status = (await searchParams).status || "";
+  const category = (await searchParams).category || "";
+  const sort = (await searchParams).sort || "";
+
+  const params = new URLSearchParams({
+    ...(q ? { q } : {}),
+    ...(status ? { status } : {}),
+    ...(category ? { category } : {}),
+    ...(sort ? { sort } : {}),
+    page: page.toString(),
+    limit: blogsPerPage.toString(),
   });
-  const [loading, setLoading] = useState(false);
-  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-  setPage(1);
-}, [filters]);
+  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/manage-blogs?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      Cookie: (await cookies()).toString(),
+    },
+    cache: "no-store",
+    credentials: "include",
+  });
 
-
-// Fetch blogs whenever filters or page change
-useEffect(() => {
-  const fetchBlogs = async () => {
-    try {
-      setLoading(true);
-
-      const params = new URLSearchParams({
-        ...(filters.q ? { q: filters.q } : {}),
-        ...(filters.status ? { status: filters.status } : {}),
-        ...(filters.category ? { category: filters.category } : {}),
-        ...(filters.sort ? { sort: filters.sort } : {}),
-        page: page.toString(),
-      });
-
-      const res = await fetch(`/api/manage-blogs?${params.toString()}`, {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch blogs");
-
-      const data = await res.json();
-      setBlogs(data.blogs || []);
-      setTotalPages(data.totalPages);
-    } catch (err) {
-      console.error("Error fetching blogs:", err);
-      setBlogs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchBlogs();
-}, [filters, page]); // 👈 include `page` here
-
-
-  const handleDelete = async (slug: string) => {
-    setDeletingSlug(slug);
-    try {
-      const res = await fetch(`/api/manage-blogs/${slug}`, { method: "DELETE" });
-      if (res.ok) {
-        setBlogs((prev) => prev.filter((blog) => blog.slug !== slug));
-      }
-    } catch (err) {
-      console.error("Error deleting blog:", err);
-    } finally {
-      setDeletingSlug(null);
-    }
-  };
+  const data = await res.json();
+  const blogs: Blog[] = data.blogs || [];
+  const totalPages = data.totalPages || 1;
 
   return (
     <div className="p-6 flex flex-col h-full overflow-hidden">
-      <ManageBlogHeader onFilterChange={setFilters} />
+      <ManageBlogHeaderWrapper />
 
-      {loading ? (
-        <p>Loading blogs...</p>
-      ) : blogs.length > 0 ? (
+      {blogs.length > 0 ? (
         <div className="flex-1 overflow-y-auto space-y-4 p-2">
           {blogs.map((blog) => (
             <BlogCard
@@ -107,37 +57,30 @@ useEffect(() => {
               views={blog.views}
               tags={blog.tags}
               isDashboardBlogs
-              onDelete={handleDelete}
-              deleting={deletingSlug === blog.slug}
               status={blog.status as "published" | "draft"}
               id={blog._id}
             />
           ))}
 
           <div className="flex justify-center gap-4 mt-4">
-            <button
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              disabled={page === 1}
-              className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            <a
+              href={`?page=${Math.max(page - 1, 1)}`}
+              className={`cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition ${page === 1 ? "opacity-50 pointer-events-none" : ""}`}
             >
               <FiChevronLeft className="w-4 h-4" /> Prev
-            </button>
+            </a>
 
             <span className="text-gray-700 font-medium">
               {page} / {totalPages}
             </span>
 
-            <button
-              onClick={() =>
-                setPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={page === totalPages}
-              className="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            <a
+              href={`?page=${Math.min(page + 1, totalPages)}`}
+              className={`cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition ${page === totalPages ? "opacity-50 pointer-events-none" : ""}`}
             >
               Next <FiChevronRight className="w-4 h-4" />
-            </button>
+            </a>
           </div>
-
         </div>
       ) : (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">

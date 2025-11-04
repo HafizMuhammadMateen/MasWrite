@@ -88,7 +88,7 @@ export default function NewBlogPage() {
 
         if (!res.ok) throw new Error("Failed to save blog");
         toast.success(status === "draft" ? "Draft saved!" : "Blog published!");
-        if (status === "published") router.push("/dashboard/manage-blogs");
+        if (status === "draft" || status === "published") router.push("/dashboard/manage-blogs");
       } catch {
         toast.error("Something went wrong.");
       } finally {

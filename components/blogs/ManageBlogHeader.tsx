@@ -11,32 +11,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Edit2 } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ManageBlogHeader({
-  onFilterChange,
-}: {
-  onFilterChange: (filters: {
-    q: string;
-    status: string;
-    category: string;
-    sort: string;
-  }) => void;
-}) {
+export default function ManageBlogHeader() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("");
   const [q, setQ] = useState("");
 
-  // Whenever any filter changes, notify parent after small delay
+  const handleFilterChange = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries({ q, status, category, sort }).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
+
+    // Reset page whenever filters change
+    router.push(`?${params.toString()}`);
+  };
+
   useEffect(() => {
-    const delay = setTimeout(() => {
-      onFilterChange({
-        q,
-        status,
-        category,
-        sort,
-      });
-    }, 400); // debounce for search typing
+    const delay = setTimeout(handleFilterChange, 300); // debounce for search typing
     return () => clearTimeout(delay);
   }, [q, status, category, sort]);
 
@@ -63,14 +64,14 @@ export default function ManageBlogHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setSort("")}>All</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setSort("createdAt")}>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("")}>All</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("createdAt")}>
               Created At
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setSort("publishedAt")}>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("publishedAt")}>
               Published At
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setSort("updatedAt")}>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("updatedAt")}>
               Updated At
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -79,15 +80,15 @@ export default function ManageBlogHeader({
         {/* Status Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-lg captialize cursor-pointer">
+            <Button variant="outline" className="text-lg cursor-pointer">
               {status ? `Status: ${status}` : "Status"}
               <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setStatus("")}>All</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setStatus("published")}>Published</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setStatus("draft")}>Draft</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setStatus("")}>All</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setStatus("published")}>Published</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setStatus("draft")}>Draft</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -100,9 +101,9 @@ export default function ManageBlogHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-h-64 overflow-y-auto text-md">
-            <DropdownMenuItem className="text-lg captialize cursor-pointer" onClick={() => setCategory("")}>All</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setCategory("")}>All</DropdownMenuItem>
             {BLOG_CATEGORIES.map((cat) => (
-              <DropdownMenuItem className="text-lg captialize cursor-pointer" key={cat} onClick={() => setCategory(cat)}>
+              <DropdownMenuItem className="text-lg cursor-pointer" key={cat} onClick={() => setCategory(cat)}>
                 {cat}
               </DropdownMenuItem>
             ))}

@@ -1,11 +1,14 @@
 import { Blog } from "@/lib/types/blog";
-import ManageBlogHeader from "@/components/blogs/ManageBlogHeader";
-import ManageBlogsList from "@/components/blogs/ManageBlogsList";
 import { cookies } from "next/headers";
+import ManageBlogsListWrapper from "@/components/blogs/ManageBlogsListWrapper";
 
 const blogsPerPage = 6;
 
-export default async function ManageBlogsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
+interface ManageBlogsPageProps {
+  searchParams: Promise<Record<string, string>>;
+}
+
+export default async function ManageBlogsPage({ searchParams }: ManageBlogsPageProps) {
   const paramsObj = await searchParams;
 
   const page = parseInt(paramsObj.page || "1");
@@ -35,15 +38,7 @@ export default async function ManageBlogsPage({ searchParams }: { searchParams: 
 
   return (
     <div className="p-6 flex flex-col h-full overflow-hidden">
-      <ManageBlogHeader />
-
-      {blogs.length > 0 ? (
-        <ManageBlogsList blogs={blogs} totalPages={totalPages} page={page} searchParams={params} />
-      ) : (
-        <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">
-          No blog posts found.
-        </div>
-      )}
+      <ManageBlogsListWrapper blogs={blogs} totalPages={totalPages} page={page} searchParams={params} />
     </div>
   );
 }

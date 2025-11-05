@@ -9,11 +9,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Edit2 } from "lucide-react";
+import { CheckSquare, ChevronDown, Edit2 } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ManageBlogHeader() {
+interface ManageBlogHeaderProps {
+  onToggleSelectMode?: () => void;
+  selectionMode?: boolean;
+}
+
+export default function ManageBlogHeader({ onToggleSelectMode, selectionMode }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -43,7 +48,7 @@ export default function ManageBlogHeader() {
 
   return (
     <div className="flex items-center justify-between mb-6 flex-shrink-0 mx-3">
-      <h1 className="text-3xl font-bold text-gray-800">Manage Blogs</h1>
+      <h1 className="text-3xl font-bold text-gray-800">Manage Your Blogs</h1>
 
       <div className="flex items-center gap-3 flex-shrink-0">
         {/* Search Filter */}
@@ -109,6 +114,16 @@ export default function ManageBlogHeader() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Select button */}
+        <Button
+          variant={selectionMode ? "default" : "outline"}
+          onClick={onToggleSelectMode}
+          className="text-lg cursor-pointer flex items-center gap-1"
+        >
+          <CheckSquare className="w-5 h-5" />
+          {selectionMode ? "Cancel Select" : "Select"}
+        </Button>
 
         {/* New Post Button */}
         <Link href="/dashboard/manage-blogs/new">

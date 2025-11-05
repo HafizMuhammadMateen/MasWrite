@@ -6,10 +6,7 @@ interface RecentBlogsProps {
 }
 
 export default function RecentBlogs({ blogs }: RecentBlogsProps) {
-  // Show only latest 6 blogs
-  const latestBlogs = blogs
-    .filter((blog) => blog.status === "published")
-    .slice(0, 6);
+  const latestBlogs = blogs; // Show only latest 6 updated blogs
 
   return (
     <section className="h-full md:col-span-2 bg-white p-6 rounded-lg shadow-md overflow-y-auto">

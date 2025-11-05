@@ -5,13 +5,13 @@ import { FaFileAlt, FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import ChartsWrapper from "@/components/dashboard/ChartsWrapper";
 
 export const revalidate = 60; // ISR (but effectively SSR due to cookies)
+const blogsPerPage = 6;
 
 export default async function DashboardPage({ params }: { params: { page: string } }) {
   const page = Number((await params).page) || 1;
-  const blogsPerPage = 6;
 
   const res = await fetch(
-    `${process.env.NEXTAUTH_URL}/api/manage-blogs?page=${page}&limit=${blogsPerPage}`,
+    `${process.env.NEXTAUTH_URL}/api/manage-blogs?status=published&page=${page}&limit=${blogsPerPage}`,
     { 
       method: "GET",
       headers: { Cookie: (await cookies()).toString() }, // Dynamic SSR
@@ -76,7 +76,7 @@ export default async function DashboardPage({ params }: { params: { page: string
       <ChartsWrapper chartData={chartData} />
 
       <section className="my-8">
-        <RecentBlogs blogs={blogs} page={page} totalPages={totalPages} />
+        <RecentBlogs blogs={blogs} />
       </section>
     </div>
   );

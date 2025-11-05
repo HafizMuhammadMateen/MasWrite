@@ -1,7 +1,6 @@
-import BlogCard from "@/components/blogs/BlogCard";
-import BlogPagination from "@/components/blogs/BlogPagination";
 import { Blog } from "@/lib/types/blog";
 import ManageBlogHeader from "@/components/blogs/ManageBlogHeader";
+import ManageBlogsList from "@/components/blogs/ManageBlogsList";
 import { cookies } from "next/headers";
 
 const blogsPerPage = 6;
@@ -39,34 +38,7 @@ export default async function ManageBlogsPage({ searchParams }: { searchParams: 
       <ManageBlogHeader />
 
       {blogs.length > 0 ? (
-        <div className="flex-1 overflow-y-auto space-y-4 p-2">
-          {blogs.map((blog) => (
-            <BlogCard
-              key={blog._id}
-              title={blog.title}
-              slug={blog.slug}
-              authorName={
-                typeof blog.author === "string"
-                  ? blog.author
-                  : blog.author?.userName
-              }              
-              excerpt={blog.content?.slice(0, 100)}
-              publishedAt={blog.publishedAt}
-              readingTime={blog.readingTime}
-              views={blog.views}
-              tags={blog.tags}
-              isDashboardBlogs
-              status={blog.status as "published" | "draft"}
-              id={blog._id}
-            />
-          ))}
-
-          <BlogPagination
-            page={page}
-            totalPages={totalPages}
-            searchParams={params}
-          />
-        </div>
+        <ManageBlogsList blogs={blogs} totalPages={totalPages} page={page} params={params} />
       ) : (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">
           No blog posts found.

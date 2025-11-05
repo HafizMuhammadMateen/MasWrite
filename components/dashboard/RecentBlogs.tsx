@@ -6,11 +6,11 @@ interface RecentBlogsProps {
 }
 
 export default function RecentBlogs({ blogs }: RecentBlogsProps) {
-  const latestBlogs = blogs; // Show only latest 6 updated blogs
+  const latestBlogs = blogs; // Show only latest 6(handled by route) updated blogs
 
   return (
     <section className="h-full md:col-span-2 bg-white p-6 rounded-lg shadow-md overflow-y-auto">
-      <h2 className="text-2xl text-center font-semibold mb-4">Recent Blogs</h2>
+      <h2 className="text-2xl text-center font-semibold mb-4">Recent Published Blogs</h2>
 
       {latestBlogs.length === 0 ? (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">

@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BlogCardProps } from "@/lib/types/blog";
@@ -13,7 +14,7 @@ import { useState } from "react";
 
 interface ExtendedBlogCardProps extends BlogCardProps {
   isDashboardBlogs?: boolean;
-  onDelete?: (id: string) => void;
+  onDelete?: (slug: string) => void;
   deleting?: boolean;
   status?: "published" | "draft"; // optional status prop
   id: string
@@ -45,11 +46,9 @@ export default function BlogCard({
   const handleConfirmDelete = async () => {
     if (!onDelete) return;
     try {
-      // Trigger deletion (and wait for it to finish)
-      await onDelete(slug);
+      await onDelete(slug); // Trigger deletion (and wait for it to finish)
     } finally {
-      // Only close the modal *after* delete completes
-      setShowDeleteModal(false);
+      setShowDeleteModal(false); // Only close the modal after delete completes
     }
   };
 
@@ -112,6 +111,7 @@ export default function BlogCard({
                   </div>
                   <Separator orientation="vertical"/> 
                   <div className="flex items-center gap-2">  
+                    {/* Edit Button */}
                     <Button
                       variant="outline"
                       size="icon"
@@ -124,6 +124,7 @@ export default function BlogCard({
                       <Edit className="w-6 h-6" />
                     </Button>
 
+                    {/* Delete Button */}
                     <Button
                       variant="destructive"
                       size="icon"

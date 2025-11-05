@@ -38,7 +38,7 @@ export default async function ManageBlogsPage({ searchParams }: { searchParams: 
       <ManageBlogHeader />
 
       {blogs.length > 0 ? (
-        <ManageBlogsList blogs={blogs} totalPages={totalPages} page={page} params={params} />
+        <ManageBlogsList blogs={blogs} totalPages={totalPages} page={page} searchParams={params} />
       ) : (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">
           No blog posts found.

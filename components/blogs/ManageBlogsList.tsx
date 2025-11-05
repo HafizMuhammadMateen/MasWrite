@@ -2,27 +2,32 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import BlogCard from "@/components/blogs/BlogCard";
-import BlogPagination from "@/components/blogs/BlogPagination";
 import { Blog } from "@/lib/types/blog";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import BlogCard from "@/components/blogs/BlogCard";
 
 interface ManageBlogsListProps {
   blogs: Blog[];
   totalPages: number;
   page: number;
-  params: URLSearchParams;
+  searchParams: URLSearchParams;
 }
 
-export default function ManageBlogsList({ blogs, totalPages, page, params }: ManageBlogsListProps) {
+export default function ManageBlogsList({ blogs, totalPages, page, searchParams }: ManageBlogsListProps) {
   const router = useRouter();
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
+
+  const handleChangePage = (newPage: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", newPage.toString());
+    router.push(`?${params.toString()}`);
+  };
 
   const handleDelete = async (slug: string) => {
     try {
       setDeletingSlug(slug);
       const res = await fetch(`/api/manage-blogs/${slug}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
-
       router.refresh(); // reload the page data
     } catch (err) {
       console.error("Error deleting blog:", err);
@@ -52,7 +57,36 @@ export default function ManageBlogsList({ blogs, totalPages, page, params }: Man
         />
       ))}
 
-      <BlogPagination page={page} totalPages={totalPages} searchParams={params} />
+      {/* Pagination */}
+      <div className="flex justify-center gap-4 mt-4">
+        {totalPages > 1 && (
+          <>
+            <button
+              onClick={() => handleChangePage(page - 1)}
+              disabled={page === 1}
+              className={`inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition ${
+                page <= 1 ? "opacity-50 pointer-events-none" : "cursor-pointer"
+              }`}
+            >
+              <FiChevronLeft className="w-4 h-4" /> Prev
+            </button>
+  
+            <span className="text-gray-700 font-medium">
+              {page} / {totalPages}
+            </span>
+  
+            <button
+              onClick={() => handleChangePage(page + 1)}
+              disabled={page === totalPages}
+              className={`inline-flex items-center px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition ${
+                page >= totalPages ? "opacity-50 pointer-events-none" : "cursor-pointer"
+              }`}
+            >
+              Next <FiChevronRight className="w-4 h-4" />
+            </button>
+        </>
+        )}
+      </div>
     </div>
   );
 }

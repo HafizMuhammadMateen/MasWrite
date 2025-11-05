@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const blogsPerPage = parseInt(searchParams.get("limit") || "6", 10);
     const authorParam = searchParams.get("author");
     const tagsParam = searchParams.get("tags")?.split(",") || [];
-    const sortBy = searchParams.get("sort") || "publishedAt";
+    const sortBy = searchParams.get("sort") || "updatedAt";
     const statusParam = searchParams.get("status") || "";
     const categoryParam = searchParams.get("category") || "";
 

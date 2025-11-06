@@ -12,12 +12,13 @@ interface ManageBlogsListProps {
   page: number;
   searchParams: URLSearchParams;
   allBlogsSelected?: boolean;
+  selectedBlogs: string[];
+  setSelectedBlogs: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export default function ManageBlogsList({ blogs, totalPages, page, searchParams, allBlogsSelected }: ManageBlogsListProps) {
+export default function ManageBlogsList({ blogs, totalPages, page, searchParams, allBlogsSelected, selectedBlogs, setSelectedBlogs }: ManageBlogsListProps) {
   const router = useRouter();
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
-  const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
 
   const handleChangePage = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
@@ -36,9 +37,9 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
   }, [allBlogsSelected, blogs]);
 
   // Toggle selection of individual blog
-  const toggleSelectBlog = (slug: string) => {
+  const toggleSelectBlog = (id: string) => {
     setSelectedBlogs((prev) =>
-      prev.includes(slug) ? prev.filter((b) => b !== slug) : [...prev, slug]
+      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
     );
   };
 
@@ -87,19 +88,6 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
           </div>
         </div>
       ))}
-
-      {/* Selection Mode Bulk Actions */}
-      {(selectedBlogs.length > 0) && (
-        <div className="sticky bottom-0 bg-gray-100 border border-red-500 py-3 px-4 rounded-md flex justify-between items-center shadow">
-          <p className="text-red-500">{selectedBlogs.length} selected</p>
-          <button
-            className="bg-red-500 text-white px-3 py-1 rounded cursor-pointer hover:bg-red-600 transition"
-            onClick={() => console.log("Perform bulk action", selectedBlogs)}
-          >
-            Delete Selected
-          </button>
-        </div>
-      )}
 
       {/* Pagination */}
       <div className="flex justify-center gap-4 mt-4">

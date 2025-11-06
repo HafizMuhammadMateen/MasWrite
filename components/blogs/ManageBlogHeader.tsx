@@ -20,9 +20,10 @@ interface ManageBlogHeaderProps {
   blogs: Blog[];
   onToggleSelectAllBlogs?: () => void;
   allBlogsSelected?: boolean;
+  selectedBlogsCount: number;
 }
 
-export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlogsSelected }: ManageBlogHeaderProps) {
+export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlogsSelected, selectedBlogsCount }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [deletingAllblogs, setDeletingAllblogs] = useState<string[] | null>(null);
@@ -116,6 +117,11 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
             )}
             </Button>
           }
+          {(selectedBlogsCount > 0) && (
+            <div className="sticky bottom-0 bg-gray-100 border border-red-500 py-2 px-4 rounded-md flex justify-between items-center shadow">
+              <p className="text-red-500">{selectedBlogsCount} selected</p>
+            </div>
+          )}
         </div>
       }
 

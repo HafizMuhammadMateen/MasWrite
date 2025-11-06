@@ -14,6 +14,7 @@ interface ManageBlogsListWrapperProps {
 
 export default function ManageBlogsListWrapper({ blogs, totalPages, page, searchParams }: ManageBlogsListWrapperProps) {
   const [allBlogsSelected, setAllBlogsSelected] = useState(false);
+  const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
 
   return (
     <>
@@ -21,7 +22,7 @@ export default function ManageBlogsListWrapper({ blogs, totalPages, page, search
         blogs={blogs}
         onToggleSelectAllBlogs={() => setAllBlogsSelected((prev) => !prev)}
         allBlogsSelected={allBlogsSelected}
-
+        selectedBlogsCount={selectedBlogs.length}
       />
       
       {blogs.length > 0 ? (
@@ -31,6 +32,8 @@ export default function ManageBlogsListWrapper({ blogs, totalPages, page, search
           page={page}
           searchParams={searchParams}
           allBlogsSelected={allBlogsSelected}
+          selectedBlogs={selectedBlogs}
+          setSelectedBlogs={setSelectedBlogs}
         />
       ) : (
         <div className="text-gray-500 bg-white rounded-lg shadow p-6 text-center">

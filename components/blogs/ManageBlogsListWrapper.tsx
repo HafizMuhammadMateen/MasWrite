@@ -13,14 +13,11 @@ interface ManageBlogsListWrapperProps {
 }
 
 export default function ManageBlogsListWrapper({ blogs, totalPages, page, searchParams }: ManageBlogsListWrapperProps) {
-  const [selectionMode, setSelectionMode] = useState(false);
   const [allBlogsSelected, setAllBlogsSelected] = useState(false);
 
   return (
     <>
       <ManageBlogHeader
-        onToggleSelectMode={() => setSelectionMode((prev) => !prev)}
-        selectionMode={selectionMode}
         onToggleSelectAllMode={() => setAllBlogsSelected((prev) => !prev)}
         allBlogsSelected={allBlogsSelected}
 
@@ -32,7 +29,6 @@ export default function ManageBlogsListWrapper({ blogs, totalPages, page, search
           totalPages={totalPages}
           page={page}
           searchParams={searchParams}
-          selectionMode={selectionMode}
           allBlogsSelected={allBlogsSelected}
         />
       ) : (

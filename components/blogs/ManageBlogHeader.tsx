@@ -14,13 +14,11 @@ import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface ManageBlogHeaderProps {
-  onToggleSelectMode?: () => void;
-  selectionMode?: boolean;
   onToggleSelectAllMode?: () => void;
   allBlogsSelected?: boolean;
 }
 
-export default function ManageBlogHeader({ onToggleSelectMode, selectionMode, onToggleSelectAllMode, allBlogsSelected }: ManageBlogHeaderProps) {
+export default function ManageBlogHeader({ onToggleSelectAllMode, allBlogsSelected }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -117,25 +115,15 @@ export default function ManageBlogHeader({ onToggleSelectMode, selectionMode, on
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Select button */}
+        {/* Select all blogs button */}
         <Button
-          variant={selectionMode ? "default" : "outline"}
-          onClick={onToggleSelectMode}
+          variant={allBlogsSelected ? "default" : "outline"}
+          onClick={onToggleSelectAllMode}
           className="text-lg cursor-pointer flex items-center gap-1"
         >
-          {/* <CheckSquare className="w-5 h-5" /> */}
-          {selectionMode ? "Cancel Select" : "Select"}
+          <CheckSquare className="w-5 h-5" />
+          {allBlogsSelected ? "Deselect All" : "Select All"}
         </Button>
-        {selectionMode && (
-          <Button
-            variant={allBlogsSelected ? "default" : "outline"}
-            onClick={onToggleSelectAllMode}
-            className="text-lg cursor-pointer flex items-center gap-1"
-          >
-            <CheckSquare className="w-5 h-5" />
-            {allBlogsSelected ? "Deselect All" : "Select All"}
-          </Button>
-        )}
 
         {/* New Post Button */}
         <Link href="/dashboard/manage-blogs/new">

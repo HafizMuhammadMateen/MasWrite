@@ -11,11 +11,10 @@ interface ManageBlogsListProps {
   totalPages: number;
   page: number;
   searchParams: URLSearchParams;
-  selectionMode?: boolean;
   allBlogsSelected?: boolean;
 }
 
-export default function ManageBlogsList({ blogs, totalPages, page, searchParams, selectionMode, allBlogsSelected }: ManageBlogsListProps) {
+export default function ManageBlogsList({ blogs, totalPages, page, searchParams, allBlogsSelected }: ManageBlogsListProps) {
   const router = useRouter();
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
@@ -59,16 +58,14 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
     <div className="flex-1 overflow-y-auto space-y-4 p-2">
       {blogs.map((blog) => (
         <div key={blog._id} className="flex items-center gap-3 w-full">
-          {selectionMode && (
-            <div className="flex">
-              <input
-                type="checkbox"
-                checked={selectedBlogs.includes(blog._id)}
-                onChange={() => toggleSelectBlog(blog._id)}
-                className="w-5 h-5 accent-blue-500 cursor-pointer mt-1"
-              />
-            </div>
-          )}
+          <div className="flex">
+            <input
+              type="checkbox"
+              checked={selectedBlogs.includes(blog._id)}
+              onChange={() => toggleSelectBlog(blog._id)}
+              className="w-5 h-5 accent-blue-500 cursor-pointer mt-1"
+            />
+          </div>
 
           <div className="flex-1">
             <BlogCard
@@ -91,7 +88,7 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
       ))}
 
       {/* Selection Mode Bulk Actions */}
-      {selectionMode && (selectedBlogs.length > 0) && (
+      {(selectedBlogs.length > 0) && (
         <div className="sticky bottom-0 bg-gray-100 border border-red-500 py-3 px-4 rounded-md flex justify-between items-center shadow">
           <p className="text-red-500">{selectedBlogs.length} selected</p>
           <button

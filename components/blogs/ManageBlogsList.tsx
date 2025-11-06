@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Blog } from "@/lib/types/blog";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import BlogCard from "@/components/blogs/BlogCard";
@@ -12,9 +12,10 @@ interface ManageBlogsListProps {
   page: number;
   searchParams: URLSearchParams;
   selectionMode?: boolean;
+  allBlogsSelected?: boolean;
 }
 
-export default function ManageBlogsList({ blogs, totalPages, page, searchParams, selectionMode }: ManageBlogsListProps) {
+export default function ManageBlogsList({ blogs, totalPages, page, searchParams, selectionMode, allBlogsSelected }: ManageBlogsListProps) {
   const router = useRouter();
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
@@ -25,6 +26,16 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
     router.push(`?${params.toString()}`);
   };
 
+  useEffect(() => {
+    if (allBlogsSelected) {
+      const allBlogSlugs = blogs.map((blog) => blog._id);
+      setSelectedBlogs(allBlogSlugs);
+    } else {
+      setSelectedBlogs([]);
+    }
+  }, [allBlogsSelected, blogs]);
+
+  // Toggle selection of individual blog
   const toggleSelectBlog = (slug: string) => {
     setSelectedBlogs((prev) =>
       prev.includes(slug) ? prev.filter((b) => b !== slug) : [...prev, slug]
@@ -80,7 +91,7 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
       ))}
 
       {/* Selection Mode Bulk Actions */}
-      {selectionMode && selectedBlogs.length > 0 && (
+      {selectionMode && (selectedBlogs.length > 0) && (
         <div className="sticky bottom-0 bg-gray-100 border border-red-500 py-3 px-4 rounded-md flex justify-between items-center shadow">
           <p className="text-red-500">{selectedBlogs.length} selected</p>
           <button

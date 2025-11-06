@@ -9,10 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Edit2 } from "lucide-react";
+import { ChevronDown, Edit2, Loader2, Trash } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Blog } from "@/lib/types/blog";
+import DeleteConfirmModal from "./DeleteConfirmModal";
+import toast from "react-hot-toast";
 
 interface ManageBlogHeaderProps {
   blogs: Blog[];
@@ -24,6 +26,7 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
   const router = useRouter();
   const searchParams = useSearchParams();
   const [deletingAllblogs, setDeletingAllblogs] = useState<string[] | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
@@ -44,9 +47,21 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
     router.push(`?${params.toString()}`);
   };
 
+  const handleClickDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowDeleteModal(true);
+  }
+
+  const handleConfirmDelete = async (slugs: string[]) => {
+    try {
+      await handleDeleteAllBlogs(slugs); // Trigger deletion (and wait for it to finish)
+    } finally {
+      setShowDeleteModal(false); // Only close the modal after delete completes
+    }
+  };
+
   const handleDeleteAllBlogs = async (slugs: string[]) => {
     try {
-      console.log("Deleting all selected blogs:", slugs);
       setDeletingAllblogs(slugs);
 
       const res = await fetch("/api/manage-blogs", {
@@ -56,17 +71,19 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
       });
 
       if (!res.ok) throw new Error("Delete failed");
-
       router.refresh();
+      toast.success("All selected blogs deleted successfully");
     } catch (err) {
       console.error("Error deleting blogs:", err);
+      toast.error("Error deleting blogs");
     } finally {
       setDeletingAllblogs(null);
     }
   };
 
+  // debounce for search typing
   useEffect(() => {
-    const delay = setTimeout(handleFilterChange, 300); // debounce for search typing
+    const delay = setTimeout(handleFilterChange, 300);
     return () => clearTimeout(delay);
   }, [q, status, category, sort]);
 
@@ -84,9 +101,19 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
           {allBlogsSelected && <Button
             variant="destructive"
             className="flex items-center cursor-pointer hover:bg-red-700 text-md"
-            onClick={handleDeleteAllBlogs.bind(null, blogs?.map((blog) => blog.slug))}
+            onClick={handleClickDelete}
             >
-              Delete All
+            {deletingAllblogs ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash className="w-6 h-6 mr-1" />
+                  Delete All
+                </>
+            )}
             </Button>
           }
         </div>
@@ -166,6 +193,13 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
           </Button>
         </Link>
       </div>
+      {/* Delete confirmation modal */}
+      <DeleteConfirmModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete.bind(null, blogs?.map((blog) => blog.slug))}
+        deleting={!!deletingAllblogs}
+      />
     </div>
   );
 }

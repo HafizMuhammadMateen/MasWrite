@@ -125,4 +125,39 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Note: PUT and DELETE handlers would go here as well, but are omitted for brevity.
+// Delete many blogs
+export async function DELETE(req: NextRequest) {
+  try {
+    await connectDB();
+    const { slugs } = await req.json();
+
+    if (!Array.isArray(slugs) || slugs.length === 0 ){
+      return error("No slugs provided", 400);
+    }
+
+    // Auth check
+    const token = req.cookies.get("token")?.value;
+    if (!token) {
+      return error("Unauthorized", 401);
+    }
+
+    const decodedToken = verifyToken(token);
+    if (!decodedToken?.userId) {
+      return error("Invalid token", 401);
+    }
+
+    // Delete blogs
+    const deleteResult = await Blog.deleteMany({
+      slug: { $in: slugs },
+    });
+
+    if (deleteResult.deletedCount === 0) return error("Blogs not found", 404);
+      
+    return NextResponse.json({ message: "All selected blogs Deleted" });
+  } catch (err) {
+    isDev && console.error("[DELETE All API] Blogs error:", err);
+    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+  }
+}
+
+// Note: PUT and DELETE handlers for single blog would go here as well, but are omitted for brevity.

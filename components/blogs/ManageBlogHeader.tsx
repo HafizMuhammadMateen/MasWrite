@@ -12,15 +12,18 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Edit2 } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Blog } from "@/lib/types/blog";
 
 interface ManageBlogHeaderProps {
+  blogs: Blog[];
   onToggleSelectAllBlogs?: () => void;
   allBlogsSelected?: boolean;
 }
 
-export default function ManageBlogHeader({ onToggleSelectAllBlogs, allBlogsSelected }: ManageBlogHeaderProps) {
+export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlogsSelected }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [deletingAllblogs, setDeletingAllblogs] = useState<string[] | null>(null);
 
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
@@ -41,6 +44,27 @@ export default function ManageBlogHeader({ onToggleSelectAllBlogs, allBlogsSelec
     router.push(`?${params.toString()}`);
   };
 
+  const handleDeleteAllBlogs = async (slugs: string[]) => {
+    try {
+      console.log("Deleting all selected blogs:", slugs);
+      setDeletingAllblogs(slugs);
+
+      const res = await fetch("/api/manage-blogs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slugs }),
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
+
+      router.refresh();
+    } catch (err) {
+      console.error("Error deleting blogs:", err);
+    } finally {
+      setDeletingAllblogs(null);
+    }
+  };
+
   useEffect(() => {
     const delay = setTimeout(handleFilterChange, 300); // debounce for search typing
     return () => clearTimeout(delay);
@@ -48,15 +72,27 @@ export default function ManageBlogHeader({ onToggleSelectAllBlogs, allBlogsSelec
 
   return (
     <div className="flex items-center justify-between mb-6 flex-shrink-0 mx-3">
-      <div className="flex items-center gap-4">
-        {/* Select all blogs button */}
-        <input
-          type="checkbox"
-          onClick={onToggleSelectAllBlogs}
-          className="w-5 h-5 accent-blue-500 cursor-pointer"
-        />
-        <h1 className="text-3xl font-bold text-gray-800">Manage Your Blogs</h1>
-      </div>
+      {/* Select all blogs button */}
+      {(blogs.length > 0) && 
+        <div className="flex items-center justify-between gap-4">
+          <input
+            type="checkbox"
+            onClick={onToggleSelectAllBlogs}
+            className="w-5 h-5 accent-blue-500 cursor-pointer"
+          />
+          {/* Bulk Delete button */}
+          {allBlogsSelected && <Button
+            variant="destructive"
+            className="flex items-center cursor-pointer hover:bg-red-700 text-md"
+            onClick={handleDeleteAllBlogs.bind(null, blogs?.map((blog) => blog.slug))}
+            >
+              Delete All
+            </Button>
+          }
+        </div>
+      }
+
+      <h1 className="text-3xl font-bold text-gray-800">Manage Your Blogs</h1>
 
       <div className="flex items-center gap-3 flex-shrink-0">
         {/* Search Filter */}

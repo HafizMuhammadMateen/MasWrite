@@ -25,6 +25,7 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
     router.push(`?${params.toString()}`);
   };
 
+  // Update selected blogs when allBlogsSelected changes
   useEffect(() => {
     if (allBlogsSelected) {
       const allBlogSlugs = blogs.map((blog) => blog._id);

@@ -63,7 +63,7 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
               type="checkbox"
               checked={selectedBlogs.includes(blog._id)}
               onChange={() => toggleSelectBlog(blog._id)}
-              className="w-5 h-5 accent-blue-500 cursor-pointer mt-1"
+              className="w-5 h-5 accent-blue-500 cursor-pointer"
             />
           </div>
 

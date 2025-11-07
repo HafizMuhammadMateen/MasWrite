@@ -10,13 +10,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import { useState } from "react";
+import { FaRegCopy } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 interface BlogCardProps {
   id: string
   title: string;
   slug: string;
   excerpt: string;
-  content?: string;
+  content?: string;     // for dublicating purpose
   authorName: string;
   readingTime: number;
   views: number;
@@ -25,13 +27,16 @@ interface BlogCardProps {
   status?: "published" | "draft";
   onDelete?: (slug: string) => void;
   deleting?: boolean;
-  publishedAt?: string; // ISO string
+  category?: string,
+  createdAt?: string,   // only for, if published is missing (Drafted blog)
+  publishedAt?: string, // ISO string
 }
 
 export default function BlogCard({
   id,
   title,
   slug,
+  content,
   excerpt,
   authorName,
   readingTime,
@@ -41,10 +46,13 @@ export default function BlogCard({
   status,
   onDelete,
   deleting = false,
+  category,
+  createdAt,
   publishedAt,
 }: BlogCardProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [dublicating, setDublicating] = useState(false);
 
   const handleClickDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,7 +67,34 @@ export default function BlogCard({
       setShowDeleteModal(false); // Only close the modal after delete completes
     }
   };
+  
+  const makeDublicateBlog = async(e: React.MouseEvent) => {
+    try {
+      e.preventDefault();
+      setDublicating(true);
+      const res = await fetch("/api/manage-blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          title: title + "-copied", 
+          content,
+          authorName,
+          tags,
+          category,
+          status,
+          publishedAt
+        }),
+      })
 
+      if (!res.ok) throw new Error("Failed to dublicate blog");
+      toast.success("Blog dublicated!");
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong.");
+    } finally {
+      setDublicating(false);
+    }
+  }
   return (
     <>
       <Card className="bg-gray-100 pb-4 transition-all duration-200 hover:shadow-md hover:-translate-y-1 hover:z-[1]">
@@ -119,7 +154,21 @@ export default function BlogCard({
                     </Button>
                   </div>
                   <Separator orientation="vertical"/> 
-                  <div className="flex items-center gap-2">  
+                  <div className="flex items-center gap-2">
+                    {/* Dublicate Button */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="cursor-pointer"
+                      onClick={makeDublicateBlog}
+                    >
+                      {dublicating ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <FaRegCopy className="w-6 h-6" />
+                      )}
+                    </Button>
+
                     {/* Edit Button */}
                     <Button
                       variant="outline"
@@ -170,12 +219,21 @@ export default function BlogCard({
                   <span>{views ?? 0} views</span>
                 </div>
               </div>
-              {publishedAt && (
+              {(publishedAt && (
                 <div className="flex flex-wrap items-center gap-1 text-gray-400 cursor-default">
+                  {isDashboardBlogs && (<>Published At:</>)}
                   <Calendar className="w-4 h-4" />
                   <span>{new Date(publishedAt).toLocaleDateString()}</span>
                 </div>
-              )}
+              )) 
+              ||
+              (createdAt && (
+                <div className="flex flex-wrap items-center gap-1 text-gray-400 cursor-default">
+                  {isDashboardBlogs && (<>Created At:</>)}
+                  <Calendar className="w-4 h-4" />
+                  <span>{new Date(createdAt).toLocaleDateString()}</span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Link>

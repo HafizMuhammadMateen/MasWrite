@@ -33,6 +33,7 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
               readingTime={blog.readingTime}
               views={blog.views}
               tags={blog.tags}
+              createdAt={blog.createdAt}   // only for, if published is missing (Drafted blog)
               publishedAt={blog.publishedAt}
             />
           ))}

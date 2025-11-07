@@ -74,6 +74,7 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
               id={blog._id}
               title={blog.title}
               slug={blog.slug}
+              content={blog.content}     // for dublicating purpose
               excerpt={blog.content.slice(0, 100)}
               authorName={typeof blog.author === "string" 
                 ? blog.author 
@@ -86,6 +87,8 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
               status={blog.status as "published" | "draft"}
               onDelete={handleDelete}
               deleting={deletingSlug === blog.slug}
+              category={blog.category}
+              createdAt={blog.createdAt}
               publishedAt={blog.publishedAt}
             />
           </div>

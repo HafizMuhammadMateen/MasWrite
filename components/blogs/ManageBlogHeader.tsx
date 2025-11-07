@@ -19,11 +19,11 @@ import toast from "react-hot-toast";
 interface ManageBlogHeaderProps {
   blogs: Blog[];
   onToggleSelectAllBlogs?: () => void;
-  allBlogsSelected?: boolean;
+  bulkBlogsSelected?: boolean;
   selectedBlogsCount: number;
 }
 
-export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlogsSelected, selectedBlogsCount }: ManageBlogHeaderProps) {
+export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, bulkBlogsSelected, selectedBlogsCount }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [deletingAllblogs, setDeletingAllblogs] = useState<string[] | null>(null);
@@ -99,7 +99,7 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
             className="w-5 h-5 accent-blue-500 cursor-pointer"
           />
           {/* Bulk Delete button */}
-          {allBlogsSelected && <Button
+          {bulkBlogsSelected && <Button
             variant="destructive"
             className="flex items-center cursor-pointer hover:bg-red-700 text-md"
             onClick={handleClickDelete}
@@ -112,7 +112,7 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, allBlo
               ) : (
                 <>
                   <Trash className="w-6 h-6 mr-1" />
-                  Delete All
+                  Delete selection
                 </>
             )}
             </Button>

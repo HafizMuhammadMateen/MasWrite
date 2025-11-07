@@ -11,12 +11,12 @@ interface ManageBlogsListProps {
   totalPages: number;
   page: number;
   searchParams: URLSearchParams;
-  allBlogsSelected?: boolean;
+  bulkBlogsSelected?: boolean;
   selectedBlogs: string[];
   setSelectedBlogs: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export default function ManageBlogsList({ blogs, totalPages, page, searchParams, allBlogsSelected, selectedBlogs, setSelectedBlogs }: ManageBlogsListProps) {
+export default function ManageBlogsList({ blogs, totalPages, page, searchParams, bulkBlogsSelected, selectedBlogs, setSelectedBlogs }: ManageBlogsListProps) {
   const router = useRouter();
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
 
@@ -26,15 +26,15 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
     router.push(`?${params.toString()}`);
   };
 
-  // Update selected blogs when allBlogsSelected changes
+  // Update selected blogs when bulkBlogsSelected changes
   useEffect(() => {
-    if (allBlogsSelected) {
+    if (bulkBlogsSelected) {
       const allBlogSlugs = blogs.map((blog) => blog._id);
       setSelectedBlogs(allBlogSlugs);
     } else {
       setSelectedBlogs([]);
     }
-  }, [allBlogsSelected, blogs]);
+  }, [bulkBlogsSelected, blogs]);
 
   // Toggle selection of individual blog
   const toggleSelectBlog = (id: string) => {

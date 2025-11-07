@@ -140,6 +140,7 @@ export default function BlogCard({
                   <div className="">
                     {/* Status Field */}
                     <Button
+                      title="Status"
                       variant="blogStatus"
                       size="md"
                       className={cn(
@@ -157,6 +158,7 @@ export default function BlogCard({
                   <div className="flex items-center gap-2">
                     {/* Dublicate Button */}
                     <Button
+                      title="Dublicate"
                       variant="outline"
                       size="icon"
                       className="cursor-pointer"
@@ -171,6 +173,7 @@ export default function BlogCard({
 
                     {/* Edit Button */}
                     <Button
+                      title="Edit"
                       variant="outline"
                       size="icon"
                       className="cursor-pointer"
@@ -184,6 +187,7 @@ export default function BlogCard({
 
                     {/* Delete Button */}
                     <Button
+                      title="Delete"
                       variant="destructive"
                       size="icon"
                       className="cursor-pointer hover:bg-red-700"

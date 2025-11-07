@@ -129,10 +129,10 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     await connectDB();
-    const { slugs } = await req.json();
+    const ids = await req.json();
 
-    if (!Array.isArray(slugs) || slugs.length === 0 ){
-      return error("No slugs provided", 400);
+    if (!Array.isArray(ids) || ids.length === 0 ){
+      return error("No ids provided", 400);
     }
 
     // Auth check
@@ -148,7 +148,7 @@ export async function DELETE(req: NextRequest) {
 
     // Delete blogs
     const deleteResult = await Blog.deleteMany({
-      slug: { $in: slugs },
+      _id: { $in: ids },
     });
 
     if (deleteResult.deletedCount === 0) return error("Blogs not found", 404);

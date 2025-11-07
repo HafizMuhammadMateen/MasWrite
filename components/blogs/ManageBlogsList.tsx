@@ -11,7 +11,7 @@ interface ManageBlogsListProps {
   totalPages: number;
   page: number;
   searchParams: URLSearchParams;
-  bulkBlogsSelected?: boolean;
+  bulkBlogsSelected: boolean;
   selectedBlogs: string[];
   setSelectedBlogs: React.Dispatch<React.SetStateAction<string[]>>;
 }

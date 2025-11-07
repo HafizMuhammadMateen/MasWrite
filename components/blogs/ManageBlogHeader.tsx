@@ -12,21 +12,18 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Edit2, Loader2, Trash } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Blog } from "@/lib/types/blog";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import toast from "react-hot-toast";
 
 interface ManageBlogHeaderProps {
-  blogs: Blog[];
-  onToggleSelectAllBlogs?: () => void;
-  bulkBlogsSelected?: boolean;
-  selectedBlogsCount: number;
+  onToggleSelectBulkBlogs: () => void;
+  selectedBlogs: string[];
 }
 
-export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, bulkBlogsSelected, selectedBlogsCount }: ManageBlogHeaderProps) {
+export default function ManageBlogHeader({ onToggleSelectBulkBlogs, selectedBlogs }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [deletingAllblogs, setDeletingAllblogs] = useState<string[] | null>(null);
+  const [deletingSelectedBlogs, setDeletingSelectedBlogs] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [status, setStatus] = useState("");
@@ -53,22 +50,13 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, bulkBl
     setShowDeleteModal(true);
   }
 
-  const handleConfirmDelete = async (slugs: string[]) => {
+  const handleConfirmDelete = async () => {
     try {
-      await handleDeleteAllBlogs(slugs); // Trigger deletion (and wait for it to finish)
-    } finally {
-      setShowDeleteModal(false); // Only close the modal after delete completes
-    }
-  };
-
-  const handleDeleteAllBlogs = async (slugs: string[]) => {
-    try {
-      setDeletingAllblogs(slugs);
-
+      setDeletingSelectedBlogs(true);
       const res = await fetch("/api/manage-blogs", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slugs }),
+        body: JSON.stringify(selectedBlogs),
       });
 
       if (!res.ok) throw new Error("Delete failed");
@@ -78,7 +66,8 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, bulkBl
       console.error("Error deleting blogs:", err);
       toast.error("Error deleting blogs");
     } finally {
-      setDeletingAllblogs(null);
+      setDeletingSelectedBlogs(false);
+      setShowDeleteModal(false); // Only close the modal after delete completes
     }
   };
 
@@ -90,40 +79,39 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, bulkBl
 
   return (
     <div className="flex items-center justify-between mb-6 flex-shrink-0 mx-3">
-      {/* Select all blogs button */}
-      {(blogs.length > 0) && 
-        <div className="flex items-center justify-between gap-4">
-          <input
-            type="checkbox"
-            onClick={onToggleSelectAllBlogs}
-            className="w-5 h-5 accent-blue-500 cursor-pointer"
-          />
-          {/* Bulk Delete button */}
-          {bulkBlogsSelected && <Button
-            variant="destructive"
-            className="flex items-center cursor-pointer hover:bg-red-700 text-md"
-            onClick={handleClickDelete}
-            >
-            {deletingAllblogs ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash className="w-6 h-6 mr-1" />
-                  Delete selection
-                </>
-            )}
+      <div className="flex items-center justify-between gap-4">
+        {/* Select all blogs checkbox */}
+        <input
+          type="checkbox"
+          onClick={onToggleSelectBulkBlogs}
+          className="w-5 h-5 accent-blue-500 cursor-pointer"
+        />
+        {/* Bulk Delete button */}
+        {selectedBlogs.length > 0 && 
+          <>
+            <Button
+              variant="destructive"
+              className="flex items-center cursor-pointer hover:bg-red-700 text-md"
+              onClick={handleClickDelete}
+              >
+              {deletingSelectedBlogs ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                    {/* Deleting... */}
+                  </>
+                ) : (
+                  <>
+                    <Trash className="w-6 h-6 mr-1" />
+                    Delete selection
+                  </>
+              )}
             </Button>
-          }
-          {(selectedBlogsCount > 0) && (
             <div className="sticky bottom-0 bg-gray-100 border border-red-500 py-2 px-4 rounded-md flex justify-between items-center shadow">
-              <p className="text-red-500">{selectedBlogsCount} selected</p>
+              <p className="text-red-500">{selectedBlogs.length} selected</p>
             </div>
-          )}
-        </div>
-      }
+          </>
+        }
+      </div>
 
       <h1 className="text-3xl font-bold text-gray-800">Manage Your Blogs</h1>
 
@@ -203,8 +191,8 @@ export default function ManageBlogHeader({ blogs, onToggleSelectAllBlogs, bulkBl
       <DeleteConfirmModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleConfirmDelete.bind(null, blogs?.map((blog) => blog.slug))}
-        deleting={!!deletingAllblogs}
+        onConfirm={handleConfirmDelete}
+        deleting={deletingSelectedBlogs}
       />
     </div>
   );

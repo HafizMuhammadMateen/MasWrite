@@ -22,7 +22,7 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
             <BlogCard
               key={blog._id || blog.slug}
               title={blog.title}
-              excerpt={blog.content}
+              excerpt={blog.content?.slice(0, 100)}
               slug={blog.slug}
               authorName={
                 typeof blog.author === "string"

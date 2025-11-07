@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BlogCardProps } from "@/lib/types/blog";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { User, Clock, Eye, Calendar, Edit, Trash, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -12,29 +11,38 @@ import { cn } from "@/lib/utils";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import { useState } from "react";
 
-interface ExtendedBlogCardProps extends BlogCardProps {
+interface BlogCardProps {
+  id: string
+  title: string;
+  slug: string;
+  excerpt: string;
+  content?: string;
+  authorName: string;
+  readingTime: number;
+  views: number;
+  tags: string[];
   isDashboardBlogs?: boolean;
+  status?: "published" | "draft";
   onDelete?: (slug: string) => void;
   deleting?: boolean;
-  status?: "published" | "draft"; // optional status prop
-  id: string
+  publishedAt?: string; // ISO string
 }
 
 export default function BlogCard({
+  id,
   title,
   slug,
-  authorName,
   excerpt,
-  publishedAt,
+  authorName,
   readingTime,
   views,
   tags,
   isDashboardBlogs,
+  status,
   onDelete,
   deleting = false,
-  status,
-  id
-}: ExtendedBlogCardProps) {
+  publishedAt,
+}: BlogCardProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -95,6 +103,7 @@ export default function BlogCard({
               {isDashboardBlogs && (
                 <div className="flex items-center gap-4">
                   <div className="">
+                    {/* Status Field */}
                     <Button
                       variant="blogStatus"
                       size="md"

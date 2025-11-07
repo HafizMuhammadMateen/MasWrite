@@ -71,19 +71,22 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
 
           <div className="flex-1">
             <BlogCard
+              id={blog._id}
               title={blog.title}
               slug={blog.slug}
-              authorName={typeof blog.author === "string" ? blog.author : blog.author?.userName}
-              excerpt={blog.content?.slice(0, 100)}
-              publishedAt={blog.publishedAt}
+              excerpt={blog.content.slice(0, 100)}
+              authorName={typeof blog.author === "string" 
+                ? blog.author 
+                : blog.author?.userName
+              }
               readingTime={blog.readingTime}
               views={blog.views}
               tags={blog.tags}
               isDashboardBlogs
               status={blog.status as "published" | "draft"}
-              id={blog._id}
               onDelete={handleDelete}
               deleting={deletingSlug === blog.slug}
+              publishedAt={blog.publishedAt}
             />
           </div>
         </div>

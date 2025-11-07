@@ -21,19 +21,19 @@ export default function RecentBlogs({ blogs }: RecentBlogsProps) {
           {latestBlogs.map((blog) => (
             <BlogCard
               key={blog._id || blog.slug}
+              id={blog._id}
               title={blog.title}
-              excerpt={blog.content?.slice(0, 100)}
               slug={blog.slug}
+              excerpt={blog.content.slice(0, 100)}
               authorName={
                 typeof blog.author === "string"
                   ? blog.author
                   : blog.author?.userName || "Unknown"
               }
-              publishedAt={blog.publishedAt}
               readingTime={blog.readingTime}
               views={blog.views}
               tags={blog.tags}
-              id={blog._id}
+              publishedAt={blog.publishedAt}
             />
           ))}
         </div>

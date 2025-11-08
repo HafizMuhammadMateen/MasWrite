@@ -212,7 +212,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
 
         {/* New Post Button */}
         <Link href="/dashboard/manage-blogs/new">
-          <Button variant="newPostButton" className="text-md">
+          <Button variant="primary">
             <Edit2 className="w-5 h-5" /> New Post
           </Button>
         </Link>

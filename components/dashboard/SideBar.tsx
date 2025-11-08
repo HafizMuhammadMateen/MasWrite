@@ -65,10 +65,8 @@ export default function SideBar() {
       {/* New Post */}
       <Link href="/dashboard/manage-blogs/new" className="mb-4 ">
         <Button
-          variant="default"
-          className={`flex items-center justify-center gap-3   w-full rounded-full py-5 text-base text-lg font-bold transition-all cursor-pointer ${
-            collapsed ? "px-0 justify-center" : "px-4"
-          }`}
+          variant="primary"
+          className="flex gap-3 w-full py-5.5"
         >
           <Edit className="w-5 h-5" strokeWidth={2}/>
           {!collapsed && "New Post"}

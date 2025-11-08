@@ -42,12 +42,12 @@ export default function DeleteConfirmModal({
             {deleting ? (
               <>
                 Deleting
-                <Loader2 className="w-4 h-4 ml-1 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               </>
             ) : (
               <>
-                <Trash className="w-4 h-4 mr-1" />
-                Yes, Delete
+                <Trash className="w-4 h-4" />
+                Delete
               </>
             )}
           </Button>

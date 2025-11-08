@@ -36,20 +36,20 @@ export default function DublicateConfirmModal({
           </Button>
 
           <Button
-            variant="secondary"
+            variant="primary"
             onClick={onConfirm}
             disabled={dublicating}
-            className="hover:bg-red-700 cursor-pointer"
+            className="text-sm cursor-pointer"
           >
             {dublicating ? (
               <>
                 Dublicating
-                <Loader2 className="w-4 h-4 ml-1 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               </>
             ) : (
               <>
-                <FaRegCopy className="w-4 h-4 mr-1" />
-                Yes, Dublicate
+                <FaRegCopy className="w-4 h-4" />
+                Dublicate
               </>
             )}
           </Button>

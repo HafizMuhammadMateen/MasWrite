@@ -20,14 +20,10 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         blogStatus: "rounded-md font-medium text-white text-sm focus:outline-none disabled:pointer-events-none dark:hover:bg-input/50",
-        newPostButton: `
-          bg-[var(--primary)] text-[var(--primary-foreground)]
-          rounded-md font-semibold px-4 py-2 cursor-pointer
-          transition-all duration-200
-          hover:shadow-md hover:scale-105
-          focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--primary-foreground)]
-          dark:bg-[var(--primary)] dark:text-[var(--primary-foreground)]
-          dark:hover:shadow-lg dark:hover:scale-105
+        primary: `
+          bg-primary text-primary-foreground font-semibold text-md
+          hover:shadow-md hover:bg-primary/90
+          rounded-md px-4 py-2 cursor-pointer
         `
       },
       size: {

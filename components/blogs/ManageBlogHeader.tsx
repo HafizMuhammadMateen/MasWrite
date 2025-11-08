@@ -90,25 +90,21 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
         {/* Bulk Delete button */}
         {isBlog && selectedBlogs.length > 0 && 
           <>
-            <Button
-              variant="destructive"
-              className="flex items-center cursor-pointer hover:bg-red-700 text-md"
-              onClick={handleClickDelete}
-              >
-              {deletingSelectedBlogs ? (
-                  <>
-                    Deleting
-                    <Loader2 className="w-4 h-4 ml-1 animate-spin" />
-                  </>
-                ) : (
-                  <>
-                    <Trash className="w-6 h-6 mr-1" />
-                    Delete selection
-                  </>
-              )}
-            </Button>
-            <div className="sticky bottom-0 bg-gray-100 border border-red-500 py-2 px-4 rounded-md flex justify-between items-center shadow">
-              <p className="text-red-500">{selectedBlogs.length} selected</p>
+            {/* Bulk Action Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="text-lg cursor-pointer">
+                  {status ? `Action: ${status}` : "Bulk Action"}
+                  <ChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem className="text-md cursor-pointer" variant="destructive" onClick={handleClickDelete}>Delete selection</DropdownMenuItem>
+                <DropdownMenuItem className="text-md cursor-pointer" variant="default" onClick={()=>{}}>Dublicate selection</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div className="sticky bottom-0 border border-primary py-1 px-4 rounded-sm flex justify-between items-center">
+              <p className="text-primary">{selectedBlogs.length} selected</p>
             </div>
           </>
         }
@@ -135,10 +131,10 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("newest")}>Newest First</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("oldest")}>Oldest First</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("updated")}>Recently Updated</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("published")}>Recently Published</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("newest")}>Newest First</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("oldest")}>Oldest First</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("updated")}>Recently Updated</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("published")}>Recently Published</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -151,9 +147,9 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setStatus("")}>All</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setStatus("published")}>Published</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setStatus("draft")}>Draft</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("")}>All</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("published")}>Published</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("draft")}>Draft</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -166,9 +162,9 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="max-h-64 overflow-y-auto text-md">
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setCategory("")}>All</DropdownMenuItem>
+            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setCategory("")}>All</DropdownMenuItem>
             {BLOG_CATEGORIES.map((cat) => (
-              <DropdownMenuItem className="text-lg cursor-pointer" key={cat} onClick={() => setCategory(cat)}>
+              <DropdownMenuItem className="text-md cursor-pointer" key={cat} onClick={() => setCategory(cat)}>
                 {cat}
               </DropdownMenuItem>
             ))}

@@ -25,9 +25,25 @@ export async function GET(req: NextRequest) {
     const blogsPerPage = parseInt(searchParams.get("limit") || "6", 10);
     const authorParam = searchParams.get("author");
     const tagsParam = searchParams.get("tags")?.split(",") || [];
-    const sortBy = searchParams.get("sort") || "updatedAt";
     const statusParam = searchParams.get("status") || "";
     const categoryParam = searchParams.get("category") || "";
+    const sortParams = searchParams.get("sort") || "updated";
+    let sortBy: Record<string, 1 | -1> = {updateAt: -1}; // default
+
+    switch (sortParams) {
+      case "newest":
+        sortBy = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortBy = { createdAt: 1 };
+        break;
+      case "updated":
+        sortBy = { updatedAt: -1 };
+        break;
+      case "published":
+        sortBy = { publishedAt: -1 };
+        break;
+    }
 
     // 3. Build MongoDB filter — only user's blogs
     const filter: Record<string, any> = { author: decodedToken.userId };
@@ -45,7 +61,7 @@ export async function GET(req: NextRequest) {
     // 5. Fetch paginated blogs
     const blogs = await Blog.find(filter)
       .populate("author", "userName email")
-      .sort({ [sortBy]: -1 })
+      .sort(sortBy)
       .skip((currentPage - 1) * blogsPerPage)
       .limit(blogsPerPage);
 

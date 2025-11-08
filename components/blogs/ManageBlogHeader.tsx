@@ -134,16 +134,10 @@ export default function ManageBlogHeader({ onToggleSelectBulkBlogs, selectedBlog
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("")}>All</DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("createdAt")}>
-              Created At
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("publishedAt")}>
-              Published At
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("updatedAt")}>
-              Updated At
-            </DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("newest")}>Newest First</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("oldest")}>Oldest First</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("updated")}>Recently Updated</DropdownMenuItem>
+            <DropdownMenuItem className="text-lg cursor-pointer" onClick={() => setSort("published")}>Recently Published</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 

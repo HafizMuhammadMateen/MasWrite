@@ -76,7 +76,7 @@ export default function BlogCard({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          title: title + "-copied", 
+          title: title + " - Copied", 
           content,
           authorName,
           tags,

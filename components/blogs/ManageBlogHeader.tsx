@@ -13,6 +13,7 @@ import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Blog } from "@/lib/types/blog";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import DublicateConfirmModal from "./DublicateConfirmModal"
 import toast from "react-hot-toast";
 import Link from "next/link";
 
@@ -26,6 +27,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDublicateModal, setShowDublicateModal] = useState(false);
   const [deletingBulk, setDeletingBulk] = useState(false);
   const [dublicatingBulk, setDublicatingBulk] = useState(false);
 
@@ -73,10 +75,14 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
       setShowDeleteModal(false); // Only close the modal after delete completes
     }
   };
-  
-  const handleConfirmDublicate = async(e: React.MouseEvent) => {
+
+  const handleClickDublicate = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowDublicateModal(true);
+  }
+
+  const handleConfirmDublicate = async() => {
     try {
-      e.preventDefault();
       setDublicatingBulk(true);
 
       const blogsToDublicate = selectedBlogs.map((blog: Blog) => { 
@@ -101,6 +107,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
       toast.error("Something went wrong.");
     } finally {
       setDublicatingBulk(false);
+      setShowDublicateModal(false);
     }
   }
 
@@ -132,7 +139,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem className="text-md cursor-pointer" variant="destructive" onClick={handleClickDelete}>Delete selection</DropdownMenuItem>
-                <DropdownMenuItem className="text-md cursor-pointer" variant="default" onClick={handleConfirmDublicate}>Dublicate selection</DropdownMenuItem> 
+                <DropdownMenuItem className="text-md cursor-pointer" variant="default" onClick={handleClickDublicate}>Dublicate selection</DropdownMenuItem> 
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="sticky bottom-0 border border-primary py-1 px-4 rounded-sm flex justify-between items-center">
@@ -210,6 +217,14 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
           </Button>
         </Link>
       </div>
+
+      {/* Dublicate confirmation modal */}
+      <DublicateConfirmModal
+        open={showDublicateModal}
+        onClose={() => setShowDublicateModal(false)}
+        onConfirm={handleConfirmDublicate}
+        dublicating={dublicatingBulk}
+      />
 
       {/* Delete confirmation modal */}
       <DeleteConfirmModal

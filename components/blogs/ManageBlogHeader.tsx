@@ -35,6 +35,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("");
   const [q, setQ] = useState("");
+  const [categorySearch, setCategorySearch] = useState("");
 
   const handleFilterChange = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -120,16 +121,15 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
   return (
     <div className="flex items-center justify-between mb-6 flex-shrink-0 mx-3">
       <div className="flex items-center justify-between gap-4">
-        {/* Select all blogs checkbox */}
+        {/* Bulk Select Checkbox */}
         {isBlog && <input
           type="checkbox"
           onClick={onToggleSelectBulkBlogs}
           className="w-5 h-5 accent-blue-500 cursor-pointer"
         />}
-        {/* Bulk Delete button */}
+        {/* Bulk Action Dropdown */}
         {isBlog && selectedBlogs.length > 0 && 
           <>
-            {/* Bulk Action Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="text-lg cursor-pointer">
@@ -158,7 +158,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
           placeholder="Search by title..."
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          className="text-lg border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="text-lg border rounded px-3 py-1 focus:outline-none focus:ring-1 focus:ring-primary"
         />
 
         {/* Sort Dropdown */}
@@ -200,13 +200,45 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
               <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="max-h-64 overflow-y-auto text-md">
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setCategory("")}>All</DropdownMenuItem>
-            {BLOG_CATEGORIES.map((cat) => (
-              <DropdownMenuItem className="text-md cursor-pointer" key={cat} onClick={() => setCategory(cat)}>
-                {cat}
-              </DropdownMenuItem>
-            ))}
+          <DropdownMenuContent className="w-56 text-md border bg-white shadow-lg rounded-md">
+            {/* Search input stays fixed at top */}
+            <div className="sticky top-0 bg-white z-10 p-1">
+              <input
+                type="text"
+                placeholder="Search categories..."
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                className="text-md border rounded px-3 py-1 w-full focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+
+            {/* Scrollable list */}
+            <div className="max-h-64 overflow-y-auto">
+              {["All", ...BLOG_CATEGORIES]
+                .filter((cat) =>
+                  cat === "All" ? true : cat.toLowerCase().includes(categorySearch.toLowerCase())
+                )
+                .map((cat) => (
+                  <DropdownMenuItem
+                    key={cat}
+                    className="text-md cursor-pointer"
+                    onMouseDown={(e) => e.preventDefault()} // prevent input losing focus
+                    onClick={() => {
+                      setCategory(cat === "All" ? "" : cat);
+                      setCategorySearch("");
+                    }}
+                  >
+                    {cat}
+                  </DropdownMenuItem>
+                ))}
+
+              {/* No categories found, show message */}
+              {BLOG_CATEGORIES.filter((cat) =>
+                cat.toLowerCase().includes(categorySearch.toLowerCase())
+              ).length === 0 && categorySearch && (
+                <div className="px-3 py-1 text-gray-500 text-center">No categories found</div>
+              )}
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
 

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Edit2, Loader2, Trash } from "lucide-react";
+import { ChevronDown, Edit2 } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Blog } from "@/lib/types/blog";
@@ -25,8 +25,9 @@ interface ManageBlogHeaderProps {
 export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, selectedBlogs }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [deletingSelectedBlogs, setDeletingSelectedBlogs] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingBulk, setDeletingBulk] = useState(false);
+  const [dublicatingBulk, setDublicatingBulk] = useState(false);
 
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
@@ -54,7 +55,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
 
   const handleConfirmDelete = async () => {
     try {
-      setDeletingSelectedBlogs(true);
+      setDeletingBulk(true);
       const res = await fetch("/api/manage-blogs", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -68,10 +69,40 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
       console.error("Error deleting blogs:", err);
       toast.error("Error deleting blogs");
     } finally {
-      setDeletingSelectedBlogs(false);
+      setDeletingBulk(false);
       setShowDeleteModal(false); // Only close the modal after delete completes
     }
   };
+  
+  const handleConfirmDublicate = async(e: React.MouseEvent) => {
+    try {
+      e.preventDefault();
+      setDublicatingBulk(true);
+
+      const blogsToDublicate = selectedBlogs.map((blog: Blog) => { 
+        return { 
+          ...blog, 
+          title: blog.title + " - Copied", 
+        } 
+      });
+      console.log("blogsToDublicate: ", blogsToDublicate)
+      const res = await fetch("/api/manage-blogs/dublicate-blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          blogsToDublicate
+        }),
+      })
+
+      if (!res.ok) throw new Error("Failed to dublicate blog");
+      router.refresh();
+      toast.success("Selected blogs dublicated!");
+    } catch {
+      toast.error("Something went wrong.");
+    } finally {
+      setDublicatingBulk(false);
+    }
+  }
 
   // debounce for search typing
   useEffect(() => {
@@ -101,6 +132,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem className="text-md cursor-pointer" variant="destructive" onClick={handleClickDelete}>Delete selection</DropdownMenuItem>
+                <DropdownMenuItem className="text-md cursor-pointer" variant="default" onClick={handleConfirmDublicate}>Dublicate selection</DropdownMenuItem> 
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="sticky bottom-0 border border-primary py-1 px-4 rounded-sm flex justify-between items-center">
@@ -178,12 +210,13 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
           </Button>
         </Link>
       </div>
+
       {/* Delete confirmation modal */}
       <DeleteConfirmModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
-        deleting={deletingSelectedBlogs}
+        deleting={deletingBulk}
       />
     </div>
   );

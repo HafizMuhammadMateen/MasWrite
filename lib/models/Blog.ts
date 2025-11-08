@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-function slugify(title: string, blogId: string) {
+export function slugify(title: string, blogId: string) {
   const slug = title
     .toLowerCase()
     .trim()

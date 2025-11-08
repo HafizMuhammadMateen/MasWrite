@@ -19,6 +19,7 @@ export default function ManageBlogsListWrapper({ blogs, totalPages, page, search
   return (
     <>
       <ManageBlogHeader
+        isBlog={blogs.length > 0}
         onToggleSelectBulkBlogs={() => setBulkBlogsSelected((prev) => !prev)}
         selectedBlogs={selectedBlogs}
       />

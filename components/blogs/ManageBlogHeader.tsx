@@ -16,11 +16,12 @@ import DeleteConfirmModal from "./DeleteConfirmModal";
 import toast from "react-hot-toast";
 
 interface ManageBlogHeaderProps {
+  isBlog: boolean;
   onToggleSelectBulkBlogs: () => void;
   selectedBlogs: string[];
 }
 
-export default function ManageBlogHeader({ onToggleSelectBulkBlogs, selectedBlogs }: ManageBlogHeaderProps) {
+export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, selectedBlogs }: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [deletingSelectedBlogs, setDeletingSelectedBlogs] = useState(false);
@@ -81,13 +82,13 @@ export default function ManageBlogHeader({ onToggleSelectBulkBlogs, selectedBlog
     <div className="flex items-center justify-between mb-6 flex-shrink-0 mx-3">
       <div className="flex items-center justify-between gap-4">
         {/* Select all blogs checkbox */}
-        <input
+        {isBlog && <input
           type="checkbox"
           onClick={onToggleSelectBulkBlogs}
           className="w-5 h-5 accent-blue-500 cursor-pointer"
-        />
+        />}
         {/* Bulk Delete button */}
-        {selectedBlogs.length > 0 && 
+        {isBlog && selectedBlogs.length > 0 && 
           <>
             <Button
               variant="destructive"
@@ -96,8 +97,8 @@ export default function ManageBlogHeader({ onToggleSelectBulkBlogs, selectedBlog
               >
               {deletingSelectedBlogs ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                    {/* Deleting... */}
+                    Deleting
+                    <Loader2 className="w-4 h-4 ml-1 animate-spin" />
                   </>
                 ) : (
                   <>

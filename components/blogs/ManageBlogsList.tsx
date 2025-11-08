@@ -12,8 +12,8 @@ interface ManageBlogsListProps {
   page: number;
   searchParams: URLSearchParams;
   bulkBlogsSelected: boolean;
-  selectedBlogs: string[];
-  setSelectedBlogs: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedBlogs: Blog[];
+  setSelectedBlogs: React.Dispatch<React.SetStateAction<Blog[]>>;
 }
 
 export default function ManageBlogsList({ blogs, totalPages, page, searchParams, bulkBlogsSelected, selectedBlogs, setSelectedBlogs }: ManageBlogsListProps) {
@@ -29,17 +29,18 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
   // Update selected blogs when bulkBlogsSelected changes
   useEffect(() => {
     if (bulkBlogsSelected) {
-      const allBlogSlugs = blogs.map((blog) => blog._id);
-      setSelectedBlogs(allBlogSlugs);
+      setSelectedBlogs(blogs);
     } else {
       setSelectedBlogs([]);
     }
   }, [bulkBlogsSelected, blogs]);
 
   // Toggle selection of individual blog
-  const toggleSelectBlog = (id: string) => {
+  const toggleSelectBlog = (blog: Blog) => {
     setSelectedBlogs((prev) =>
-      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
+      prev.some(b => b._id === blog._id) 
+        ? prev.filter(b => b._id !== blog._id) 
+        : [...prev, blog]
     );
   };
 
@@ -63,8 +64,8 @@ export default function ManageBlogsList({ blogs, totalPages, page, searchParams,
           <div className="flex">
             <input
               type="checkbox"
-              checked={selectedBlogs.includes(blog._id)}
-              onChange={() => toggleSelectBlog(blog._id)}
+              checked={selectedBlogs.some((b) => b._id === blog._id)}
+              onChange={() => toggleSelectBlog(blog)}
               className="w-5 h-5 accent-blue-500 cursor-pointer"
             />
           </div>

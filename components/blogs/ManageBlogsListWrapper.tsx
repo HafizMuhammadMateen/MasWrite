@@ -14,14 +14,14 @@ interface ManageBlogsListWrapperProps {
 
 export default function ManageBlogsListWrapper({ blogs, totalPages, page, searchParams }: ManageBlogsListWrapperProps) {
   const [bulkBlogsSelected, setBulkBlogsSelected] = useState(false);
-  const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
+  const [selectedBlogs, setSelectedBlogs] = useState<Blog[]>([]);
 
   return (
     <>
       <ManageBlogHeader
         isBlog={blogs.length > 0}
         onToggleSelectBulkBlogs={() => setBulkBlogsSelected((prev) => !prev)}
-        selectedBlogs={selectedBlogs}
+        selectedBlogs={selectedBlogs}           // Blog obj
       />
       
       {blogs.length > 0 ? (
@@ -30,8 +30,8 @@ export default function ManageBlogsListWrapper({ blogs, totalPages, page, search
           totalPages={totalPages}
           page={page}
           searchParams={searchParams}
-          bulkBlogsSelected={bulkBlogsSelected}
-          selectedBlogs={selectedBlogs}
+          bulkBlogsSelected={bulkBlogsSelected} // boolean
+          selectedBlogs={selectedBlogs}         // Blog obj
           setSelectedBlogs={setSelectedBlogs}
         />
       ) : (

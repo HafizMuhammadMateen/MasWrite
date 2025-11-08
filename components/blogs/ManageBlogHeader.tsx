@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +11,15 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Edit2, Loader2, Trash } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Blog } from "@/lib/types/blog";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 interface ManageBlogHeaderProps {
   isBlog: boolean;
   onToggleSelectBulkBlogs: () => void;
-  selectedBlogs: string[];
+  selectedBlogs: Blog[];
 }
 
 export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, selectedBlogs }: ManageBlogHeaderProps) {
@@ -57,7 +58,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
       const res = await fetch("/api/manage-blogs", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selectedBlogs),
+        body: JSON.stringify(selectedBlogs.map(blog => blog._id)),
       });
 
       if (!res.ok) throw new Error("Delete failed");
@@ -100,7 +101,6 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem className="text-md cursor-pointer" variant="destructive" onClick={handleClickDelete}>Delete selection</DropdownMenuItem>
-                <DropdownMenuItem className="text-md cursor-pointer" variant="default" onClick={()=>{}}>Dublicate selection</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="sticky bottom-0 border border-primary py-1 px-4 rounded-sm flex justify-between items-center">

@@ -54,7 +54,7 @@ export default function LoginForm() {
       // await new Promise(resolve => setTimeout(resolve, 3000));
       const response = await fetch("/api/auth/login", {
       method: "POST",
-      headers: { "Content-type": "application/json"},
+      headers: { "Content-Type": "application/json"},
       body: JSON.stringify({ email, password }),
       credentials: "include" // inlcude cookies in fetch [to avoid using localstorage]
     });

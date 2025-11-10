@@ -8,12 +8,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Edit2 } from "lucide-react";
+import { ChevronDown, Edit2, FilterIcon, FilterXIcon } from "lucide-react";
 import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Blog } from "@/lib/types/blog";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import DublicateConfirmModal from "./DublicateConfirmModal"
+import FilterModal from "./FilterModal"
 import toast from "react-hot-toast";
 import Link from "next/link";
 
@@ -28,14 +29,16 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
   const searchParams = useSearchParams();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDublicateModal, setShowDublicateModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [deletingBulk, setDeletingBulk] = useState(false);
   const [dublicatingBulk, setDublicatingBulk] = useState(false);
+  const [applyingFilter, setApplyingFilter] = useState(false);
 
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("");
   const [q, setQ] = useState("");
-  const [categorySearch, setCategorySearch] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
 
   const handleFilterChange = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -112,6 +115,15 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
     }
   }
 
+  const handleFilterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowFilterModal(true);
+  }
+
+  const handleConfirmFilter = async() => {
+
+  }
+
   // debounce for search typing
   useEffect(() => {
     const delay = setTimeout(handleFilterChange, 300);
@@ -161,8 +173,33 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
           className="text-lg border rounded px-3 py-1 focus:outline-none focus:ring-1 focus:ring-primary"
         />
 
+        {/* Filters */}
+        <Button
+          variant="outline"
+          className="text-lg cursor-pointer"
+          onClick={handleFilterClick}
+        >
+          <FilterIcon />
+          Filters
+        </Button>
+        {/* Dublicate confirmation modal */}
+        <FilterModal
+          open={showFilterModal}
+          onClose={() => setShowFilterModal(false)}
+          onConfirm={handleConfirmFilter}
+          applying={applyingFilter}
+          sort="sort"
+          setSort={setSort}
+          status="status"
+          setStatus={setStatus}
+          category="category"
+          setCategory={setCategory}
+          searchCategory="searchCategory"
+          setSearchCategory={setSearchCategory}
+        />
+
         {/* Sort Dropdown */}
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="text-lg cursor-pointer">
               {sort ? `Sort by: ${sort}` : "Sort by"}
@@ -175,10 +212,10 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
             <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("updated")}>Recently Updated</DropdownMenuItem>
             <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("published")}>Recently Published</DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
 
         {/* Status Dropdown */}
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="text-lg cursor-pointer">
               {status ? `Status: ${status}` : "Status"}
@@ -190,10 +227,10 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
             <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("published")}>Published</DropdownMenuItem>
             <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("draft")}>Draft</DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
 
         {/* Category Dropdown */}
-        <DropdownMenu>
+        {false && <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="text-lg cursor-pointer">
               {category ? `Category: ${category}` : "Category"}
@@ -201,13 +238,13 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 text-md border bg-white shadow-lg rounded-md">
-            {/* Search input stays fixed at top */}
+            {/* Search Categories */}
             <div className="sticky top-0 bg-white z-10 p-1">
               <input
                 type="text"
                 placeholder="Search categories..."
-                value={categorySearch}
-                onChange={(e) => setCategorySearch(e.target.value)}
+                value={searchCategory}
+                onChange={(e) => setSearchCategory(e.target.value)}
                 className="text-md border rounded px-3 py-1 w-full focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -216,7 +253,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
             <div className="max-h-64 overflow-y-auto">
               {["All", ...BLOG_CATEGORIES]
                 .filter((cat) =>
-                  cat === "All" ? true : cat.toLowerCase().includes(categorySearch.toLowerCase())
+                  cat === "All" ? true : cat.toLowerCase().includes(searchCategory.toLowerCase())
                 )
                 .map((cat) => (
                   <DropdownMenuItem
@@ -225,7 +262,7 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
                     onMouseDown={(e) => e.preventDefault()} // prevent input losing focus
                     onClick={() => {
                       setCategory(cat === "All" ? "" : cat);
-                      setCategorySearch("");
+                      setSearchCategory("");
                     }}
                   >
                     {cat}
@@ -234,13 +271,13 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
 
               {/* No categories found, show message */}
               {BLOG_CATEGORIES.filter((cat) =>
-                cat.toLowerCase().includes(categorySearch.toLowerCase())
-              ).length === 0 && categorySearch && (
+                cat.toLowerCase().includes(searchCategory.toLowerCase())
+              ).length === 0 && searchCategory && (
                 <div className="px-3 py-1 text-gray-500 text-center">No categories found</div>
               )}
             </div>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu>}
 
         {/* New Post Button */}
         <Link href="/dashboard/manage-blogs/new">

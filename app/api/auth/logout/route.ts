@@ -1,20 +1,41 @@
-import { NextResponse } from "next/server";
+import { success, error } from "@/utils/apiResponse";
+import { destroySession } from "@/utils/authHelpers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/nextAuthOptions";
+import { cookies } from "next/headers";
 
 export async function POST() {
-  try {
-    // Invalidating session
-    const response = NextResponse.json({ message: "Logout successfully." });
-    response.cookies.set("token", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      expires: new Date(0),
-      maxAge: 0,
-      path: "/",
-    })
+  const isDev = process.env.NODE_ENV === "development";
 
-    return response;
-  } catch (e) {
-    return NextResponse.json({error: "Something went wrong"}, {status: 500})
+  try {
+    // Check for OAuth session first
+    const session = await getServerSession(authOptions);
+    const cookieStore = await cookies();
+
+    // Case 1: Manual JWT session
+    if (cookieStore.get("token")) {
+      const res = success("Logged out successfully", 200);
+      destroySession(res);
+      isDev && console.log("✅ [LogoutAPI] Manual user logged out");
+      return res;
+    }
+
+    // Case 2: NextAuth session (OAuth)
+    if (session) {
+      cookieStore.delete("next-auth.session-token");
+      cookieStore.delete("__Secure-next-auth.session-token");
+      cookieStore.delete("next-auth.callback-url");
+      cookieStore.delete("next-auth.csrf-token");
+
+      const res = success("Logged out successfully", 200);
+      isDev && console.log("✅ [LogoutAPI] OAuth user logged out");
+      return res;
+    }
+
+    // Case 3: No active session at all
+    return success("No active session found", 200);
+  } catch (err: any) {
+    isDev && console.error("❌ [LogoutAPI] Error:", err.message || err);
+    return error(err.message || "Server error", 500);
   }
 }

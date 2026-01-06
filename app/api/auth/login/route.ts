@@ -1,49 +1,28 @@
-import { NextResponse } from "next/server";
-import clientPromise from "../../../../lib/mongodb";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { comparePassword, getUserByEmail, signToken, createSession } from "@/utils/authHelpers";
+import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: Request) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
     const { email, password } = await req.json();
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email & password required" }, { status: 400 });
-    }
+    if (!email || !password) return error("Email & password required", 400);
 
-    const client = await clientPromise;
-    const db = client.db("auth-module");
+    const user = await getUserByEmail(email);
+    if (!user) return error("Invalid credentials", 401);
+    if (!user.password) return error("This account uses OAuth. Sign in with Google or GitHub.", 403);
 
-    const user = await db.collection("users").findOne({ email });
-    if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) return error("Invalid credentials", 401);
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
+    const token = signToken({ userId: user._id.toString(), email: user.email });
+    const res = success("Login successful", 200);
+    createSession(res, token);
 
-    // Sign JWT
-    const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
-    );
-
-    // return NextResponse.json({ message: "Login successful", token }, { status: 200 });
-    const response = NextResponse.json({ message: "Login successful"}, { status: 200 });
-
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60,
-      path: "/",
-    })
-
-    return response;
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    isDev && console.log("✅ [LoginAPI] User logged in:", user.email);
+    return res;
+  } catch (err: any) {
+    isDev && console.error("❌ [LoginAPI] Error:", err.message || err);
+    return error(err.message || "Server error", 500);
   }
 }

@@ -1,81 +1,86 @@
-"use client";
+import { cookies } from "next/headers";
+import SummaryCards from "@/components/dashboard/SummaryCards";
+import RecentBlogs from "@/components/dashboard/RecentBlogs";
+import ChartsWrapper from "@/components/dashboard/ChartsWrapper";
+import { FaFileAlt, FaCheckCircle, FaRegEdit } from "react-icons/fa";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
+export const revalidate = 60;
 
-export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
-  const[isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter();
+interface DashboardPageProps {
+  params: {
+    page: string;
+  };
+}
 
-  useEffect(() => {
-    async function fetchDashboard() {
-      const res = await fetch("/api/dashboard", {
-        method: "GET",
-        credentials: "include", // ensures cookies are sent
-      });
+export default async function DashboardPage({ params }: DashboardPageProps) {
+  const page = parseInt(params.page) || 1;
+  const cookieHeader = (await cookies()).toString();
+  const fetchOptions = { method: "GET", headers: { Cookie: cookieHeader }, next: { revalidate: 60 } };
+  const blogsPerPage = 6;
 
-      const result = await res.json();
-      setData(result);
-    }
-    fetchDashboard();
-  }, []);
+  const [analyticsResponse, recentBlogsResponse] = await Promise.all([
+    fetch(`${process.env.NEXTAUTH_URL}/api/manage-blogs`, fetchOptions),
+    fetch(`${process.env.NEXTAUTH_URL}/api/manage-blogs?page=${page}&limit=${blogsPerPage}`, fetchOptions),
+  ]);
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    router.push("/login");
+  if (!analyticsResponse.ok || !recentBlogsResponse.ok) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-red-600">Failed to load dashboard data.</p>
+      </div>
+    );
   }
 
-  if (!data) return <p>Loading...</p>;
-  
-  if (data.error) {
-    router.push("/login");
-    return <p>❌ {data.error}</p>;
-  }
+  const {
+    blogs: allBlogs = [],
+    totalBlogs = 0,
+    publishedCount = 0,
+    draftCount = 0,
+  } = await analyticsResponse.json();
+
+  const { blogs = [] } = await recentBlogsResponse.json();
+
+  // Chart 1: Views per published date
+  const viewsData = allBlogs
+    .filter((b: any) => b.publishedAt && b.views != null)
+    .map((b: any) => ({
+      date: new Date(b.publishedAt).toLocaleDateString(),
+      views: b.views,
+    }));
+
+  // Chart 2: Published count per day
+  const publishedData = Object.entries(
+    allBlogs.reduce((acc: any, b: any) => {
+      if (b.publishedAt) {
+        const date = new Date(b.publishedAt).toLocaleDateString();
+        acc[date] = (acc[date] || 0) + 1;
+      }
+      return acc;
+    }, {})
+  ).map(([date, count]) => ({ date, count }));
+
+  const chartData = { viewsData, publishedData };
 
   return (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-    <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-        Dashboard
-      </h1>
+    <div className="h-full p-6 flex flex-col flex-grow">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Dashboard</h2>
 
-      <div className="space-y-4">
-        <p className="text-lg text-green-700 text-center">
-          {data.message}
-        </p>
-
-        <div className="bg-gray-100 rounded-md p-4 text-sm text-gray-600 overflow-x-auto">
-          <pre>{JSON.stringify(data.user, null, 2)}</pre>
-        </div>
-      </div>
-
-
-      <button
-        type="reset"
-        onClick={() => setIsModalOpen(true)}
-        className="mt-8 w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 cursor-pointer transition"
-      >
-        Change Password
-      </button>
-
-      <ChangePasswordModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+      <SummaryCards
+        totalBlogs={totalBlogs}
+        published={publishedCount}
+        drafts={draftCount}
+        icons={[
+          <FaFileAlt key="total" className="w-6 h-6" />,
+          <FaCheckCircle key="published" className="w-6 h-6 text-green-500" />,
+          <FaRegEdit key="draft" className="w-6 h-6 text-yellow-500" />,
+        ]}
       />
 
-      <button
-        type="reset"
-        onClick={handleLogout}
-        className="mt-2 w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 cursor-pointer transition"
-      >
-        Logout
-      </button>
+      <ChartsWrapper chartData={chartData} />
+
+      <section className="my-8">
+        <RecentBlogs blogs={blogs} />
+      </section>
     </div>
-  </div>
   );
 }

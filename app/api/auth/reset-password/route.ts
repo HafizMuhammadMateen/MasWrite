@@ -1,23 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
-import jwt from "jsonwebtoken";
+import { NextRequest } from "next/server";
+import { updatePassword, verifyToken, getUserById } from "@/utils/authHelpers";
+import { validatePassword } from "@/utils/validators";
+import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: NextRequest) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
     const { token, newPassword } = await req.json();
 
-    const payload: any = jwt.verify(token, process.env.JWT_SECRET!);
+    const { userId } = verifyToken(token);
+    const user = await getUserById(userId);
+    if (!user) return error("User not found", 404);
+    if (!user.password) return error("OAuth accounts cannot reset passwords manually", 403);
 
-    const client = await clientPromise;
-    const db = client.db("auth-module");
+    const passwordError = validatePassword(newPassword, true);
+    if (passwordError) return error(passwordError, 400);
 
-    await db.collection("users").updateOne(
-      { _id: payload.userId },
-      { $set: { password: newPassword } } // hash it in production
-    );
+    await updatePassword(userId, newPassword);
 
-    return NextResponse.json({ message: "Password reset successfully" });
+    isDev && console.log("🔑 [ResetPasswordAPI] Password reset successful for:", user.email);
+    return success("Password reset successfully", 200);
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Invalid or expired token" }, { status: 400 });
+    isDev && console.error("❌ [ResetPasswordAPI] Error:", err.message || err);
+    return error(err.message || "Invalid or expired token", 401);
   }
 }

@@ -4,86 +4,96 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { validateUsername, validateEmail, validatePassword } from "@/utils/validators";
-import { FormErrors } from "@/utils/types"; // for type defination
+import { FormErrors } from "@/utils/types";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { signupSchema } from "@/lib/validation/zodSchemas";
+import { z } from "zod";
 
 export default function SignupForm() {
-  const[email, setEmail] = useState("");
-  const[userName, setUsername] = useState("");
-  const[password, setPassword] = useState("");
-  const[loading, setLoading] = useState(false);
-  const[errors, setErrors] = useState<FormErrors>({});
+  const isDev = process.env.NODE_ENV === "development";
+
+  const [email, setEmail] = useState("");
+  const [userName, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const[showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.name === "userName") {
-      setUsername(e.target.value);
-    } else if(e.target.name === "email") {
-      setEmail(e.target.value);
-    } else if(e.target.name === "password") {
-      setPassword(e.target.value);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "userName") setUsername(value);
+    else if (name === "email") setEmail(value);
+    else if (name === "password") setPassword(value);
   }
 
-  const handleBlur = (e:React.ChangeEvent<HTMLInputElement>) => {
-    if(e.target.name === "userName") {
-      const validationError = validateUsername(e.currentTarget.value);
-      setErrors((prev) => ({...prev, userName: validationError}));
-    } else if(e.target.name === "email") {
-      const validationError = validateEmail(e.target.value);
-      setErrors((prev) => ({...prev, email: validationError}));
-    } else if(e.target.name === "password") {
-      const validationError = validatePassword(e.target.value, true); //calling strict check for signup page
-      setErrors((prev) => ({...prev, password: validationError}));
+  const handleBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Dynamically pick the schema for the single field
+    const fieldSchema = signupSchema.pick({ [name]: true } as any);
+    const result = fieldSchema.safeParse({ [name]: value });
+
+    if (!result.success) {
+      const { fieldErrors }: any = z.flattenError(result.error);
+      setErrors((prev) => ({ ...prev, [name]: fieldErrors[name]?.[0]}));
+    } else {
+      setErrors((prev) => ({ ...prev, [name]: null }));
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // validation again on submit not just on blur
-    const userNameError = validateUsername(userName);
-    const emailError = validateEmail(email);
-    const passwordError = validatePassword(password, true);
-
-    if(userNameError || emailError || passwordError) {
-      setErrors({userName: userNameError, email: emailError, password: passwordError});
-      return;
-    }
-    
-    setErrors({});
-    // setErrors({ email: "", userName: "", password: "" });
-    console.log("Form submitted with: ", {userName, email, password});
+    setLoading(true);
 
     try {
-      setLoading(true);
-      
+      // Validate with Zod
+      const result = signupSchema.safeParse({ userName, email, password });
+
+      if (!result.success) {
+        const { fieldErrors } = z.flattenError(result.error);
+        setErrors({
+          userName: fieldErrors.userName?.[0],
+          email: fieldErrors.email?.[0],
+          password: fieldErrors.password?.[0],
+        });
+        return;
+      }
+
+      setErrors({}); // Clear previous errors
+
+      isDev && console.log("[SignupForm Page] Form submitted with:", result.data);
+
+      // Send data to backend
       const response = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-type": "application/json"},
+        headers: { "Content-Type": "application/json"},
         body: JSON.stringify({ userName, email, password }),
         // credentials: "include" // No need in signup page bcz cookies are not setting in signup page
-      })
+      });
 
-      if(!response.ok) {
+      if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.error || "Some thing went wrong!");
+        throw new Error(errData.error || "Something went wrong!");
       }
 
       const data = await response.json();
-      console.log("Signup successful:", data);
+      isDev && console.log("[SignupForm Page] Signup successful:", data);
 
+      toast.success("Signup successful! Please log in.");
       router.push("/login");
 
-    } catch(err:any) {
-      // backend error message
-      setErrors((prev) => ({ ...prev, formError: err.message}))
+    } catch (err: any) {
+      // ✅ 4. Handle network or backend errors
+      const message = err instanceof Error ? err.message : "Signup failed!";
+      toast.error(message);
+      setErrors((prev) => ({ ...prev, formError: message }));
     } finally {
       setLoading(false);
     }
-
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

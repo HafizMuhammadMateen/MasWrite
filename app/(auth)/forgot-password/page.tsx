@@ -19,7 +19,10 @@ export default function ForgotPassword() {
 
   const handleBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
     const validationError = validateEmail(e.target.value);
-    setErrors((prev) => ({ ...prev, email: validationError }));
+    if (validationError) { 
+      setErrors((prev) => ({ ...prev, email: validationError }));
+      return;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -15,21 +15,15 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-export default function ChangePasswordModal({
-  isOpen,
-  onClose,
-  isResetFlow = false,
-  token,
-}: ChangePasswordModalProps) {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
+export default function ChangePasswordModal({ isOpen, onClose, isResetPasswordFlow = false, token }: ChangePasswordModalProps) {
+  const[currentPassword, setCurrentPassword] = useState("");
+  const[newPassword, setNewPassword] = useState("");
+  const[confirmPassword, setConfirmPassword] = useState("");
+  const[loading, setLoading] = useState(false);
+  const[errors, setErrors] = useState<FormErrors>({});
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,15 +47,15 @@ export default function ChangePasswordModal({
     e.preventDefault();
 
     let currentPasswordError = null;
-    if (!isResetFlow) currentPasswordError = validatePassword(currentPassword, true);
+    if(!isResetPasswordFlow) currentPasswordError = validatePassword(currentPassword, true);
     const newPasswordError = validatePassword(newPassword, true);
     const confirmPasswordError = validatePassword(confirmPassword, true);
 
     if (currentPasswordError || newPasswordError || confirmPasswordError) {
       setErrors({
-        ...(isResetFlow ? {} : { currentPassword: currentPasswordError }),
-        newPassword: newPasswordError,
-        confirmPassword: confirmPasswordError,
+        ...(isResetPasswordFlow? {} : {currentPassword: currentPasswordError || undefined}), 
+        newPassword: newPasswordError || undefined, 
+        confirmPassword: confirmPasswordError || undefined,
       });
       return;
     }
@@ -75,9 +69,13 @@ export default function ChangePasswordModal({
     setLoading(true);
 
     try {
-      const url = isResetFlow ? "/api/auth/reset-password" : "/api/auth/change-password";
-      const body = isResetFlow ? { token, newPassword } : { currentPassword, newPassword };
+      setLoading(true);
 
+      const url = isResetPasswordFlow ? "/api/auth/reset-password" : "/api/auth/change-password";
+      const body = isResetPasswordFlow
+      ? { token, newPassword }
+      : { currentPassword, newPassword };
+      
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,7 +102,7 @@ export default function ChangePasswordModal({
   };
 
   const handleCancel = () => {
-    if (isResetFlow) router.push("/login");
+    if (isResetPasswordFlow) router.push("/login");
     else onClose();
   };
 
@@ -118,7 +116,7 @@ export default function ChangePasswordModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {!isResetFlow && (
+          {!isResetPasswordFlow && (
             <div>
               <label>Current Password</label>
               <div className="relative">

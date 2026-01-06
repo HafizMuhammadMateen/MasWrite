@@ -62,8 +62,8 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+    <div className="fixed inset-0 bg-foreground/30 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-background rounded-lg shadow-lg p-8 w-full max-w-xl">
         <h2 className="text-xl text-center font-semibold mb-4">Forgot Password</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -77,15 +77,15 @@ export default function ForgotPassword() {
             required
             onChange={handleChange}
             onBlur={handleBlur}
-            className="w-full border border-gray-300 rounded px-3 py-2 focus-visible:ring-gray-900"
+            className="w-full border border-border rounded px-3 py-2 focus-visible:ring-ring"
           />
 
-          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
 
           <button
             type="button"
             onClick={router.back}
-            className="w-full bg-gray-400 text-white rounded py-2 font-semibold cursor-pointer hover:bg-gray-600 transition"
+            className="w-full bg-muted text-muted-foreground rounded py-2 font-semibold cursor-pointer hover:bg-muted-foreground hover:text-muted transition"
           >
             Cancel
           </button>
@@ -93,12 +93,12 @@ export default function ForgotPassword() {
           <button
             type="submit"
             disabled={loading || Boolean(errors.email)}
-            className={`w-full bg-blue-600 text-white rounded py-2 font-semibold flex justify-center items-center gap-2
+            className={`w-full bg-blue-600 text-background rounded py-2 font-semibold flex justify-center items-center gap-2
               ${loading ? "opacity-75 cursor-not-allowed" : "cursor-pointer hover:bg-blue-700 transition"}`}
           >
             {loading ? (
               <>
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin"></span>
                 Sending...
               </>
             ) : (

@@ -69,8 +69,9 @@ export default function SignupForm() {
       // Send data to backend
       const response = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result.data),
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({ userName, email, password }),
+        // credentials: "include" // No need in signup page bcz cookies are not setting in signup page
       });
 
       if (!response.ok) {

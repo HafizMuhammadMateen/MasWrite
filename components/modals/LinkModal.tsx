@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Editor } from "@tiptap/react";
 
 interface LinkModalProps {
-  editor: Editor;
+  editor: typeof Editor;
   onClose: () => void;
 }
 

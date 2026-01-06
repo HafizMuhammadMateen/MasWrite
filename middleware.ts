@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/utils/authHelpers";
 import { getToken } from "next-auth/jwt";
@@ -88,6 +87,7 @@ export const config = {
     "/api/dashboard/:path*",
     "/api/auth/change-password/:path*",
     "/api/auth/reset-password/:path*",
+    "/api/auth/me/:path*",
   ],
   runtime: "nodejs",
 };

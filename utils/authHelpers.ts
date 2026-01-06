@@ -4,6 +4,7 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
+const NEXTAUTH_URL = process.env.NEXTAUTH_URL as string;
 const JWT_AUTH_SECRET = process.env.JWT_AUTH_SECRET!;
 const JWT_EXPIRY = "1h";
 const DB_NAME = "auth-module";
@@ -12,16 +13,28 @@ const USERS_COLLECTION = "users";
 // ==========================
 // 🧾 JWT Utilities
 // ==========================
-export function signToken(payload: object): string {
-  return jwt.sign(payload, JWT_AUTH_SECRET, { expiresIn: JWT_EXPIRY });
-}
-
-export function signResetPasswordToken(payload: object): string {
-  return jwt.sign(payload, JWT_AUTH_SECRET, { expiresIn: "15m" });
-}
-
-export function verifyToken(token: string): { userId: string } {
+export function verifyToken(token: string) {
   return jwt.verify(token, JWT_AUTH_SECRET) as { userId: string };
+}
+
+export function signToken(payload: object) {
+  return jwt.sign(
+    payload,
+    JWT_AUTH_SECRET,
+    {expiresIn: JWT_EXPIRY}
+  )
+}
+
+export function signResetPasswordToken(payload: object) {
+  return jwt.sign(
+    payload,
+    JWT_AUTH_SECRET,
+    { expiresIn: "15m" }
+  )
+}
+
+export function getResetPasswordURL(token: string) {
+  return `${NEXTAUTH_URL}/reset-password?token=${token}`;
 }
 
 // ==========================

@@ -23,8 +23,10 @@ import {
   ItalicIcon,
   UnderlineIcon,
 } from "lucide-react"
+import { Blog } from "@/lib/types/blog"
+import StatusSelector from "@/components/blogs/StatusSelector"
 
-export default function NewBlogPage() {
+export default function EditBlogPage() {
   const router = useRouter()
   const params = useParams()
   const [title, setTitle] = useState("")
@@ -33,25 +35,33 @@ export default function NewBlogPage() {
   const [category, setCategory] = useState("Web Development")
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
-  const [, forceUpdate] = useState({})
-  const [blogData, setBlogData] = useState()
-  const { slug } = useParams()
+  const [status, setStatus] = useState("draft")
   const editor = useTiptapEditor()
 
-  // Auto fetch current blog's data
+  // Fetch blog data and populate fields
   useEffect(() => {
-    if(slug) {
-      console.log("Current blog data: ", slug);
-      fetch(`/api/blog/${slug}`)
-        .then(res => res.json())
-        .then(data => setBlogData(data))
+    if (!params.slug) return console.error("Slug is undefined");
+    
+    const fetchBlog = async () => {
+      try {
+        const res = await fetch(`/api/manage-blogs/${params.slug}`, { method: "GET" })
+        const data: Blog = await res.json()
+        setTitle(data.title)
+        setTags(data.tags || [])
+        setCategory(data.category || "Web Development")
+        setStatus(data.status || "draft")
+        editor?.commands.setContent(data.content || "")
+      } catch (err) {
+        console.error("Failed to fetch blog", err)
+      }
     }
-  }, [slug])
-
-  // Selection tooltip
+    fetchBlog()
+  }, [params.slug, editor])
+    
+  // Editor toolbar re-render
   useEffect(() => {
     if (!editor) return
-    const update = () => forceUpdate({})
+    const update = () => {}
     editor.on("selectionUpdate", update)
     editor.on("update", update)
     return () => {
@@ -60,12 +70,7 @@ export default function NewBlogPage() {
     }
   }, [editor])
 
-  // auto-focus editor cursor
-  useEffect(() => {
-    editor?.commands.focus("end")
-  }, [editor])
-
-  // Ctrl + K shortcut for links
+  // Ctrl + K for link
   useEffect(() => {
     const handleShortcut = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -90,7 +95,7 @@ export default function NewBlogPage() {
     setLoading("updating")
 
     try {
-      const res = await fetch(`/api/manage-blogs/${params.id}`, {
+      const res = await fetch(`/api/manage-blogs/${params.slug}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content, tags, category, status }),
@@ -113,11 +118,11 @@ export default function NewBlogPage() {
         setTitle={setTitle}
         loading={loading}
         handleSave={handleUpdate}
+        isEdit={true}
       />
 
-      {/* Editor + Meta Panel */}
+      {/* Editor + Sidebar */}
       <div className="w-full bg-white rounded-lg shadow-md p-6 flex flex-1 overflow-y-auto gap-6">
-        {/* Editor Section */}
         <div className="flex-1 flex flex-col">
           {/* Toolbar */}
           {editor && (
@@ -125,7 +130,7 @@ export default function NewBlogPage() {
               <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive("bold")}><BoldIcon className="w-4 h-4" /></ToolbarButton>
               <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive("italic")}><ItalicIcon className="w-4 h-4" /></ToolbarButton>
               <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive("underline")}><UnderlineIcon className="w-4 h-4" /></ToolbarButton>
-              {([1, 2, 3] as const).map(l => <ToolbarButton key={l} onClick={() => editor.chain().focus().toggleHeading({ level: l }).run()} isActive={editor.isActive("heading", { level: l })}>H<sub className="text-xs">{l}</sub></ToolbarButton>)}
+              {[1, 2, 3].map(l => <ToolbarButton key={l} onClick={() => editor.chain().focus().toggleHeading({ level: l }).run()} isActive={editor.isActive("heading", { level: l })}>H<sub className="text-xs">{l}</sub></ToolbarButton>)}
               <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive("bulletList")}><List className="w-4 h-4" /></ToolbarButton>
               <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive("orderedList")}><ListOrdered className="w-4 h-4" /></ToolbarButton>
               <ToolbarButton onClick={() => editor.chain().focus().toggleTaskList().run()} isActive={editor.isActive("taskList")}><CheckSquare className="w-4 h-4" /></ToolbarButton>
@@ -138,19 +143,17 @@ export default function NewBlogPage() {
             </div>
           )}
 
-          {/* Main Editor */}
-          <div
-            className="flex flex-1 overflow-y-auto border rounded-md p-4 cursor-text prose prose-sm sm:prose lg:prose-lg w-full max-w-none"
-            onClick={() => editor?.chain().focus().run()}
-          >
-            <EditorContent editor={editor} className="w-full h-full outline-none focus:outline-none p-2" />
+          {/* Editor */}
+          <div className="flex flex-1 overflow-y-auto border rounded-md p-4 cursor-text prose w-full max-w-none" onClick={() => editor?.chain().focus().run()}>
+            <EditorContent editor={editor} className="w-full h-full outline-none" />
           </div>
         </div>
 
-        {/* Sidebar: Category + Tags */}
+        {/* Sidebar */}
         <div className="w-[30%] flex flex-col gap-6 border-l pl-6">
           <CategorySelector value={category} onChange={setCategory} />
           <TagsInput tags={tags} setTags={setTags} />
+          <StatusSelector value={status} onChange={setStatus} />
         </div>
       </div>
     </div>

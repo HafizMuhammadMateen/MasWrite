@@ -7,13 +7,14 @@ export default function SingleBlog() {
   const { slug } = useParams();
   const [blog, setBlog] = useState<Blog | null>(null);
 
-  // Views counter
   useEffect(() => {
-    fetch(`/api/blogs/${slug}/view`, { method: "POST" });
-  }, [slug]);
+    // Fetch blog data
+    fetch(`/api/manage-blogs/${slug}`, { method: "GET" })
+      .then(res => res.json())
+      .then(setBlog);
 
-  useEffect(() => {
-    fetch(`/api/blogs/${slug}`).then(res => res.json()).then(setBlog);
+    // Increment views
+    fetch(`/api/manage-blogs/${slug}/view`, { method: "POST" });
   }, [slug]);
 
   if (!blog) return <p>Loading...</p>;

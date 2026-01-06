@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface ImageModalProps {
-  editor: Editor;
+  editor: typeof Editor;
   open: boolean;
   onClose: () => void;
 }

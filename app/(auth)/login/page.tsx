@@ -22,7 +22,7 @@ export default async function LoginPage() {
 
   return (
   <div className="flex justify-center items-center min-h-screen">
-    <div className="bg-white rounded-lg shadow p-8 w-full max-w-sm">
+    <div className="bg-background rounded-lg shadow p-8 w-full max-w-sm">
       <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
       <div>
         <LoginForm />

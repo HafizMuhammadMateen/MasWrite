@@ -1,39 +1,30 @@
-export const validateUsername = (username: string): string => {
-  if (!username) {
-    return "Username required!";
-  } else if (username.length < 3) {
-    return "Username must be at least 3 characters!";
-  } else if (username.length > 50) {
-    return "Username must not be more than 50 characters!";
-  }
-  return "";
-};
+const EMAIL_REGEX = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-zA-Z]{2,}$/;
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 50;
+const PASSWORD_MIN_LENGTH = 8;
 
-export const validateEmail = (email: string): string => {
-  const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if (!email) {
-    return "Email required!";
-  } else if (!emailRegex.test(email)) {
-    return "Please enter a valid email address!";
-  }
-  return "";
-};
+export function validateUsername(userName: string): string | null {
+  if (!userName) return "Username is required.";
+  if (userName.length < USERNAME_MIN_LENGTH) return `Username must be at least ${USERNAME_MIN_LENGTH} characters long.`;
+  if (userName.length > USERNAME_MAX_LENGTH) return `Username must not exceed ${USERNAME_MAX_LENGTH} characters.`;
+  return null;
+}
 
-export const validatePassword = (password: string, isSignup: boolean = false): string => {
-  if (!password) {
-    return "Password required!";
-  }
-  
-  // stricter only on signup
+export function validateEmail(email: string): string | null {
+  if (!email) return "Email is required.";
+  if (!EMAIL_REGEX.test(email)) return "Please enter a valid email address.";
+  return null;
+}
+
+export function validatePassword(password: string, isSignup: boolean = false): string | null {
+  if (!password) return "Password is required.";
+
+  // Apply stricter checks on signup
   if (isSignup) {
-    if (password.length < 8) {
-      return "Password must be at least 8 characters!";
-    } else if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least 1 capital letter!";
-    } else if (!/\d/.test(password)) {
-      return "Password must contain at least 1 digit!";
-    }
+    if (password.length < PASSWORD_MIN_LENGTH) return `Password must be at least ${PASSWORD_MIN_LENGTH} characters long.`;
+    if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter.";
+    if (!/\d/.test(password)) return "Password must contain at least one number.";
   }
-  
-  return "";
-};
+
+  return null;
+}

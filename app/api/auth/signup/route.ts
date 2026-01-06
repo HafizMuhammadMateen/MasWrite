@@ -1,53 +1,33 @@
-import { NextResponse } from "next/server";
-import clientPromise from "../../../../lib/mongodb";
-import bcrypt from "bcryptjs";
+import { validateEmail, validatePassword } from "@/utils/validators";
+import { getUserByEmail, createUser } from "@/utils/authHelpers";
+import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: Request) {
+  const isDev = process.env.NODE_ENV === "development";
+
   try {
+    const { userName, email, password } = await req.json();
+    if (!userName || !email || !password) return error("All fields are required", 400);
 
-    const body = await req.json();
-    console.log("Incoming body:", body);
+    const emailError = validateEmail(email);
+    if (emailError) return error(emailError, 422);
 
-    const { userName, email, password } = body;
+    const passwordError = validatePassword(password, true);
+    if (passwordError) return error(passwordError, 422);
 
-    // Basic validation
-    if (!userName || !email || !password) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) {
+      if (!existingUser.password)
+        return error("Email registered via Google/GitHub. Sign in using that provider.", 409);
+      return error("Email already registered", 409);
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-    }
+    await createUser(userName, email, password);
 
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password)) {
-      return NextResponse.json({ error: "Weak password" }, { status: 400 });
-    }
-
-    const client = await clientPromise;
-    const db = client.db("auth-module");
-
-    // Check duplicates
-    const existing = await db.collection("users").findOne({ email });
-    if (existing) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 400 });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = {
-      userName,
-      email,
-      password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    await db.collection("users").insertOne(newUser);
-
-    return NextResponse.json({ message: "User created successfully" }, { status: 201 });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    isDev && console.log("✅ [SignupAPI] New user registered:", email);
+    return success("Account created successfully", 201, { userName, email });
+  } catch (err: any) {
+    isDev && console.error("❌ [SignupAPI] Error:", err.message || err);
+    return error(err.message || "Server error", 500);
   }
 }

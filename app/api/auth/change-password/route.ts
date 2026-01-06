@@ -1,61 +1,39 @@
-import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs";
-import clientPromise from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import { NextRequest } from "next/server";
+import { comparePassword, updatePassword, destroySession } from "@/utils/authHelpers";
+import { validatePassword } from "@/utils/validators";
+import { success, error } from "@/utils/apiResponse";
+import { getAuthenticatedUser } from "@/lib/authenticateUser";
 
 export async function POST(req: NextRequest) {
+  const isDev = process.env.NODE_ENV === "development";
+  
   try {
     const { currentPassword, newPassword } = await req.json();
 
-    // Getting token from cookies [receiving request]
-    const token = req.cookies.get("token")?.value;
-    
-    // Authenticating user
-    if(!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-    const userId = decoded.userId;
-    if(userId) console.log("Logged in user's id:", userId);
+    // Authenticate user (manual + OAuth)
+    const user = await getAuthenticatedUser(req);
+    if (!user) return error("Unauthorized", 401);
 
-    // Finding user in db using userId
-    const client = await clientPromise;
-    const db = client.db("auth-module");
+    // Disallow OAuth users from changing password
+    if (!user.password)
+      return error("Password change not allowed for Google/GitHub users", 403);
 
-    const user = await db.collection("users").findOne({_id: new ObjectId(userId)});
-    if(!user) {
-      return NextResponse.json({error: "User not found"}, {status: 404});
-    }
+    const isMatch = await comparePassword(currentPassword, user.password);
+    if (!isMatch) return error("Incorrect current password", 400);
 
-    // Verify current password
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if(!isMatch) {
-      return NextResponse.json({ error: "Incorrect current password!" }, { status: 400 });
-    }
+    const passwordError = validatePassword(newPassword, true);
+    if (passwordError) return error(passwordError, 400);
 
-    // Validate new password
-    if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      return NextResponse.json({ error: "Weak password" }, { status: 400 });
-    }
+    await updatePassword(user._id.toString(), newPassword);
 
-    // Update password in DB  
-    const hashed = await bcrypt.hash(newPassword, 10);
-    await db.collection("users").updateOne(
-      {_id: new ObjectId(userId)}, 
-      {$set: {password: hashed} }
-    );
+    isDev && console.log("🔑 [ChangePasswordAPI] Password updated for:", user.email);
+    const res = success("Password updated successfully. Please login again.", 200);
+    destroySession(res);
 
-    // Invalidate old session
-    const res = NextResponse.json({ message: "Password updated successsfully. Please login again."}, { status: 200} );
-    res.cookies.set("token", "", {
-      httpOnly: true,
-      sameSite: "strict",
-      expires: new Date(0),
-      maxAge: 0,
-    })
     return res;
-  } catch (err:any) {
-    return NextResponse.json({error: err.message || "Server error"}, {status: 500});
+
+  } catch (err: any) {
+    isDev && console.error("❌ [ChangePasswordAPI] Failed:", err.message || err);
+    return error(err.message || "Server error", 500);
   }
 }

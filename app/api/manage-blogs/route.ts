@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const statusParam = searchParams.get("status") || "";
     const categoryParam = searchParams.get("category") || "";
     const sortParams = searchParams.get("sort") || "updated";
-    let sortBy: Record<string, 1 | -1> = {updateAt: -1}; // default
+    let sortBy: Record<string, 1 | -1> = { updatedAt: -1 }; // default
 
     switch (sortParams) {
       case "newest":
@@ -162,9 +162,10 @@ export async function DELETE(req: NextRequest) {
       return error("Invalid token", 401);
     }
 
-    // Delete blogs
+    // Delete only blogs owned by the authenticated user
     const deleteResult = await Blog.deleteMany({
       _id: { $in: ids },
+      author: decodedToken.userId,
     });
 
     if (deleteResult.deletedCount === 0) return error("Blogs not found", 404);

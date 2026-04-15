@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { validateUsername, validateEmail, validatePassword } from "@/utils/validators";
 import { FormErrors } from "@/utils/types";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import toast from "react-hot-toast";

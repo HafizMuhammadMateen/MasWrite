@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { validateEmail } from "@/utils/validators";
+import { validateEmail } from "@/lib/validation/zodSchemas";
 import type { FormErrors } from "@/utils/types";
 import toast from "react-hot-toast";
 

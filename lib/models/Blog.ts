@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { BLOG_CATEGORIES } from "@/constants/blogCategories";
 
 export function slugify(title: string, blogId: string) {
   const slug = title
@@ -24,18 +25,7 @@ const blogSchema = new Schema(
     status: { type: String, enum: ["draft", "published"], default: "draft" },
     category: {
       type: String,
-      enum: [
-        "Web Development",
-        "UI/UX",
-        "JavaScript",
-        "React",
-        "Next.js",
-        "Backend",
-        "Databases",
-        "DevOps",
-        "AI/ML",
-        "Other",
-      ],
+      enum: BLOG_CATEGORIES,
       required: true,
     },
   },

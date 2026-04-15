@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { updatePassword, verifyToken, getUserById } from "@/utils/authHelpers";
-import { validatePassword } from "@/utils/validators";
+import { validatePassword } from "@/lib/validation/zodSchemas";
 import { success, error } from "@/utils/apiResponse";
 
 export async function POST(req: NextRequest) {

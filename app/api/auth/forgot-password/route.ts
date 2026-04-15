@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { Resend } from "resend";
 import { getUserByEmail, signResetPasswordToken } from "@/utils/authHelpers";
-import { validateEmail } from "@/utils/validators";
+import { validateEmail } from "@/lib/validation/zodSchemas";
 import { success, error } from "@/utils/apiResponse";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);

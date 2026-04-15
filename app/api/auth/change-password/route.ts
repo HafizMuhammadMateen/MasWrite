@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { comparePassword, updatePassword, destroySession } from "@/utils/authHelpers";
-import { validatePassword } from "@/utils/validators";
+import { validatePassword } from "@/lib/validation/zodSchemas";
 import { success, error } from "@/utils/apiResponse";
 import { getAuthenticatedUser } from "@/lib/authenticateUser";
 

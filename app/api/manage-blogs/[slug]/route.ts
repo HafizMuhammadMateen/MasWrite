@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
+import { error } from "@/utils/apiResponse";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -12,14 +13,12 @@ export async function GET(_: NextRequest, context: { params: Promise<{ slug: str
     isDev && console.log("Fetching blog with slug:", slug);
 
     const blog = await Blog.findOne({ slug });
-    if (!blog) {
-      return NextResponse.json({ message: "Blog not found" }, { status: 404 });
-    }
+    if (!blog) return error("Blog not found", 404);
 
     return NextResponse.json(blog, { status: 200 });
-  } catch (error) {
-    isDev && console.error("[GET API] Blog fetch error:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  } catch (err) {
+    isDev && console.error("[GET API] Blog fetch error:", err);
+    return error("Internal Server Error", 500);
   }
 }
 
@@ -32,14 +31,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ slug: s
     const { title, content, tags, category, status } = await req.json();
 
     // Validation
-    if (!title || !content || !tags?.length || !category) {
-      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
-    }
+    if (!title || !content || !tags?.length || !category) return error("Missing required fields", 400);
 
     const titleWords = title.trim().split(/\s+/).length;
-    if (titleWords > 10) {
-      return NextResponse.json({ message: "Title should be less than 10 words" }, { status: 400 });
-    }
+    if (titleWords > 10) return error("Title should be less than 10 words", 400);
 
     // Compute reading time
     const contentWords = content.split(/\s+/).length;
@@ -47,9 +42,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ slug: s
 
     // Find and update blog
     const blog = await Blog.findOne({ slug });
-    if (!blog) {
-      return NextResponse.json({ message: "Blog not found" }, { status: 404 });
-    }
+    if (!blog) return error("Blog not found", 404);
 
     // Update fields
     blog.title = title;
@@ -75,7 +68,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ slug: s
     return NextResponse.json(blog, { status: 200 });
   } catch (err) {
     isDev && console.error("[PUT API] Blog update error:", err);
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+    return error("Something went wrong", 500);
   }
 }
 
@@ -86,13 +79,12 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ slug: 
     await connectDB();
     const { slug } = await context.params;
 
-    const deleted = await Blog.findOneAndDelete({ slug});
-
-    if (!deleted) return NextResponse.json({ message: "Blog not found" }, { status: 404 });
+    const deleted = await Blog.findOneAndDelete({ slug });
+    if (!deleted) return error("Blog not found", 404);
 
     return NextResponse.json({ message: "Blog Deleted" });
   } catch (err) {
     isDev && console.error("[DELETE API] Blog error:", err);
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+    return error("Something went wrong", 500);
   }
 }

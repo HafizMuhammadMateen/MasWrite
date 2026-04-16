@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { validatePassword } from "@/utils/validators";
+import { validatePassword } from "@/lib/validation/zodSchemas";
 import { ChangePasswordModalProps } from "../../utils/types";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FormErrors } from "@/utils/types";

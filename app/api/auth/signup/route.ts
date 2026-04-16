@@ -1,4 +1,4 @@
-import { validateEmail, validatePassword } from "@/utils/validators";
+import { validateEmail, validatePassword } from "@/lib/validation/zodSchemas";
 import { getUserByEmail, createUser } from "@/utils/authHelpers";
 import { success, error } from "@/utils/apiResponse";
 

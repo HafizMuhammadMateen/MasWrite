@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import "@fontsource/lato/400.css";
@@ -9,12 +9,6 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// Add Lato manually via CSS variable
 const lato = { variable: "--font-lato" };
 
 export const metadata = {
@@ -29,7 +23,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${lato.variable} antialiased`}
+        className={`${geistSans.variable} ${lato.variable} antialiased`}
         style={{ fontFamily: 'var(--font-lato), var(--font-geist-sans), sans-serif' }}
       >
         {children}

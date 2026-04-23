@@ -3,6 +3,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import "@fontsource/lato/400.css";
 import "@fontsource/lato/700.css";
+import Providers from "@/components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,9 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
         className={`${geistSans.variable} ${lato.variable} antialiased`}
         style={{ fontFamily: 'var(--font-lato), var(--font-geist-sans), sans-serif' }}
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
         <Toaster
           position="top-right"
           toastOptions={{

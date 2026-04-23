@@ -13,23 +13,33 @@ function getInitials(name?: string) {
 }
 
 interface ProfileModalProps {
-  user?: {
-    name?: string;
-    userName?: string;
-    email?: string;
-  };
+  user?: { name?: string; userName?: string; email?: string };
   onClose: () => void;
   onChangePassword: () => void;
   onLogout: () => void;
+  position?: "above" | "below-right";
 }
 
-export default function ProfileModal({ user, onClose, onChangePassword, onLogout }: ProfileModalProps) {
+export default function ProfileModal({
+  user,
+  onClose,
+  onChangePassword,
+  onLogout,
+  position = "below-right",
+}: ProfileModalProps) {
   const displayName = user?.userName || user?.name || "Unknown User";
   const initials = getInitials(displayName);
 
+  const positionClass =
+    position === "above"
+      ? "bottom-full mb-2 left-0"
+      : "top-full mt-2 right-0";
+
   return (
-    <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-100/80 z-50 overflow-hidden">
-      {/* User info header */}
+    <div
+      className={`absolute ${positionClass} w-64 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden`}
+    >
+      {/* User info */}
       <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100">
         <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
           {initials}

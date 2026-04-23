@@ -72,14 +72,14 @@ export default function SideBar() {
       >
         {/* Brand + toggle */}
         <div
-          className={`flex items-center h-14 border-b border-gray-100 px-3 ${
+          className={`flex items-center h-14 border-b border-primary/10 px-3 bg-gradient-to-r from-primary/5 to-transparent ${
             collapsed ? "justify-center" : "justify-between"
           }`}
         >
           {!collapsed && (
             <Link
               href="/dashboard"
-              className="font-bold text-gray-800 text-base tracking-tight px-1"
+              className="font-bold text-primary text-base tracking-tight px-1"
             >
               MasWrite
             </Link>

@@ -28,6 +28,8 @@ export default function ManageBlogsListWrapper({
     <div className="flex flex-col h-full gap-4">
       <ManageBlogHeader
         isBlog={blogs.length > 0}
+        bulkBlogsSelected={bulkBlogsSelected}
+        totalCount={blogs.length}
         onToggleSelectBulkBlogs={() => setBulkBlogsSelected((prev) => !prev)}
         selectedBlogs={selectedBlogs}
       />

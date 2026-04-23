@@ -1,40 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Edit, Settings, LogOut, NotebookPen } from "lucide-react";
 import { TbBrandBlogger } from "react-icons/tb";
 import { VscLayoutSidebarLeftOff } from "react-icons/vsc";
 import { FaBars } from "react-icons/fa";
-import toast from "react-hot-toast";
 import { useState } from "react";
+import { useLogout } from "@/hooks/useLogout";
 
 export default function SideBar() {
-  const router = useRouter();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const handleLogout = useLogout();
 
-  // Logout handler
-  async function handleLogout() {
-    try {
-      const res = await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
-        toast.success("Logged out successfully");
-        router.push("/login");
-      } else {
-        toast.error("Logout failed, please try again");
-      }
-    } catch {
-      toast.error("Something went wrong while logging out");
-    }
-  }
-
-  // Sidebar menu items
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/manage-blogs", label: "Manage Blogs", icon: NotebookPen },
@@ -48,37 +29,28 @@ export default function SideBar() {
         ${collapsed ? "w-20" : "w-64"}
       `}
     >
-      {/* Top Section */}
       <div className="flex items-center justify-between mb-4">
         {!collapsed && <span className="font-semibold text-xl">Menu</span>}
-
         <button
           onClick={() => setCollapsed((prev) => !prev)}
           className="p-2 pl-4 rounded hover:bg-muted transition cursor-col-resize"
         >
-          {/* Responsive icons */}
           <FaBars size={18} className="block md:hidden" />
           <VscLayoutSidebarLeftOff size={20} className="hidden md:block" />
         </button>
       </div>
 
-      {/* New Post */}
-      <Link href="/dashboard/manage-blogs/new" className="mb-4 ">
-        <Button
-          variant="primary"
-          className="flex gap-3 w-full py-5.5"
-        >
-          <Edit className="w-5 h-5" strokeWidth={2}/>
+      <Link href="/dashboard/manage-blogs/new" className="mb-4">
+        <Button variant="primary" className="flex gap-3 w-full py-5.5">
+          <Edit className="w-5 h-5" strokeWidth={2} />
           {!collapsed && "New Post"}
         </Button>
       </Link>
 
       <Separator className="mb-3" />
 
-      {/* Menu Buttons */}
       <nav className="flex flex-col gap-2 flex-1">
         {menuItems.map(({ href, label, icon: Icon }) => {
-          // Match only /dashboard or /dashboard/<number>
           const isDashboardMain = /^\/dashboard(\/\d+)?$/.test(pathname);
           const isActive = href === "/dashboard" ? isDashboardMain : pathname === href;
           const isPublicBlogs = href === "/blogs";
@@ -87,13 +59,9 @@ export default function SideBar() {
             <Link
               key={href}
               href={href}
-              target= {isPublicBlogs ? "_blank" : "_self"}
+              target={isPublicBlogs ? "_blank" : "_self"}
               className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors
-                ${
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }
+                ${isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}
                 ${collapsed ? "justify-center" : ""}
               `}
             >
@@ -104,7 +72,6 @@ export default function SideBar() {
         })}
       </nav>
 
-      {/* Logout at bottom */}
       <Button
         variant="ghost"
         onClick={handleLogout}

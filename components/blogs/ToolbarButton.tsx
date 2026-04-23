@@ -1,4 +1,13 @@
-export default function ToolbarButton({ onClick, isActive, children, title }: any) {
+import { ReactNode } from "react";
+
+interface ToolbarButtonProps {
+  onClick: () => void;
+  isActive?: boolean;
+  title?: string;
+  children: ReactNode;
+}
+
+export default function ToolbarButton({ onClick, isActive = false, children, title }: ToolbarButtonProps) {
   return (
     <button
       onClick={onClick}

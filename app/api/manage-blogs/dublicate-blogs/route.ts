@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import Blog, { slugify } from "@/lib/models/Blog";
-import { verifyToken } from "@/utils/authHelpers";
 import { error } from "@/utils/apiResponse";
+import { resolveUserId } from "@/lib/authenticateUser";
 import mongoose from "mongoose";
 
 // Dublicate bulk blogs
@@ -20,11 +20,8 @@ export async function POST(req: NextRequest) {
     if (hasInvalid) return error("Missing required fields", 400);
 
     // Auth check
-    const token = req.cookies.get("token")?.value;
-    if (!token) return error("Unauthorized", 401);
-
-    const decodedToken = verifyToken(token);
-    if (!decodedToken?.userId) return error("Invalid token", 401);
+    const userId = await resolveUserId(req);
+    if (!userId) return error("Unauthorized", 401);
 
     const now = new Date();
 
@@ -33,7 +30,7 @@ export async function POST(req: NextRequest) {
       return {
         ...blog,
         _id,
-        author: decodedToken.userId,
+        author: userId,
         slug: slugify(blog.title, _id.toString()),
         createdAt: now,
         updatedAt: now,

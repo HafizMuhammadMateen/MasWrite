@@ -8,23 +8,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Edit2, FilterIcon, FilterXIcon } from "lucide-react";
-import { BLOG_CATEGORIES } from "@/constants/blogCategories";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ChevronDown, PenLine, SlidersHorizontal, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Blog } from "@/lib/types/blog";
 import DeleteConfirmModal from "./DeleteConfirmModal";
-import DublicateConfirmModal from "./DublicateConfirmModal"
-import FilterModal from "./FilterModal"
+import DublicateConfirmModal from "./DublicateConfirmModal";
+import FilterModal from "./FilterModal";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
 interface ManageBlogHeaderProps {
   isBlog: boolean;
+  bulkBlogsSelected: boolean;
+  totalCount: number;
   onToggleSelectBulkBlogs: () => void;
   selectedBlogs: Blog[];
 }
 
-export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, selectedBlogs }: ManageBlogHeaderProps) {
+export default function ManageBlogHeader({
+  isBlog,
+  bulkBlogsSelected,
+  totalCount,
+  onToggleSelectBulkBlogs,
+  selectedBlogs,
+}: ManageBlogHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -32,32 +40,35 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [deletingBulk, setDeletingBulk] = useState(false);
   const [dublicatingBulk, setDublicatingBulk] = useState(false);
-  const [applyingFilter, setApplyingFilter] = useState(false);
 
-  const [status, setStatus] = useState("");
-  const [category, setCategory] = useState("");
-  const [sort, setSort] = useState("");
-  const [q, setQ] = useState("");
+  const [status, setStatus] = useState(searchParams.get("status") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "");
+  const [sort, setSort] = useState(searchParams.get("sort") || "");
+  const [q, setQ] = useState(searchParams.get("q") || "");
   const [searchCategory, setSearchCategory] = useState("");
 
-  const handleFilterChange = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    Object.entries({ q, status, category, sort }).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-    });
+  const hasActiveFilters = !!(status || category || sort);
+  const activeFilterCount = [status, category, sort].filter(Boolean).length;
+  const someSelected = selectedBlogs.length > 0 && selectedBlogs.length < totalCount;
+  const allSelected = bulkBlogsSelected && selectedBlogs.length === totalCount;
 
-    // Reset page whenever filters change
+  const applyFilters = (overrides?: Record<string, string>) => {
+    const merged = { q, status, category, sort, ...overrides };
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(merged).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    });
+    params.delete("page");
     router.push(`?${params.toString()}`);
   };
 
-  const handleClickDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowDeleteModal(true);
-  }
+  const clearFilters = () => {
+    setStatus(""); setCategory(""); setSort("");
+    const params = new URLSearchParams(searchParams.toString());
+    ["status", "category", "sort", "page"].forEach((k) => params.delete(k));
+    router.push(`?${params.toString()}`);
+  };
 
   const handleConfirmDelete = async () => {
     try {
@@ -65,237 +76,172 @@ export default function ManageBlogHeader({ isBlog, onToggleSelectBulkBlogs, sele
       const res = await fetch("/api/manage-blogs", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selectedBlogs.map(blog => blog._id)),
+        body: JSON.stringify(selectedBlogs.map((b) => b._id)),
       });
-
-      if (!res.ok) throw new Error("Delete failed");
+      if (!res.ok) throw new Error();
       router.refresh();
-      toast.success("All selected blogs deleted successfully");
-    } catch (err) {
-      console.error("Error deleting blogs:", err);
-      toast.error("Error deleting blogs");
+      toast.success(`${selectedBlogs.length} blog${selectedBlogs.length > 1 ? "s" : ""} deleted`);
+    } catch {
+      toast.error("Failed to delete selected blogs");
     } finally {
       setDeletingBulk(false);
-      setShowDeleteModal(false); // Only close the modal after delete completes
+      setShowDeleteModal(false);
     }
   };
 
-  const handleClickDublicate = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowDublicateModal(true);
-  }
-
-  const handleConfirmDublicate = async() => {
+  const handleConfirmDublicate = async () => {
     try {
       setDublicatingBulk(true);
-
-      const blogsToDublicate = selectedBlogs.map((blog: Blog) => { 
-        return { 
-          ...blog, 
-          title: blog.title + " - Copied", 
-        } 
-      });
-      console.log("blogsToDublicate: ", blogsToDublicate)
       const res = await fetch("/api/manage-blogs/dublicate-blogs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          blogsToDublicate
+        body: JSON.stringify({
+          blogsToDublicate: selectedBlogs.map((b) => ({ ...b, title: b.title + " - Copied" })),
         }),
-      })
-
-      if (!res.ok) throw new Error("Failed to dublicate blog");
+      });
+      if (!res.ok) throw new Error();
       router.refresh();
-      toast.success("Selected blogs dublicated!");
+      toast.success(`${selectedBlogs.length} blog${selectedBlogs.length > 1 ? "s" : ""} duplicated`);
     } catch {
-      toast.error("Something went wrong.");
+      toast.error("Failed to duplicate selected blogs");
     } finally {
       setDublicatingBulk(false);
       setShowDublicateModal(false);
     }
-  }
+  };
 
-  const handleFilterClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowFilterModal(true);
-  }
-
-  const handleConfirmFilter = async() => {
-
-  }
-
-  // debounce for search typing
   useEffect(() => {
-    const delay = setTimeout(handleFilterChange, 300);
+    const delay = setTimeout(() => applyFilters(), 300);
     return () => clearTimeout(delay);
-  }, [q, status, category, sort]);
+  }, [q]);
 
   return (
-    <div className="flex items-center justify-between mb-6 flex-shrink-0 mx-3">
-      <div className="flex items-center justify-between gap-4">
-        {/* Bulk Select Checkbox */}
-        {isBlog && <input
-          type="checkbox"
-          onClick={onToggleSelectBulkBlogs}
-          className="w-5 h-5 accent-blue-500 cursor-pointer"
-        />}
-        {/* Bulk Action Dropdown */}
-        {isBlog && selectedBlogs.length > 0 && 
-          <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="text-lg cursor-pointer">
-                  {status ? `Action: ${status}` : "Bulk Action"}
-                  <ChevronDown />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem className="text-md cursor-pointer" variant="destructive" onClick={handleClickDelete}>Delete selection</DropdownMenuItem>
-                <DropdownMenuItem className="text-md cursor-pointer" variant="default" onClick={handleClickDublicate}>Dublicate selection</DropdownMenuItem> 
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="sticky bottom-0 border border-primary py-1 px-4 rounded-sm flex justify-between items-center">
-              <p className="text-primary">{selectedBlogs.length} selected</p>
-            </div>
-          </>
-        }
-      </div>
-
-      <h1 className="text-3xl font-bold text-gray-800">Manage Your Blogs</h1>
-
-      <div className="flex items-center gap-3 flex-shrink-0">
-        {/* Search Filter */}
-        <input
-          type="text"
-          placeholder="Search by title..."
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          className="text-lg border rounded px-3 py-1 focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-
-        {/* Filters */}
-        <Button
-          variant="outline"
-          className="text-lg cursor-pointer"
-          onClick={handleFilterClick}
-        >
-          <FilterIcon />
-          Filters
-        </Button>
-        {/* Dublicate confirmation modal */}
-        <FilterModal
-          open={showFilterModal}
-          onClose={() => setShowFilterModal(false)}
-          onConfirm={handleConfirmFilter}
-          applying={applyingFilter}
-          sort="sort"
-          setSort={setSort}
-          status="status"
-          setStatus={setStatus}
-          category="category"
-          setCategory={setCategory}
-          searchCategory="searchCategory"
-          setSearchCategory={setSearchCategory}
-        />
-
-        {/* Sort Dropdown */}
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-lg cursor-pointer">
-              {sort ? `Sort by: ${sort}` : "Sort by"}
-              <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("newest")}>Newest First</DropdownMenuItem>
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("oldest")}>Oldest First</DropdownMenuItem>
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("updated")}>Recently Updated</DropdownMenuItem>
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setSort("published")}>Recently Published</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
-
-        {/* Status Dropdown */}
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-lg cursor-pointer">
-              {status ? `Status: ${status}` : "Status"}
-              <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("")}>All</DropdownMenuItem>
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("published")}>Published</DropdownMenuItem>
-            <DropdownMenuItem className="text-md cursor-pointer" onClick={() => setStatus("draft")}>Draft</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
-
-        {/* Category Dropdown */}
-        {false && <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-lg cursor-pointer">
-              {category ? `Category: ${category}` : "Category"}
-              <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 text-md border bg-white shadow-lg rounded-md">
-            {/* Search Categories */}
-            <div className="sticky top-0 bg-white z-10 p-1">
-              <input
-                type="text"
-                placeholder="Search categories..."
-                value={searchCategory}
-                onChange={(e) => setSearchCategory(e.target.value)}
-                className="text-md border rounded px-3 py-1 w-full focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
-            {/* Scrollable list */}
-            <div className="max-h-64 overflow-y-auto">
-              {["All", ...BLOG_CATEGORIES]
-                .filter((cat) =>
-                  cat === "All" ? true : cat.toLowerCase().includes(searchCategory.toLowerCase())
-                )
-                .map((cat) => (
-                  <DropdownMenuItem
-                    key={cat}
-                    className="text-md cursor-pointer"
-                    onMouseDown={(e) => e.preventDefault()} // prevent input losing focus
-                    onClick={() => {
-                      setCategory(cat === "All" ? "" : cat);
-                      setSearchCategory("");
-                    }}
-                  >
-                    {cat}
-                  </DropdownMenuItem>
-                ))}
-
-              {/* No categories found, show message */}
-              {BLOG_CATEGORIES.filter((cat) =>
-                cat.toLowerCase().includes(searchCategory.toLowerCase())
-              ).length === 0 && searchCategory && (
-                <div className="px-3 py-1 text-gray-500 text-center">No categories found</div>
-              )}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>}
-
-        {/* New Post Button */}
+    <div className="flex flex-col gap-3 flex-shrink-0">
+      {/* Row 1 — title + new post */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Manage Blogs</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Create, edit, and organise your posts</p>
+        </div>
         <Link href="/dashboard/manage-blogs/new">
-          <Button variant="primary">
-            <Edit2 className="w-5 h-5" /> New Post
+          <Button variant="primary" size="sm" className="flex items-center gap-1.5 cursor-pointer">
+            <PenLine className="w-4 h-4" />
+            New Post
           </Button>
         </Link>
       </div>
 
-      {/* Dublicate confirmation modal */}
+      {/* Row 2 — controls */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Select-all checkbox */}
+        {isBlog && (
+          <Checkbox
+            checked={allSelected}
+            indeterminate={someSelected}
+            onChange={onToggleSelectBulkBlogs}
+            title="Select all"
+          />
+        )}
+
+        {/* Bulk action dropdown */}
+        {selectedBlogs.length > 0 && (
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-1.5 cursor-pointer h-8">
+                  Bulk Action
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem
+                  variant="destructive"
+                  className="cursor-pointer"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Delete selection
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setShowDublicateModal(true)}
+                >
+                  Duplicate selection
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <span className="text-xs font-medium text-primary border border-primary/30 bg-primary/5 px-2.5 py-1 rounded-full">
+              {selectedBlogs.length} selected
+            </span>
+          </>
+        )}
+
+        <div className="flex-1" />
+
+        {/* Search */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search posts..."
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="h-8 pl-3 pr-8 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition w-52 bg-white"
+          />
+          {q && (
+            <button
+              onClick={() => setQ("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Filters */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1.5 cursor-pointer h-8 relative"
+          onClick={() => setShowFilterModal(true)}
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="ml-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-semibold">
+              {activeFilterCount}
+            </span>
+          )}
+        </Button>
+
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-gray-400 hover:text-destructive cursor-pointer px-2"
+            title="Clear all filters"
+            onClick={clearFilters}
+          >
+            <X className="w-3.5 h-3.5" />
+          </Button>
+        )}
+      </div>
+
+      {/* Modals */}
+      <FilterModal
+        open={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onConfirm={() => { applyFilters(); setShowFilterModal(false); }}
+        sort={sort} setSort={setSort}
+        status={status} setStatus={setStatus}
+        category={category} setCategory={setCategory}
+        searchCategory={searchCategory} setSearchCategory={setSearchCategory}
+      />
       <DublicateConfirmModal
         open={showDublicateModal}
         onClose={() => setShowDublicateModal(false)}
         onConfirm={handleConfirmDublicate}
         dublicating={dublicatingBulk}
       />
-
-      {/* Delete confirmation modal */}
       <DeleteConfirmModal
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

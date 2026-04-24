@@ -1,23 +1,19 @@
-"use client"
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import BlogEditor from "@/components/blogs/BlogEditor";
 
-import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
-import BlogEditor from "@/components/blogs/BlogEditor"
-import type { Blog } from "@/lib/types/blog"
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
-export default function EditBlogPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const [blog, setBlog] = useState<Blog | null>(null)
+export default async function EditBlogPage({ params }: PageProps) {
+  const { slug } = await params;
+  const res = await fetch(`${process.env.NEXTAUTH_URL}/api/manage-blogs/${slug}`, {
+    headers: { Cookie: (await cookies()).toString() },
+  });
 
-  useEffect(() => {
-    if (!slug) return
-    fetch(`/api/manage-blogs/${slug}`)
-      .then((r) => r.json())
-      .then(setBlog)
-      .catch((err) => console.error("Failed to fetch blog", err))
-  }, [slug])
+  if (!res.ok) notFound();
+  const blog = await res.json();
 
-  if (!blog) return null
-
-  return <BlogEditor initialData={blog} slug={slug} />
+  return <BlogEditor initialData={blog} slug={slug} />;
 }

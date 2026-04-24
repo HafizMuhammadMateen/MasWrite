@@ -1,14 +1,23 @@
 "use client";
 
+import Link from "next/link";
+import { KeyRound, LogOut, Settings } from "lucide-react";
+
+function getInitials(name?: string) {
+  if (!name) return "U";
+  return name
+    .split(/[\s_]+/)
+    .map((w) => w[0]?.toUpperCase())
+    .slice(0, 2)
+    .join("");
+}
+
 interface ProfileModalProps {
-  user?: {
-    name?: string;
-    userName?: string;
-    email?: string;
-  };
+  user?: { name?: string; userName?: string; email?: string };
   onClose: () => void;
   onChangePassword: () => void;
   onLogout: () => void;
+  position?: "above" | "below-right";
 }
 
 export default function ProfileModal({
@@ -16,48 +25,59 @@ export default function ProfileModal({
   onClose,
   onChangePassword,
   onLogout,
+  position = "below-right",
 }: ProfileModalProps) {
+  const displayName = user?.userName || user?.name || "Unknown User";
+  const initials = getInitials(displayName);
+
+  const positionClass =
+    position === "above"
+      ? "bottom-full mb-2 left-0"
+      : "top-full mt-2 right-0";
+
   return (
-    <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg p-4 z-50">
+    <div
+      className={`absolute ${positionClass} w-64 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden`}
+    >
       {/* User info */}
-      <div className="mb-3">
-        <p className="font-medium">{user?.userName || user?.name || "Unknown User"}</p>
-        <p className="text-sm text-gray-500 break-words">{user?.email || "No email"}</p>
+      <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100">
+        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <p className="font-semibold text-gray-800 truncate">{displayName}</p>
+          <p className="text-sm text-gray-400 truncate">{user?.email || "No email"}</p>
+        </div>
       </div>
 
-      <div className="border-t my-2"></div>
+      {/* Actions */}
+      <div className="p-1.5">
+        <Link
+          href="/dashboard/settings"
+          onClick={onClose}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors w-full"
+        >
+          <Settings className="w-4 h-4 shrink-0 text-gray-400" />
+          Settings
+        </Link>
+        <button
+          onClick={onChangePassword}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors w-full text-left cursor-pointer"
+        >
+          <KeyRound className="w-4 h-4 shrink-0 text-gray-400" />
+          Change Password
+        </button>
+      </div>
 
-      {/* Menu items */}
-      <ul className="space-y-2">
-        <li>
-          <button
-            onClick={onChangePassword}
-            className="w-full text-left text-gray-700 hover:bg-gray-100 px-2 py-1 rounded  cursor-pointer"
-          >
-            Change Password
-          </button>
-        </li>
-        <li>
-          <button className="w-full text-left text-gray-700 hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
-            Settings
-          </button>
-        </li>
-        <li>
-          <button className="w-full text-left text-gray-700 hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
-            Help
-          </button>
-        </li>
-      </ul>
-
-      <div className="border-t my-2"></div>
-
-      {/* Logout */}
-      <button
-        onClick={onLogout}
-        className="w-full text-left text-red-600 hover:bg-red-50 px-2 py-1 rounded cursor-pointer"
-      >
-        Logout
-      </button>
+      <div className="border-t border-gray-100 p-1.5">
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors w-full text-left cursor-pointer"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          Logout
+        </button>
+      </div>
     </div>
   );
 }

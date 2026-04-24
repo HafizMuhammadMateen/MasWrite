@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/utils/db";
 import Blog from "@/lib/models/Blog";
-import { verifyToken } from "@/utils/authHelpers";
 import { error } from "@/utils/apiResponse";
+import { resolveUserId } from "@/lib/authenticateUser";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -11,12 +11,9 @@ export async function GET(req: NextRequest) {
   try {
     await connectDB();
 
-    // 1. Verify user token
-    const token = req.cookies.get("token")?.value;
-    if (!token) return error("Unauthorized", 401);
-
-    const decodedToken = verifyToken(token);
-    if (!decodedToken?.userId) return error("Invalid token", 401);
+    // 1. Resolve userId from manual JWT or NextAuth session
+    const userId = await resolveUserId(req);
+    if (!userId) return error("Unauthorized", 401);
 
     // 2. Extract and parse query parameters
     const { searchParams } = new URL(req.url);
@@ -46,7 +43,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 3. Build MongoDB filter — only user's blogs
-    const filter: Record<string, any> = { author: decodedToken.userId };
+    const filter: Record<string, any> = { author: userId };
 
     if (searchQuery) filter.title = { $regex: searchQuery, $options: "i" };
     if (authorParam) filter.author = authorParam;
@@ -67,8 +64,8 @@ export async function GET(req: NextRequest) {
 
     // 6. Counts for summary cards
     const [publishedCount, draftCount] = await Promise.all([
-      Blog.countDocuments({ author: decodedToken.userId, status: "published" }),
-      Blog.countDocuments({ author: decodedToken.userId, status: "draft" }),
+      Blog.countDocuments({ author: userId, status: "published" }),
+      Blog.countDocuments({ author: userId, status: "draft" }),
     ]);
 
     // 7. Send structured response
@@ -104,15 +101,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Auth check
-    const token = req.cookies.get("token")?.value;
-    if (!token) {
-      return error("Unauthorized", 401);
-    }
-
-    const decodedToken = verifyToken(token);
-    if (!decodedToken?.userId) {
-      return error("Invalid token", 401);
-    }
+    const userId = await resolveUserId(req);
+    if (!userId) return error("Unauthorized", 401);
 
     // Compute reading time
     const contentWords = content.split(/\s+/).length;
@@ -123,7 +113,7 @@ export async function POST(req: NextRequest) {
     const blog = new Blog({
       title,
       content,
-      author: decodedToken.userId,
+      author: userId,
       status,
       tags,
       category,
@@ -152,20 +142,14 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Auth check
-    const token = req.cookies.get("token")?.value;
-    if (!token) {
-      return error("Unauthorized", 401);
-    }
-
-    const decodedToken = verifyToken(token);
-    if (!decodedToken?.userId) {
-      return error("Invalid token", 401);
-    }
+    // Auth check
+    const userId = await resolveUserId(req);
+    if (!userId) return error("Unauthorized", 401);
 
     // Delete only blogs owned by the authenticated user
     const deleteResult = await Blog.deleteMany({
       _id: { $in: ids },
-      author: decodedToken.userId,
+      author: userId,
     });
 
     if (deleteResult.deletedCount === 0) return error("Blogs not found", 404);

@@ -1,41 +1,34 @@
-import { success, error } from "@/utils/apiResponse";
+import { NextResponse } from "next/server";
 import { destroySession } from "@/utils/authHelpers";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/nextAuthOptions";
 import { cookies } from "next/headers";
 
+const EXPIRED = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, expires: new Date(0), maxAge: 0, path: "/" };
+const isDev = process.env.NODE_ENV === "development";
+
 export async function POST() {
-  const isDev = process.env.NODE_ENV === "development";
-
   try {
-    // Check for OAuth session first
-    const session = await getServerSession(authOptions);
     const cookieStore = await cookies();
+    const res = NextResponse.json({ success: true, message: "Logged out successfully" }, { status: 200 });
 
-    // Case 1: Manual JWT session
+    // Clear manual JWT cookie
     if (cookieStore.get("token")) {
-      const res = success("Logged out successfully", 200);
       destroySession(res);
-      isDev && console.log("✅ [LogoutAPI] Manual user logged out");
-      return res;
+      isDev && console.log("✅ [LogoutAPI] Manual JWT cleared");
     }
 
-    // Case 2: NextAuth session (OAuth)
-    if (session) {
-      cookieStore.delete("next-auth.session-token");
-      cookieStore.delete("__Secure-next-auth.session-token");
-      cookieStore.delete("next-auth.callback-url");
-      cookieStore.delete("next-auth.csrf-token");
+    // Clear all NextAuth cookies on the response (works for both http + https)
+    res.cookies.set("next-auth.session-token", "", EXPIRED);
+    res.cookies.set("next-auth.callback-url", "", EXPIRED);
+    res.cookies.set("next-auth.csrf-token", "", EXPIRED);
+    res.cookies.set("__Secure-next-auth.session-token", "", EXPIRED);
+    res.cookies.set("__Secure-next-auth.callback-url", "", EXPIRED);
+    res.cookies.set("__Secure-next-auth.csrf-token", "", EXPIRED);
+    res.cookies.set("__Host-next-auth.csrf-token", "", EXPIRED);
 
-      const res = success("Logged out successfully", 200);
-      isDev && console.log("✅ [LogoutAPI] OAuth user logged out");
-      return res;
-    }
-
-    // Case 3: No active session at all
-    return success("No active session found", 200);
+    isDev && console.log("✅ [LogoutAPI] Session cleared");
+    return res;
   } catch (err: any) {
     isDev && console.error("❌ [LogoutAPI] Error:", err.message || err);
-    return error(err.message || "Server error", 500);
+    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
